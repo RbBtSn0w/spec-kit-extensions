@@ -50,12 +50,16 @@ Locate and internalize the superpowers finishing skill using this priority chain
 
 ## Step 2 — Bind Spec-Kit Context
 
-1. Identify the current feature branch name from `tasks.md` header or `git branch --show-current`.
-2. Identify the base branch:
+1. Read any user-provided directives for the PR or merge context:
+   ```
+   $ARGUMENTS
+   ```
+2. Identify the current feature branch name from `tasks.md` header or `git branch --show-current`.
+3. Identify the base branch:
    ```bash
    git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
    ```
-3. Summarize what was implemented — read `spec.md` feature name and the
+4. Summarize what was implemented — read `spec.md` feature name and the
    verification evidence from the most recent `verify` run.
 
 ---

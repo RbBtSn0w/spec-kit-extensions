@@ -13,7 +13,7 @@
 
 # Project specific
 *.log
-superpowers-bridge-config.local.yml
+superb-config.local.yml
 node_modules/
 dist/
 build/

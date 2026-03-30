@@ -36,10 +36,14 @@ override any urge to "just try something."
 
 ## Step 2 — Bind Spec-Kit Context
 
-1. Read the current `tasks.md` to identify which task is blocked.
-2. Read `spec.md` to understand the intended behavior (not what the code does,
+1. Read any user-provided context or explicit error logs:
+   ```
+   $ARGUMENTS
+   ```
+2. Read the current `tasks.md` to identify which task is blocked.
+3. Read `spec.md` to understand the intended behavior (not what the code does,
    but what it **should** do).
-3. Gather evidence:
+4. Gather evidence:
    - The exact error message or unexpected behavior
    - The test command and its output
    - Recent `git diff` or `git log --oneline -10`

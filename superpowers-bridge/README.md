@@ -20,16 +20,14 @@ This extension combines:
 
 ## Installation
 
-### Install from GitHub
+### Install from GitHub Repository
+
+Clone the collection repository and install the extension folder directly:
 
 ```bash
-specify extension add https://github.com/RbBtSn0w/spec-kit-extensions/tree/main/superpowers-bridge
-```
-
-### Local development install
-
-```bash
-specify extension add --dev /absolute/path/to/spec-kit-extensions/superpowers-bridge
+git clone https://github.com/RbBtSn0w/spec-kit-extensions.git
+cd spec-kit-extensions
+specify extension add --dev ./superpowers-bridge
 ```
 
 ## Commands
@@ -58,7 +56,7 @@ This extension registers the following hooks:
 
 This extension currently has **no required runtime configuration**.
 
-A placeholder `config-template.yml` is included for future extension options and
+A placeholder `superb-config.template.yml` is included for future extension options and
 for consistency with the Spec Kit extension template.
 
 ## Requirements

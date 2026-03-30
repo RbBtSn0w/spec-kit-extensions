@@ -10,16 +10,14 @@ A collection of high-performance extensions for [Spec Kit](https://github.com/gi
 
 ## Installation
 
-To add an extension to your Spec Kit environment:
+Since this is a collection of extensions, you should clone this repository and install the specific extension you need:
 
 ```bash
-specify extension add https://github.com/RbBtSn0w/spec-kit-extensions/tree/main/[extension-name]
-```
+git clone https://github.com/RbBtSn0w/spec-kit-extensions.git
+cd spec-kit-extensions
 
-Example:
-
-```bash
-specify extension add https://github.com/RbBtSn0w/spec-kit-extensions/tree/main/superpowers-bridge
+# Install the extension you want
+specify extension add --dev ./superpowers-bridge
 ```
 
 ## Development

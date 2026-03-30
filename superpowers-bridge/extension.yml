@@ -4,15 +4,7 @@ extension:
   id: superb
   name: Superpowers Bridge
   version: 1.0.0
-  description: >
-    Orchestrates obra/superpowers skills within the spec-kit SDD workflow.
-    Thin bridge commands delegate to superpowers' authoritative SKILL.md files
-    at runtime (with graceful fallback), while bridge-original commands provide
-    spec-kit-native value. Eight commands cover the full lifecycle: intent
-    clarification, TDD enforcement, task review, verification, critique,
-    systematic debugging, branch completion, and review response.
-    Hook-bound commands fire automatically; standalone commands are invoked
-    when needed.
+  description: "Orchestrates obra/superpowers skills inside Spec Kit workflow. Provides commands for intent clarification, TDD, task review, verification, critique, debugging, branch completion, and code review."
   author: rbbtsn0w
   repository: https://github.com/RbBtSn0w/spec-kit-extensions
   license: MIT
@@ -82,6 +74,12 @@ provides:
         Code review response protocol. Loads the superpowers receiving-code-review
         skill at runtime. Enforces technical verification before implementing
         feedback. Pairs with critique as the implementer counterpart.
+
+  config:
+    - name: superb-config.yml
+      template: superb-config.template.yml
+      description: "Superpowers Bridge configuration"
+      required: false
 
 hooks:
   before_specify:

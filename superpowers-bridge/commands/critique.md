@@ -32,6 +32,11 @@ Invoke with the argument context:
 /speckit.superb.critique [optional: task number or scope description]
 ```
 
+User Context:
+```
+$ARGUMENTS
+```
+
 If no argument is provided, review the full implementation against the complete spec.
 
 ---

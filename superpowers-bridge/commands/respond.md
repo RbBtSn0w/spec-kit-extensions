@@ -37,7 +37,10 @@ Locate and internalize the superpowers receiving-code-review skill using this pr
 
 ## Step 2 — Bind Spec-Kit Context
 
-1. Read the review feedback (from `critique` output, PR comments, or user-provided review).
+1. Read the review feedback (from `critique` output, PR comments, or user-provided review):
+   ```
+   $ARGUMENTS
+   ```
 2. Read `spec.md` — the spec is the authority, not the reviewer's opinion.
 3. Read `tasks.md` — understand what was intended to be built.
 4. If any review item is **unclear**, STOP and ask for clarification on ALL

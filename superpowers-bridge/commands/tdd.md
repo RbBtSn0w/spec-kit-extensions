@@ -33,8 +33,12 @@ are non-negotiable for this implementation session.
 
 ## Step 2 — Bind Spec-Kit Task Context
 
-1. Read `tasks.md` in the current feature directory to understand the task plan.
-2. Run the project's test suite now and record the baseline:
+1. Identify the task or context to work on:
+   ```
+   $ARGUMENTS
+   ```
+2. Read `tasks.md` in the current feature directory to understand the task plan.
+3. Run the project's test suite now and record the baseline:
 
 ```
 Baseline: [N] tests, [M] passing, [K] failing
@@ -42,7 +46,7 @@ Baseline: [N] tests, [M] passing, [K] failing
 
 If the baseline has unexpected failures, **STOP** and report them before proceeding.
 
-3. For each task, note its test target (file, assertion, verification command)
+4. For each task, note its test target (file, assertion, verification command)
    as declared in `tasks.md`. These are your RED-phase targets — do not invent
    new test locations unless the plan specifies a reason.
 

@@ -14,6 +14,11 @@ description: >
 
 ## Step 1 — Load the Authoritative Verification Skill
 
+Any user context provided:
+```
+$ARGUMENTS
+```
+
 Locate and internalize the superpowers verification skill using this priority chain:
 
 1. **Local plugin:** Read `skills/verification-before-completion/SKILL.md` from the

@@ -45,9 +45,13 @@ govern the dialogue structure for this session.
 
 Before asking the user anything, silently read:
 
-1. Any existing `spec.md` or `constitution.md` in the feature directory
-2. Recent commit messages (`git log --oneline -20`) to understand adjacent work
-3. Any `.specify/init-options.json` to understand project conventions
+1. Any user context provided:
+   ```
+   $ARGUMENTS
+   ```
+2. Any existing `spec.md` or `constitution.md` in the feature directory
+3. Recent commit messages (`git log --oneline -20`) to understand adjacent work
+4. Any `.specify/init-options.json` to understand project conventions
 
 If the intent is fully clear from context (e.g., tiny bug fix with exact
 reproduction steps), output a one-line summary and exit:

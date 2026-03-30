@@ -26,6 +26,11 @@ This review catches all of these before a single line of code is written.
 
 ---
 
+## User Context
+```
+$ARGUMENTS
+```
+
 ## Process — Execute in Order
 
 ### Step 1 — Load Artifacts

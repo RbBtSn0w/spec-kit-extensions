@@ -25,4 +25,4 @@ reporting:
   include_test_evidence_summary: true
 
 # Local override file (recommended for experimentation, gitignored):
-# superpowers-bridge-config.local.yml
+# superb-config.local.yml
