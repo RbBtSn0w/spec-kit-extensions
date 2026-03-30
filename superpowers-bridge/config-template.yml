@@ -1,0 +1,28 @@
+# Superpowers Bridge Configuration Template
+#
+# This extension currently works without required runtime configuration.
+# The sections below are optional placeholders for future tuning.
+
+features:
+  # Enable or disable standalone helper commands in docs/tooling contexts
+  standalone_commands_enabled: true
+
+  # If true, command docs should emphasize strict fail-fast behavior
+  strict_mode: true
+
+fallback:
+  # Runtime fallback order used by thin orchestration commands
+  # local: read local superpowers SKILL.md from workspace plugin
+  # remote: fetch from GitHub raw URL
+  # embedded: use minimal hardcoded contract in command file
+  order:
+    - local
+    - remote
+    - embedded
+
+reporting:
+  include_spec_coverage_summary: true
+  include_test_evidence_summary: true
+
+# Local override file (recommended for experimentation, gitignored):
+# superpowers-bridge-config.local.yml
