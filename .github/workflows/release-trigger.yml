@@ -66,7 +66,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Create and push tag
+        env:
+          GITHUB_REPO: ${{ github.repository }}
         run: |
+          # Use a personal access token (stored in secrets.PUSH_TOKEN) to push so the push can trigger other workflows.
+          # Create the tag locally and push via HTTPS using the token. Ensure you set repository secret PUSH_TOKEN with a PAT that has repo access.
           git tag "$tag"
+          git remote set-url origin "https://x-access-token:${{ secrets.PUSH_TOKEN }}@github.com/${GITHUB_REPO}.git"
           git push origin "$tag"
-          echo "Pushed tag $tag — release workflow will handle the rest"
+          echo "Pushed tag $tag via PUSH_TOKEN — release workflow should trigger"
