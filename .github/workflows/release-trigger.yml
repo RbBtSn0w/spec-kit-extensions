@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Validate inputs
         env:
@@ -65,13 +66,25 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Validate PUSH_TOKEN secret
+        env:
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        run: |
+          if [[ -z "$PUSH_TOKEN" ]]; then
+            echo "Error: Repository secret PUSH_TOKEN is not set" >&2
+            exit 1
+          fi
+
       - name: Create and push tag
         env:
           GITHUB_REPO: ${{ github.repository }}
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
           # Use a personal access token (stored in secrets.PUSH_TOKEN) to push so the push can trigger other workflows.
           # Create the tag locally and push via HTTPS using the token. Ensure you set repository secret PUSH_TOKEN with a PAT that has repo access.
           git tag "$tag"
-          git remote set-url origin "https://x-access-token:${{ secrets.PUSH_TOKEN }}@github.com/${GITHUB_REPO}.git"
+          # Ensure checkout's default auth header does not override PAT auth.
+          git config --local --unset-all http.https://github.com/.extraheader || true
+          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
           git push origin "$tag"
           echo "Pushed tag $tag via PUSH_TOKEN — release workflow should trigger"
