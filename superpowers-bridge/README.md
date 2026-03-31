@@ -20,9 +20,17 @@ This extension combines:
 
 ## Installation
 
-### Install from GitHub Repository
+### Install from ZIP (Recommended)
 
-Clone the collection repository and install the extension folder directly:
+Install directly from the release asset:
+
+```bash
+specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.0.0/superpowers-bridge.zip
+```
+
+### Install from GitHub Repository (Development)
+
+Clone the collection repository and install the extension folder locally:
 
 ```bash
 git clone https://github.com/RbBtSn0w/spec-kit-extensions.git
