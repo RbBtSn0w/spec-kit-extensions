@@ -7,6 +7,39 @@ This extension combines:
 - **Hook-based guardrails** for core Spec Kit commands (`specify`, `tasks`, `implement`), and
 - **Standalone operational commands** for debugging, review response, and branch completion.
 
+## Workflow Architecture
+
+```text
+  [ Developer Workflow ]                               [ Superpowers Bridge Hooks & Commands ]
+           │
+           ├── (Optional) /speckit.superb.clarify ───> 🧠 Brainstorming & Intent Clarification
+           │
+ ┌─────────▼─────────┐
+ │ /speckit specify  │ 
+ └─────────┬─────────┘
+           │
+ ┌─────────▼─────────┐
+ │ /speckit tasks    │
+ └─────────┬─────────┘
+           │
+           ├── (Optional) /speckit.superb.review ────> 🔍 Spec-Coverage Gap Analysis
+           │
+           ├── (Mandatory) /speckit.superb.tdd ──────> 🔴 RED-GREEN-REFACTOR Enforcer
+           │
+ ┌─────────▼─────────┐
+ │ /speckit implement│
+ └─────────┬─────────┘
+           │
+           ├── (Mandatory) /speckit.superb.verify ───> ✅ Evidence-Based Completion Gate
+           │
+           ▼
+  [ Standalone Utilities ]
+   ├─ /speckit.superb.debug   ──> 🐛 Systematic root-cause investigation
+   ├─ /speckit.superb.critique──> 📝 Independent spec-aligned code review
+   ├─ /speckit.superb.respond ──> 💬 Rigorous review feedback implementation
+   └─ /speckit.superb.finish  ──> 🏁 Branch completion & merge strategy
+```
+
 ## Features
 
 - Pre-spec intent clarification (`clarify`)
