@@ -76,15 +76,15 @@ jobs:
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
           GITHUB_REPO: ${{ github.repository }}
         run: |
-          git add .
-          if ! git diff --cached --quiet; then
+          if git diff --quiet "$EXTENSION_ID/README.md"; then
+            echo "No changes to commit."
+          else
+            git add "$EXTENSION_ID/README.md"
             git commit -m "docs: auto-update release links to ${{ steps.parse.outputs.version }} [skip ci]"
             # Use PUSH_TOKEN to push to main branch
             git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
             # Attempt to push to main (default)
             git push origin HEAD:main || echo "Warning: Could not push to main branch (it might have a different name or be protected)"
-          else
-            echo "No changes to commit."
           fi
 
       - name: Generate release notes
