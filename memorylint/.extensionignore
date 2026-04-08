@@ -1,0 +1,12 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+
+# Git
+.gitignore
+.git/
+
+# Development / Testing
+test/
+tests/

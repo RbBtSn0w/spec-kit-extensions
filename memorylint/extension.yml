@@ -1,0 +1,23 @@
+schema_version: "1.0"
+
+extension:
+  id: "memorylint"
+  name: "MemoryLint"
+  version: "1.0.0"
+  description: "Agent memory governance tool: Automatically audits and fixes boundary conflicts between AGENTS.md and the constitution."
+  author: "Spec-kit Community"
+
+requires:
+  speckit_version: ">=0.1.0"
+
+provides:
+  commands:
+    - name: "speckit.memorylint.run"
+      file: "commands/check-boundaries.md"
+      description: "Audit and fix overlaps and out-of-bounds issues between AGENTS.md and project constitution"
+
+hooks:
+  before_constitution:
+    command: "speckit.memorylint.run"
+    optional: true
+    prompt: "Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infrastructure guidelines in AGENTS.md?"
