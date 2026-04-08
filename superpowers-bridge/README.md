@@ -10,28 +10,22 @@ This extension combines:
 ## Workflow Architecture
 
 ```text
-  [ Developer Workflow ]                               [ Superpowers Bridge Hooks & Commands ]
+  [ Developer Command ]                          [ Hook Execution Flow ]
+                                
+ ┌───────────────────┐       (before_specify) 
+ │ /speckit specify  │ ─────> 1. 🧠 clarify (Optional: Intent Clarification)
+ └─────────┬─────────┘        2. Execute Core Specify Logic
            │
-           ├── (Optional) /speckit.superb.clarify ───> 🧠 Brainstorming & Intent Clarification
+ ┌─────────▼─────────┐       
+ │ /speckit tasks    │ ─────> 1. Execute Core Tasks Logic
+ └─────────┬─────────┘        2. 🔍 review (Optional: Spec-Coverage Gap Analysis)
+           │                  (after_tasks)
            │
- ┌─────────▼─────────┐
- │ /speckit specify  │ 
- └─────────┬─────────┘
-           │
- ┌─────────▼─────────┐
- │ /speckit tasks    │
- └─────────┬─────────┘
-           │
-           ├── (Optional) /speckit.superb.review ────> 🔍 Spec-Coverage Gap Analysis
-           │
-           ├── (Mandatory) /speckit.superb.tdd ──────> 🔴 RED-GREEN-REFACTOR Enforcer
-           │
- ┌─────────▼─────────┐
- │ /speckit implement│
- └─────────┬─────────┘
-           │
-           ├── (Mandatory) /speckit.superb.verify ───> ✅ Evidence-Based Completion Gate
-           │
+ ┌─────────▼─────────┐       (before_implement)
+ │ /speckit implement│ ─────> 1. 🔴 tdd (Mandatory: RED-GREEN-REFACTOR Enforcer)
+ └─────────┬─────────┘        2. Execute Core Implement Logic
+           │                  3. ✅ verify (Mandatory: Evidence-Based Completion Gate)
+           │                  (after_implement)
            ▼
   [ Standalone Utilities ]
    ├─ /speckit.superb.debug   ──> 🐛 Systematic root-cause investigation
