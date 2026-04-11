@@ -300,7 +300,7 @@ already own specification quality and artifact consistency.
         |                |
         |                +--> /speckit.superb.review
         |                     checks task coverage and TDD readiness
-        |                     writes `Status: Tasked`
+        |                     writes `**Status**: Tasked`
         |
         +--> creates technical plan and implementation structure
 
@@ -308,13 +308,13 @@ already own specification quality and artifact consistency.
         |
         +--> /speckit.superb.tdd
         |     enforces test-first implementation before work starts
-        |     writes `Status: Implementing`
+        |     writes `**Status**: Implementing`
         |
         +--> implementation execution
         |
         +--> /speckit.superb.verify
               enforces evidence before completion claims
-              writes `Status: Verified`
+              writes `**Status**: Verified`
 
  Standalone support around implementation:
  - /speckit.superb.debug
@@ -325,8 +325,8 @@ already own specification quality and artifact consistency.
    use after critique output or external review feedback
  - /speckit.superb.finish
    use after verification succeeds and the branch is ready to integrate
-   writes `Status: In Review` after successful PR creation
-   writes `Status: Abandoned` after successful discard
+   writes `**Status**: In Review` after successful PR creation
+   writes `**Status**: Abandoned` after successful discard
 ```
 
 ### Practical Division Of Labor
