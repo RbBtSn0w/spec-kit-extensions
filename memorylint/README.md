@@ -88,14 +88,16 @@ specify extension add --dev ./memorylint
 | Command | Type | Purpose |
 |---|---|---|
 | `/speckit.memorylint.run` | Hookable | Prune out-of-bounds rules and enrich missing infrastructure guidelines in `AGENTS.md`. |
+| `/speckit.memorylint.load-agents` | Hookable | Mandatory gate: Load `AGENTS.md` to enforce core rules before planning. |
 
-*(Note: If the interactive hook is skipped in non-TTY environments, you can manually trigger the command above before running `/speckit constitution`.)*
+*(Note: If the interactive hook is skipped in non-TTY environments, you can manually trigger `/speckit.memorylint.run` before running `/speckit constitution`.)*
 
 ## Hook Integration
 
 This extension registers the following hooks:
 
 - `before_constitution` → `run` (optional)
+- `before_plan` → `load-agents` (mandatory)
 
 ## Usage / Execution Flow
 
@@ -107,6 +109,10 @@ Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infr
 
 - **If you select `y`**: The audit will run, govern `AGENTS.md`, and the extracted rules will be incorporated into the new constitution seamlessly.
 - **If you select `n`**: The hook is bypassed and the standard constitution generation proceeds.
+
+When you run `/speckit plan`, the system will automatically execute the `load-agents` hook:
+
+- **Mandatory Gate**: The system will read your `AGENTS.md` file and acknowledge its core rules before starting the planning process. This ensures that the generated `plan.md` and `tasks.md` strictly adhere to your workspace's architectural constraints without needing manual confirmation.
 
 ## Requirements
 
