@@ -126,8 +126,24 @@ if ($hadTrailingNewline) {
 
 $changed = $content -ne $rawContent
 if ($changed) {
-    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    [System.IO.File]::WriteAllText($specPath, $content, $utf8NoBom)
+    $fileBytes = [System.IO.File]::ReadAllBytes($specPath)
+    $outputEncoding = $null
+
+    if ($fileBytes.Length -ge 3 -and $fileBytes[0] -eq 0xEF -and $fileBytes[1] -eq 0xBB -and $fileBytes[2] -eq 0xBF) {
+        $outputEncoding = New-Object System.Text.UTF8Encoding($true)
+    } elseif ($fileBytes.Length -ge 4 -and $fileBytes[0] -eq 0xFF -and $fileBytes[1] -eq 0xFE -and $fileBytes[2] -eq 0x00 -and $fileBytes[3] -eq 0x00) {
+        $outputEncoding = New-Object System.Text.UTF32Encoding($false, $true)
+    } elseif ($fileBytes.Length -ge 4 -and $fileBytes[0] -eq 0x00 -and $fileBytes[1] -eq 0x00 -and $fileBytes[2] -eq 0xFE -and $fileBytes[3] -eq 0xFF) {
+        $outputEncoding = New-Object System.Text.UTF32Encoding($true, $true)
+    } elseif ($fileBytes.Length -ge 2 -and $fileBytes[0] -eq 0xFF -and $fileBytes[1] -eq 0xFE) {
+        $outputEncoding = New-Object System.Text.UnicodeEncoding($false, $true)
+    } elseif ($fileBytes.Length -ge 2 -and $fileBytes[0] -eq 0xFE -and $fileBytes[1] -eq 0xFF) {
+        $outputEncoding = New-Object System.Text.UnicodeEncoding($true, $true)
+    } else {
+        $outputEncoding = New-Object System.Text.UTF8Encoding($false)
+    }
+
+    [System.IO.File]::WriteAllText($specPath, $content, $outputEncoding)
 }
 
 [pscustomobject]@{

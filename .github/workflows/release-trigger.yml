@@ -208,7 +208,7 @@ jobs:
 
           git config --local --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
-          git push origin HEAD:main
+          git push origin HEAD:${{ github.event.repository.default_branch }}
 
       - name: Create and push tag
         env:
