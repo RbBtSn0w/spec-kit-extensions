@@ -15,9 +15,16 @@ provides:
     - name: "speckit.memorylint.run"
       file: "commands/check-boundaries.md"
       description: "Audit and fix overlaps and out-of-bounds issues between AGENTS.md and project constitution"
+    - name: "speckit.memorylint.load-agents"
+      file: "commands/load-agents.md"
+      description: "Load AGENTS.md to ensure core rules do not drift during implementation"
 
 hooks:
   before_constitution:
     command: "speckit.memorylint.run"
     optional: true
     prompt: "Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infrastructure guidelines in AGENTS.md?"
+  before_implement:
+    command: "speckit.memorylint.load-agents"
+    optional: false
+    description: "Mandatory gate: Load AGENTS.md to enforce core rules and prevent rule drift during the implementation phase."
