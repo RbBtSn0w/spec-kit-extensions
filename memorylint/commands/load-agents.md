@@ -13,4 +13,4 @@ Your task is to load the `AGENTS.md` file from the workspace root directory into
 
 # Output Protocol
 Output a brief confirmation message indicating that `AGENTS.md` has been successfully loaded and that its rules will be enforced. For example:
-"✅ `AGENTS.md` loaded successfully. Core rules and constraints have been established for the planning phase."
+`AGENTS.md` loaded successfully. Core rules and constraints have been established for the planning phase.
