@@ -58,7 +58,7 @@ MemoryLint hooks into the `before_constitution` lifecycle to perform bidirection
 ═══════════╪═════════════════════════════════╪═════════════════════════════════════╪═══════════════════
            │                                 │                                     │
            │ 4. Trigger Plan Pre-hook        │                                     │
-           │ > /speckit.memorylint.load...   │ (Mandatory load-agents gate)        │
+           │ > /speckit.memorylint.load-agents │ (Mandatory load-agents gate)     │
            ├───────────────────────────────> │ Read load-agents.md                │
            │                                 │ ─── (Action) Tool: read_file ─────> │ 📄 AGENTS.md (Governed)
            │                                 │ <── Return core rules context ──────│

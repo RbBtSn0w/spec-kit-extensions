@@ -50,7 +50,7 @@ if (-not (Test-Path $specPath)) {
 }
 
 $lines = [System.Collections.Generic.List[string]]::new()
-$lines.AddRange([string[]](Get-Content $specPath))
+$lines.AddRange([string[]](Get-Content -Path $specPath -Encoding utf8))
 $statusPattern = '^\*\*Status\*\*:\s*(.+?)\s*$'
 $matchIndexes = [System.Collections.Generic.List[int]]::new()
 $previousStatus = $null

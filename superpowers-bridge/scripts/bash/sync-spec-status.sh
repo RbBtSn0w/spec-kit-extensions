@@ -57,22 +57,22 @@ fi
 resolve_feature_json() {
   local output
 
-  if [[ ! -x scripts/bash/check-prerequisites.sh ]]; then
-    echo "ERROR: scripts/bash/check-prerequisites.sh not found or not executable in project root" >&2
+  if [[ ! -f scripts/bash/check-prerequisites.sh || ! -r scripts/bash/check-prerequisites.sh ]]; then
+    echo "ERROR: scripts/bash/check-prerequisites.sh not found or not readable in project root" >&2
     return 1
   fi
 
-  if output=$(scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks 2>/dev/null); then
+  if output=$(bash scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks 2>/dev/null); then
     printf '%s\n' "$output"
     return 0
   fi
 
-  if output=$(scripts/bash/check-prerequisites.sh --json --paths-only 2>/dev/null); then
+  if output=$(bash scripts/bash/check-prerequisites.sh --json --paths-only 2>/dev/null); then
     printf '%s\n' "$output"
     return 0
   fi
 
-  if output=$(scripts/bash/check-prerequisites.sh --json 2>/dev/null); then
+  if output=$(bash scripts/bash/check-prerequisites.sh --json 2>/dev/null); then
     printf '%s\n' "$output"
     return 0
   fi
