@@ -6,6 +6,17 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t superb.XXXXXX)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
+file_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    echo "ERROR: Requires sha256sum or shasum for test hashing" >&2
+    exit 1
+  fi
+}
+
 mkdir -p "$TMP_DIR/scripts/bash" "$TMP_DIR/specs/001-demo"
 
 cat >"$TMP_DIR/scripts/bash/check-prerequisites.sh" <<'EOF'
@@ -58,9 +69,9 @@ PY
 
 (
   cd "$CRLF_DIR"
-  before_hash="$(shasum -a 256 specs/001-demo/spec.md | awk '{print $1}')"
+  before_hash="$(file_sha256 specs/001-demo/spec.md)"
   result="$("$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Verified)"
-  after_hash="$(shasum -a 256 specs/001-demo/spec.md | awk '{print $1}')"
+  after_hash="$(file_sha256 specs/001-demo/spec.md)"
   [[ "$before_hash" == "$after_hash" ]]
   printf '%s' "$result" | grep -q '"changed": false'
   python3 - <<'PY'
