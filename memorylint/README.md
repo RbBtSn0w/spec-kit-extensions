@@ -112,7 +112,7 @@ Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infr
 
 ## Requirements
 
-- Spec Kit: `>=0.1.0`
+- Spec Kit: `>=0.5.1`
 
 ## License
 

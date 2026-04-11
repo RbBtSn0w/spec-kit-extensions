@@ -8,7 +8,7 @@ extension:
   author: "Spec-kit Community"
 
 requires:
-  speckit_version: ">=0.1.0"
+  speckit_version: ">=0.5.1"
 
 provides:
   commands:
