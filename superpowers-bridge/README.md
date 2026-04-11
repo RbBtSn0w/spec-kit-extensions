@@ -1,24 +1,36 @@
 # Superpowers Bridge
 
-Orchestrates selected [obra/superpowers](https://github.com/obra/superpowers) skills inside the Spec Kit SDD workflow.
+Bridges selected installed [obra/superpowers](https://github.com/obra/superpowers) quality-control skills into the Spec Kit workflow and adds a small set of bridge-native review utilities.
 
 This extension combines:
 
-- **Hook-based guardrails** for core Spec Kit commands (`specify`, `tasks`, `implement`), and
+- **Hook-based guardrails** for core Spec Kit commands (`tasks`, `implement`), and
 - **Standalone operational commands** for debugging, review response, and branch completion.
 
-## Workflow Architecture
+It does **not** replace the Spec Kit main flow. The main flow remains:
+
+`/speckit.specify -> /speckit.clarify -> /speckit.plan -> /speckit.tasks -> /speckit.analyze | /speckit.checklist -> /speckit.implement`
+
+## Bridge Model
 
 ```text
-  [ Developer Command ]                          [ Hook Execution Flow ]
-                                
- ┌───────────────────┐       (before_specify) 
- │ /speckit specify  │ ─────> 1. 🧠 clarify (Optional: Intent Clarification)
- └─────────┬─────────┘        2. Execute Core Specify Logic
+  [ Spec Kit Main Flow ]                         [ Bridge Enhancements ]
+
+ ┌───────────────────┐
+ │ /speckit specify  │ ─────> Spec Kit owns specification creation
+ └─────────┬─────────┘
            │
- ┌─────────▼─────────┐       
+ ┌─────────▼─────────┐
+ │ /speckit clarify  │ ─────> Spec Kit owns clarification and spec updates
+ └─────────┬─────────┘
+           │
+ ┌─────────▼─────────┐
+ │ /speckit plan     │ ─────> Spec Kit owns technical planning
+ └─────────┬─────────┘
+           │
+ ┌─────────▼─────────┐
  │ /speckit tasks    │ ─────> 1. Execute Core Tasks Logic
- └─────────┬─────────┘        2. 🔍 review (Optional: Spec-Coverage Gap Analysis)
+ └─────────┬─────────┘        2. 🔍 review (Optional: Coverage + TDD-readiness)
            │                  (after_tasks)
            │
  ┌─────────▼─────────┐       (before_implement)
@@ -28,22 +40,54 @@ This extension combines:
            │                  (after_implement)
            ▼
   [ Standalone Utilities ]
+   ├─ /speckit.superb.check   ──> 🩺 Skill installation and hook readiness diagnostics
    ├─ /speckit.superb.debug   ──> 🐛 Systematic root-cause investigation
-   ├─ /speckit.superb.critique──> 📝 Independent spec-aligned code review
+   ├─ /speckit.superb.critique──> 📝 Bridge-native spec-aligned code review
    ├─ /speckit.superb.respond ──> 💬 Rigorous review feedback implementation
    └─ /speckit.superb.finish  ──> 🏁 Branch completion & merge strategy
 ```
 
 ## Features
 
-- Pre-spec intent clarification (`clarify`)
+- Local skill discovery and readiness diagnostics (`check`)
 - Mandatory TDD gate before implementation (`tdd`)
-- Task/spec coverage check (`review`)
+- Task/spec coverage and TDD-readiness check (`review`)
 - Mandatory evidence-based completion gate (`verify`)
-- Spec-aligned reviewer role (`critique`)
+- Bridge-native spec-aligned reviewer role (`critique`)
 - Root-cause debugging escalation (`debug`)
 - Structured branch completion options (`finish`)
 - Technical response workflow for review feedback (`respond`)
+
+## What This Bridge Does Not Do
+
+The bridge intentionally does **not** take over these responsibilities from
+Spec Kit:
+
+- Specification generation and branch creation
+- Clarification and spec mutation
+- Technical planning
+- Task generation
+- Implementation orchestration
+
+The following superpowers workflow skills are therefore **not** bridged as
+formal commands or hooks:
+
+- `brainstorming`
+- `writing-plans`
+- `subagent-driven-development`
+- `executing-plans`
+- `using-git-worktrees`
+- `requesting-code-review`
+
+## Design Notes
+
+The V2 redesign rationale is documented in
+[V2-DESIGN-NOTES.md](V2-DESIGN-NOTES.md), including:
+
+- why the bridge no longer tries to embed the full Superpowers workflow
+- which Superpowers skills are intentionally excluded
+- how Spec Kit ownership boundaries were used to shape the bridge
+- why the bridge now depends on locally installed skills instead of remote fallbacks
 
 ## Installation
 
@@ -65,15 +109,31 @@ cd spec-kit-extensions
 specify extension add --dev ./superpowers-bridge
 ```
 
+### Install Superpowers Skills
+
+This bridge expects the relevant superpowers skills to already be installed in
+one of these locations:
+
+1. `./.agents/skills/`
+2. `~/.agents/skills/`
+
+Workspace skills take precedence over global skills.
+
+Run the diagnostics command after installation:
+
+```text
+/speckit.superb.check
+```
+
 ## Commands
 
 | Command | Type | Purpose |
 |---|---|---|
-| `/speckit.superb.clarify` | Hookable | Run brainstorming-style clarification before writing spec |
+| `/speckit.superb.check` | Standalone | Verify installed skill availability and hook readiness |
 | `/speckit.superb.tdd` | Hookable | Enforce RED-GREEN-REFACTOR before code changes |
-| `/speckit.superb.review` | Hookable | Check `tasks.md` covers `spec.md` requirements |
+| `/speckit.superb.review` | Hookable | Check `tasks.md` coverage and TDD-readiness |
 | `/speckit.superb.verify` | Hookable | Block completion claims without fresh evidence |
-| `/speckit.superb.critique` | Standalone | Independent spec-aligned code review |
+| `/speckit.superb.critique` | Standalone | Bridge-native spec-aligned code review |
 | `/speckit.superb.debug` | Standalone | Systematic root-cause debugging |
 | `/speckit.superb.finish` | Standalone | Post-verify branch completion workflow |
 | `/speckit.superb.respond` | Standalone | Process and implement review feedback rigorously |
@@ -82,22 +142,34 @@ specify extension add --dev ./superpowers-bridge
 
 This extension registers the following hooks:
 
-- `before_specify` → `clarify` (optional)
 - `after_tasks` → `review` (optional)
 - `before_implement` → `tdd` (mandatory)
 - `after_implement` → `verify` (mandatory)
 
 ## Configuration
 
-This extension currently has **no required runtime configuration**.
-
-A placeholder `superb-config.template.yml` is included for future extension options and
-for consistency with the Spec Kit extension template.
+`superb-config.template.yml` controls discovery order, required skill sets, and
+which standalone bridge commands are enabled. It does not define remote
+fallbacks or bundled skill content.
 
 ## Requirements
 
 - Spec Kit: `>=0.4.3`
-- Optional tool: `superpowers >=5.0.0`
+- Installed superpowers-compatible skills in `./.agents/skills/` or `~/.agents/skills/`
+
+## Responsibility Boundaries
+
+| Responsibility | Owner |
+|---|---|
+| Create and update `spec.md` | Spec Kit |
+| Clarify unresolved spec decisions | Spec Kit |
+| Build `plan.md` and `tasks.md` | Spec Kit |
+| Analyze artifact consistency | Spec Kit |
+| Generate requirements-quality checklists | Spec Kit |
+| Enforce TDD discipline during implementation | Superpowers Bridge |
+| Enforce verification before completion | Superpowers Bridge |
+| Review task coverage and TDD-readiness | Superpowers Bridge |
+| Review implementation against spec/plan/tasks | Superpowers Bridge |
 
 ## License
 

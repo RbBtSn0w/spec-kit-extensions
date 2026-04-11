@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned
+### Changed
 
-- Optional alias-surface simplification based on command-usage feedback
-- Additional docs/examples for standalone command chaining
+- Repositioned Superpowers Bridge as a Spec Kit enhancement layer instead of a workflow replacement
+- Removed the `before_specify` clarify bridge from the official hook surface
+- Added `speckit.superb.check` for local superpowers skill discovery and readiness diagnostics
+- Updated command docs to bridge installed local skills from workspace/global roots instead of remote or embedded fallbacks
+- Narrowed `speckit.superb.review` to task coverage and TDD-readiness checks
+- Clarified which capabilities are bridge-native versus superpowers-adapted
 
 ## [1.0.0] - 2026-03-30
 

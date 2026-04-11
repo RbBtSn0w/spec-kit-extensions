@@ -1,46 +1,52 @@
 ---
 description: >
-  Mandatory completion gate. Loads the obra/superpowers verification skill
-  at runtime and extends it with spec-kit's spec-coverage checklist.
-  No task may be marked done without fresh evidence.
+  Mandatory completion gate. Bridges an installed obra/superpowers
+  verification-before-completion skill and extends it with spec-kit's
+  spec-coverage checklist. No task may be marked done without fresh evidence.
 ---
 
 # Verification Before Completion — After Implementation
 
+> **Type:** Superpowers-adapted command
 > **Skill origin:** [obra/superpowers `verification-before-completion`](https://github.com/obra/superpowers)
 > **Invocation:** Mandatory post-hook for `speckit.implement`. Cannot be skipped.
 
 ---
 
-## Step 1 — Load the Authoritative Verification Skill
+## Step 1 — Resolve Installed Skill
 
 Any user context provided:
 ```
 $ARGUMENTS
 ```
 
-Locate and internalize the superpowers verification skill using this priority chain:
+Look for `verification-before-completion/SKILL.md` in this exact order:
 
-1. **Local plugin:** Read `skills/verification-before-completion/SKILL.md` from the
-   workspace root (present when superpowers is installed as a plugin).
-2. **Remote fetch:** If the local file does not exist, fetch from
-   `https://raw.githubusercontent.com/obra/superpowers/main/skills/verification-before-completion/SKILL.md`
-3. **Embedded fallback:** If both fail, apply this minimal contract:
-   > NO COMPLETION CLAIM WITHOUT FRESH VERIFICATION EVIDENCE.
-   > 1. IDENTIFY which command proves the claim.
-   > 2. RUN the full command (fresh, not cached).
-   > 3. READ the output in full — check exit code, count failures.
-   > 4. VERIFY the output confirms the claim. If not, state actual status.
-   > 5. ONLY THEN make the completion claim.
+1. `./.agents/skills/verification-before-completion/SKILL.md`
+2. `~/.agents/skills/verification-before-completion/SKILL.md`
 
-**You must internalize the full SKILL.md content before proceeding.** Its rules
-are non-negotiable for every completion claim.
+If the workspace and global copies both exist, use the workspace copy.
+
+If no readable file is found, **STOP**:
+
+```text
+ERROR: Required superpowers skill `verification-before-completion` not found.
+Run /speckit.superb.check for diagnostics.
+```
+
+Report the source you resolved before continuing:
+
+```text
+Using installed skill: verification-before-completion
+Source: [workspace|global]
+Path: [resolved path]
+```
 
 ---
 
 ## Step 2 — Execute the Verification Skill
 
-Apply the loaded skill against the current implementation state:
+Apply the resolved installed skill against the current implementation state:
 
 1. Run the project's **full** test suite (not a subset) and paste the output.
 2. Run any applicable build / lint / type-check commands and paste the output.

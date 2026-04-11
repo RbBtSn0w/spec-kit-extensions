@@ -1,37 +1,42 @@
 ---
 description: >
-  Code review response protocol. Loads the obra/superpowers
-  receiving-code-review SKILL.md at runtime. Enforces technical verification
-  before implementing review feedback — no performative agreement, no blind
-   fixes. Pairs with speckit.superb.critique as the implementer
-  counterpart.
+  Code review response protocol. Bridges an installed obra/superpowers
+  receiving-code-review skill. Enforces technical verification before
+  implementing review feedback — no performative agreement, no blind fixes.
+  Pairs with speckit.superb.critique as the implementer counterpart.
 ---
 
 # Respond — Receiving Code Review Feedback
 
+> **Type:** Superpowers-adapted command
 > **Skill origin:** [obra/superpowers `receiving-code-review`](https://github.com/obra/superpowers)
 > **Invocation:** Standalone command. Call after receiving output from `speckit.superb.critique` or any external code review.
 
 ---
 
-## Step 1 — Load the Authoritative Code Review Reception Skill
+## Step 1 — Resolve Installed Skill
 
-Locate and internalize the superpowers receiving-code-review skill using this priority chain:
+Look for `receiving-code-review/SKILL.md` in this exact order:
 
-1. **Local plugin:** Read `skills/receiving-code-review/SKILL.md` from the
-   workspace root (present when superpowers is installed as a plugin).
-2. **Remote fetch:** If the local file does not exist, fetch from
-   `https://raw.githubusercontent.com/obra/superpowers/main/skills/receiving-code-review/SKILL.md`
-3. **Embedded fallback:** If both fail, apply this minimal contract:
-   > 1. READ: Complete feedback without reacting.
-   > 2. UNDERSTAND: Restate each item in own words.
-   > 3. VERIFY: Check against codebase reality — is the suggestion correct HERE?
-   > 4. EVALUATE: Technically sound for THIS codebase and spec?
-   > 5. RESPOND: Technical acknowledgment or reasoned pushback.
-   > 6. IMPLEMENT: One item at a time, test after each fix.
-   > Never say "Great point!" or "You're absolutely right!" — just fix or push back.
+1. `./.agents/skills/receiving-code-review/SKILL.md`
+2. `~/.agents/skills/receiving-code-review/SKILL.md`
 
-**You must internalize the full SKILL.md content before proceeding.**
+If the workspace and global copies both exist, use the workspace copy.
+
+If no readable file is found, **STOP**:
+
+```text
+ERROR: Optional superpowers skill `receiving-code-review` not found.
+Run /speckit.superb.check for diagnostics.
+```
+
+Report the source you resolved before continuing:
+
+```text
+Using installed skill: receiving-code-review
+Source: [workspace|global]
+Path: [resolved path]
+```
 
 ---
 
