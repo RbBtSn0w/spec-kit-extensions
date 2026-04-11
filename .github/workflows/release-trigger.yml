@@ -119,16 +119,24 @@ jobs:
           lines = extension_file.read_text().splitlines()
           updated = False
           in_extension = False
+          extension_indent = None
           for i, line in enumerate(lines):
-              if line.strip() == "extension:":
+              stripped = line.strip()
+              indent = len(line) - len(line.lstrip(" "))
+
+              if stripped == "extension:":
                   in_extension = True
+                  extension_indent = indent
                   continue
-              if in_extension and re.match(r"^[A-Za-z_][A-Za-z0-9_]*:", line):
-                  in_extension = False
-              if in_extension and re.match(r"^\s{2}version:\s*", line):
-                  lines[i] = f"  version: {version}"
-                  updated = True
-                  break
+
+              if in_extension:
+                  if stripped and not stripped.startswith("#") and indent <= extension_indent:
+                      in_extension = False
+                      extension_indent = None
+                  elif indent == extension_indent + 2 and re.match(r"^\s*version:\s*", line):
+                      lines[i] = " " * (extension_indent + 2) + f"version: {version}"
+                      updated = True
+                      break
           if not updated:
               raise SystemExit("Failed to update extension.version in extension.yml")
           extension_file.write_text("\n".join(lines) + "\n")

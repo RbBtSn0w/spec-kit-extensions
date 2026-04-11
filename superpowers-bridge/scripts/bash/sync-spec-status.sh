@@ -135,7 +135,10 @@ spec_path = pathlib.Path(sys.argv[1])
 target_status = sys.argv[2]
 status_re = re.compile(r"^\*\*Status\*\*:\s*(.+?)\s*$")
 
-lines = spec_path.read_text(encoding="utf-8").splitlines()
+raw_text = spec_path.read_text(encoding="utf-8", newline="")
+line_ending = "\r\n" if "\r\n" in raw_text else ("\n" if "\n" in raw_text else ("\r" if "\r" in raw_text else "\n"))
+had_trailing_newline = raw_text.endswith(("\r\n", "\n", "\r"))
+lines = raw_text.splitlines()
 matches = [i for i, line in enumerate(lines) if status_re.match(line)]
 
 previous_status = None
@@ -169,12 +172,18 @@ else:
             insert_at += 1
         lines.insert(insert_at, status_line)
 
-spec_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+new_text = line_ending.join(lines)
+if had_trailing_newline:
+    new_text += line_ending
+
+changed = new_text != raw_text
+if changed:
+    spec_path.write_text(new_text, encoding="utf-8", newline="")
 
 print(json.dumps({
     "spec_path": str(spec_path),
     "previous_status": previous_status,
     "new_status": target_status,
-    "changed": previous_status != target_status,
+    "changed": changed,
 }))
 PY

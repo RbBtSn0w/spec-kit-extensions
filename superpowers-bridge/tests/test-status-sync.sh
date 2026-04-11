@@ -42,4 +42,33 @@ EOF
   grep -q '^\*\*Status\*\*: Abandoned$' specs/001-demo/spec.md
 )
 
+CRLF_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t superb-crlf.XXXXXX)"
+trap 'rm -rf "$TMP_DIR" "$CRLF_DIR"' EXIT
+
+mkdir -p "$CRLF_DIR/scripts/bash" "$CRLF_DIR/specs/001-demo"
+cp "$TMP_DIR/scripts/bash/check-prerequisites.sh" "$CRLF_DIR/scripts/bash/check-prerequisites.sh"
+chmod +x "$CRLF_DIR/scripts/bash/check-prerequisites.sh"
+
+python3 - "$CRLF_DIR/specs/001-demo/spec.md" <<'PY'
+from pathlib import Path
+Path(__import__("sys").argv[1]).write_bytes(
+    b"# Demo Feature\r\n\r\n**Status**: Verified\r\n\r\n## Overview\r\n\r\nTesting status sync.\r\n"
+)
+PY
+
+(
+  cd "$CRLF_DIR"
+  before_hash="$(shasum -a 256 specs/001-demo/spec.md | awk '{print $1}')"
+  result="$("$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Verified)"
+  after_hash="$(shasum -a 256 specs/001-demo/spec.md | awk '{print $1}')"
+  [[ "$before_hash" == "$after_hash" ]]
+  printf '%s' "$result" | grep -q '"changed": false'
+  python3 - <<'PY'
+from pathlib import Path
+data = Path("specs/001-demo/spec.md").read_bytes()
+assert b"\r\n" in data
+assert b"\n" not in data.replace(b"\r\n", b"")
+PY
+)
+
 echo "status sync tests passed"
