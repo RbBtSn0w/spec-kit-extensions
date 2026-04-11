@@ -59,14 +59,13 @@ jobs:
           fi
 
           CHANGELOG="$EXTENSION_ID/CHANGELOG.md"
-          if [[ ! -f "$CHANGELOG" ]]; then
-            echo "Error: $CHANGELOG not found" >&2
-            exit 1
-          fi
-
-          if ! grep -q '^## \[Unreleased\]$' "$CHANGELOG"; then
-            echo "Error: $CHANGELOG must contain a '## [Unreleased]' section" >&2
-            exit 1
+          if [[ -f "$CHANGELOG" ]]; then
+            if ! grep -q '^## \[Unreleased\]$' "$CHANGELOG"; then
+              echo "Error: $CHANGELOG must contain a '## [Unreleased]' section" >&2
+              exit 1
+            fi
+          else
+            echo "Warning: $CHANGELOG not found; skipping changelog validation"
           fi
 
           echo "tag=$TAG" >> "$GITHUB_ENV"
@@ -115,8 +114,6 @@ jobs:
 
           if not extension_file.exists():
               raise SystemExit(f"Missing {extension_file}")
-          if not changelog_file.exists():
-              raise SystemExit(f"Missing {changelog_file}")
 
           # Update extension.version in the extension metadata block only.
           lines = extension_file.read_text().splitlines()
@@ -146,35 +143,36 @@ jobs:
               )
               readme_file.write_text(readme_text)
 
-          # Rotate changelog unreleased section into a versioned release section.
-          changelog_text = changelog_file.read_text()
-          match = re.search(r"^## \[Unreleased\]\n(?P<body>.*?)(?=^## \[|\Z)", changelog_text, re.S | re.M)
-          if not match:
-              raise SystemExit("CHANGELOG.md must contain an '## [Unreleased]' section")
+          # Rotate changelog unreleased section into a versioned release section when present.
+          if changelog_file.exists():
+              changelog_text = changelog_file.read_text()
+              match = re.search(r"^## \[Unreleased\]\n(?P<body>.*?)(?=^## \[|\Z)", changelog_text, re.S | re.M)
+              if not match:
+                  raise SystemExit("CHANGELOG.md must contain an '## [Unreleased]' section")
 
-          body = match.group("body").strip("\n")
-          if not body.strip():
-              raise SystemExit("CHANGELOG.md Unreleased section is empty")
+              body = match.group("body").strip("\n")
+              if not body.strip():
+                  raise SystemExit("CHANGELOG.md Unreleased section is empty")
 
-          release_heading = f"## [{version}] - {today}\n"
-          replacement = "## [Unreleased]\n\n" + release_heading + body.strip() + "\n\n"
-          changelog_text = changelog_text[:match.start()] + replacement + changelog_text[match.end():]
+              release_heading = f"## [{version}] - {today}\n"
+              replacement = "## [Unreleased]\n\n" + release_heading + body.strip() + "\n\n"
+              changelog_text = changelog_text[:match.start()] + replacement + changelog_text[match.end():]
 
-          unreleased_link = f"[Unreleased]: {repo_base_url}/compare/{tag}...HEAD"
-          release_link = f"[{version}]: {repo_base_url}/releases/tag/{tag}"
+              unreleased_link = f"[Unreleased]: {repo_base_url}/compare/{tag}...HEAD"
+              release_link = f"[{version}]: {repo_base_url}/releases/tag/{tag}"
 
-          if re.search(r"^\[Unreleased\]: .*?$", changelog_text, re.M):
-              changelog_text = re.sub(r"^\[Unreleased\]: .*?$", unreleased_link, changelog_text, count=1, flags=re.M)
-          else:
-              changelog_text = changelog_text.rstrip() + "\n\n" + unreleased_link + "\n"
+              if re.search(r"^\[Unreleased\]: .*?$", changelog_text, re.M):
+                  changelog_text = re.sub(r"^\[Unreleased\]: .*?$", unreleased_link, changelog_text, count=1, flags=re.M)
+              else:
+                  changelog_text = changelog_text.rstrip() + "\n\n" + unreleased_link + "\n"
 
-          release_ref_pattern = rf"^\[{re.escape(version)}\]: .*?$"
-          if re.search(release_ref_pattern, changelog_text, re.M):
-              changelog_text = re.sub(release_ref_pattern, release_link, changelog_text, count=1, flags=re.M)
-          else:
-              changelog_text = changelog_text.rstrip() + "\n" + release_link + "\n"
+              release_ref_pattern = rf"^\[{re.escape(version)}\]: .*?$"
+              if re.search(release_ref_pattern, changelog_text, re.M):
+                  changelog_text = re.sub(release_ref_pattern, release_link, changelog_text, count=1, flags=re.M)
+              else:
+                  changelog_text = changelog_text.rstrip() + "\n" + release_link + "\n"
 
-          changelog_file.write_text(changelog_text)
+              changelog_file.write_text(changelog_text)
           PY
 
       - name: Commit release metadata
@@ -184,7 +182,10 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
-          release_files=("$EXTENSION_ID/extension.yml" "$EXTENSION_ID/CHANGELOG.md")
+          release_files=("$EXTENSION_ID/extension.yml")
+          if [[ -f "$EXTENSION_ID/CHANGELOG.md" ]]; then
+            release_files+=("$EXTENSION_ID/CHANGELOG.md")
+          fi
           if [[ -f "$EXTENSION_ID/README.md" ]]; then
             release_files+=("$EXTENSION_ID/README.md")
           fi
