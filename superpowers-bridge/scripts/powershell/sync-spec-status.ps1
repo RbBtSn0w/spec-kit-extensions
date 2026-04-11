@@ -102,7 +102,10 @@ if ($matchIndexes.Count -gt 0) {
     }
 }
 
-Set-Content -Path $specPath -Value $lines -Encoding utf8
+$lineEnding = "`n"
+$content = [string]::Join($lineEnding, [string[]]$lines) + $lineEnding
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($specPath, $content, $utf8NoBom)
 
 [pscustomobject]@{
     spec_path = $specPath

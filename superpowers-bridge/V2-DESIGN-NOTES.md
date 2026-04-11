@@ -50,12 +50,11 @@ skills?" but rather:
 
 ## Analysis Process
 
-The redesign was based on direct comparison of three sources of truth:
+The redesign was based on direct comparison of three inputs:
 
 1. The current `superpowers-bridge` extension manifest, command docs, and README
-2. The vendored Superpowers materials under `superpowers-bridge/superpowers-5.0.7`
-   and `superpowers-bridge/v/superpowers`
-3. The Spec Kit command definitions under `superpowers-bridge/v/spec-kit`
+2. The Superpowers workflow and skill definitions reviewed during the redesign
+3. The Spec Kit command model and artifact ownership definitions reviewed during the redesign
 
 The analysis focused on responsibility boundaries rather than superficial naming
 similarity.

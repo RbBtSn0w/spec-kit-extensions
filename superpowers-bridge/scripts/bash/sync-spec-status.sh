@@ -47,10 +47,10 @@ esac
 
 if command -v python3 >/dev/null 2>&1; then
   PYTHON_BIN="python3"
-elif command -v python >/dev/null 2>&1; then
+elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(0 if sys.version_info[0] >= 3 else 1)' >/dev/null 2>&1; then
   PYTHON_BIN="python"
 else
-  echo "ERROR: sync-spec-status.sh requires python3 or python on PATH" >&2
+  echo "ERROR: sync-spec-status.sh requires Python 3 on PATH (python3, or python if it is Python 3)" >&2
   exit 1
 fi
 
@@ -83,12 +83,17 @@ resolve_feature_json() {
 
 JSON_PAYLOAD="$(resolve_feature_json)"
 
-SPEC_PATH="$("$PYTHON_BIN" - "$JSON_PAYLOAD" <<'PY'
+if ! SPEC_PATH="$("$PYTHON_BIN" - "$JSON_PAYLOAD" <<'PY'
 import json
 import os
 import sys
 
-payload = json.loads(sys.argv[1])
+try:
+    payload = json.loads(sys.argv[1])
+except json.JSONDecodeError as exc:
+    print(f"ERROR: check-prerequisites.sh returned invalid JSON: {exc}", file=sys.stderr)
+    sys.exit(2)
+
 feature_spec = payload.get("FEATURE_SPEC")
 feature_dir = payload.get("FEATURE_DIR")
 
@@ -97,9 +102,13 @@ if feature_spec:
 elif feature_dir:
     print(os.path.join(feature_dir, "spec.md"))
 else:
-    sys.exit(1)
+    print("ERROR: feature resolution did not provide FEATURE_SPEC or FEATURE_DIR", file=sys.stderr)
+    sys.exit(3)
 PY
-)"
+)"; then
+  echo "ERROR: Unable to resolve spec path from check-prerequisites output" >&2
+  exit 1
+fi
 
 if [[ -z "$SPEC_PATH" || ! -f "$SPEC_PATH" ]]; then
   echo "ERROR: Resolved spec file does not exist: ${SPEC_PATH:-<empty>}" >&2

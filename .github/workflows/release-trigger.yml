@@ -184,12 +184,17 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
-          if git diff --quiet -- "$EXTENSION_ID/extension.yml" "$EXTENSION_ID/CHANGELOG.md" "$EXTENSION_ID/README.md"; then
+          release_files=("$EXTENSION_ID/extension.yml" "$EXTENSION_ID/CHANGELOG.md")
+          if [[ -f "$EXTENSION_ID/README.md" ]]; then
+            release_files+=("$EXTENSION_ID/README.md")
+          fi
+
+          if git diff --quiet -- "${release_files[@]}"; then
             echo "Error: release preparation produced no changes" >&2
             exit 1
           fi
 
-          git add "$EXTENSION_ID/extension.yml" "$EXTENSION_ID/CHANGELOG.md" "$EXTENSION_ID/README.md"
+          git add -- "${release_files[@]}"
           git commit -m "chore: prepare ${EXTENSION_ID} release v${VERSION} [skip ci]"
 
           git config --local --unset-all http.https://github.com/.extraheader || true
