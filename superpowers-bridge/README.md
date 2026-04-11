@@ -228,9 +228,11 @@ This extension registers the following hooks:
 
 ## Configuration
 
-`superb-config.template.yml` controls discovery order, required skill sets, and
-which standalone bridge commands are enabled. It does not define remote
-fallbacks or bundled skill content.
+`superb-config.template.yml` documents the intended bridge configuration shape
+for discovery order, required skill sets, and standalone command toggles.
+The current command prompts still use the documented defaults directly; the
+template is not yet enforced as a live runtime config file. It does not define
+remote fallbacks or bundled skill content.
 
 ## Requirements
 
