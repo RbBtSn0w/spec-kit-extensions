@@ -111,11 +111,7 @@ if ($matchIndexes.Count -gt 0) {
     if ($headingIndex -lt 0) {
         $lines.Insert(0, $statusLine)
     } else {
-        $insertAt = $headingIndex + 1
-        if ($insertAt -lt $lines.Count -and [string]::IsNullOrWhiteSpace($lines[$insertAt])) {
-            $insertAt++
-        }
-        $lines.Insert($insertAt, $statusLine)
+        $lines.Insert($headingIndex, $statusLine)
     }
 }
 

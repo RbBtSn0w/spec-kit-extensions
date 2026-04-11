@@ -213,7 +213,8 @@ So the highest accurate PR-based state in the current design is:
   - `scripts/bash/sync-spec-status.sh`
   - `scripts/powershell/sync-spec-status.ps1`
 - If the status line is missing, the helper inserts it once near the top
-  metadata block.
+  of the document: before the first H1 heading when present, otherwise at
+  file start.
 - If the status line exists, the helper updates it in place.
 - The helper normalizes duplicate `**Status**:` lines into one canonical line.
 - The bridge does not silently overwrite `Abandoned`.

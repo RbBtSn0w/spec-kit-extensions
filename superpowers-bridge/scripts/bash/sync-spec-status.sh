@@ -167,10 +167,7 @@ else:
     if heading_index is None:
         lines.insert(0, status_line)
     else:
-        insert_at = heading_index + 1
-        if insert_at < len(lines) and lines[insert_at].strip() == "":
-            insert_at += 1
-        lines.insert(insert_at, status_line)
+        lines.insert(heading_index, status_line)
 
 new_text = line_ending.join(lines)
 if had_trailing_newline:
