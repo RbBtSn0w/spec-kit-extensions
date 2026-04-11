@@ -3,6 +3,9 @@ description: >
   Mandatory completion gate. Bridges an installed obra/superpowers
   verification-before-completion skill and extends it with spec-kit's
   spec-coverage checklist. No task may be marked done without fresh evidence.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Verification Before Completion — After Implementation
@@ -44,7 +47,20 @@ Path: [resolved path]
 
 ---
 
-## Step 2 — Execute the Verification Skill
+## Step 2 — Resolve Active Feature Spec
+
+Resolve the active feature spec path using the same Spec Kit prerequisite script
+pattern used by follow-up commands:
+
+- Prefer `FEATURE_SPEC` when present
+- Otherwise use `FEATURE_DIR/spec.md`
+
+Do not derive the path from the branch name manually.
+If the active feature spec cannot be resolved, **STOP** and report the failure.
+
+---
+
+## Step 3 — Execute the Verification Skill
 
 Apply the resolved installed skill against the current implementation state:
 
@@ -55,7 +71,7 @@ Apply the resolved installed skill against the current implementation state:
 
 ---
 
-## Step 3 — Spec-Kit Extension: Spec-Coverage Checklist
+## Step 4 — Spec-Kit Extension: Spec-Coverage Checklist
 
 After the verification skill's checks pass, perform this additional spec-kit gate:
 
@@ -83,7 +99,25 @@ Unmet requirements: [list them]
 
 ---
 
-## Step 4 — Completion Report
+## Step 5 — Status Synchronization
+
+Only after all verification checks pass, synchronize the feature spec status to:
+
+```bash
+{SCRIPT} --status "Verified"
+```
+
+Status sync rules:
+
+- Use the script output as the source of truth for resolved spec path and
+  resulting status
+- If verification fails, leave the previous status unchanged
+- Do not overwrite `Abandoned`
+- Do not introduce `Completed` here
+
+---
+
+## Step 6 — Completion Report
 
 When all checks pass, output:
 

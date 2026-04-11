@@ -3,6 +3,9 @@ description: >
   Mandatory pre-implement TDD gate. Bridges an installed obra/superpowers
   test-driven-development skill into spec-kit's tasks.md task structure and
   enforces RED-GREEN-REFACTOR for every task.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # TDD Enforcement Gate — Before Implementation
@@ -58,6 +61,14 @@ If the baseline has unexpected failures, **STOP** and report them before proceed
    as declared in `tasks.md`. These are your RED-phase targets — do not invent
    new test locations unless the plan specifies a reason.
 
+Also resolve the current feature spec path using the same Spec Kit feature
+resolution used by follow-up commands:
+
+- Prefer `FEATURE_SPEC` when the prerequisite script exposes it
+- Otherwise use `FEATURE_DIR/spec.md`
+
+Do not infer the feature path from the current branch name manually.
+
 ---
 
 ## Step 3 — Execute
@@ -68,6 +79,19 @@ Apply the resolved installed TDD skill to every task in `tasks.md`:
 - Paste evidence of each RED failure and each GREEN pass inline.
 - If any task starts with production code before a failing test, delete the code
   and restart from RED. **No exceptions without explicit user permission.**
+
+When the implementation phase is formally entered, synchronize the feature spec
+status to:
+
+```bash
+{SCRIPT} --status "Implementing"
+```
+
+Status sync rules:
+
+- Use the script output as the source of truth for resolved spec path and
+  resulting status
+- Preserve `Abandoned` if the feature has already been explicitly discarded
 
 ---
 

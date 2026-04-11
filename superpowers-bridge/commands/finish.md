@@ -4,6 +4,9 @@ description: >
   obra/superpowers finishing-a-development-branch skill. Guides the user
   through structured options (merge, PR, keep, discard) after verification
   passes. Call manually after speckit.superb.verify succeeds.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Finish — Complete Development Branch
@@ -69,6 +72,11 @@ Path: [resolved path]
    ```
 4. Summarize what was implemented — read `spec.md` feature name and the
    verification evidence from the most recent `verify` run.
+5. Resolve the active feature spec path using the same Spec Kit prerequisite
+   script pattern used by follow-up commands:
+   - Prefer `FEATURE_SPEC` when present
+   - Otherwise use `FEATURE_DIR/spec.md`
+   - Do not infer the path from the branch name manually
 
 ---
 
@@ -93,7 +101,56 @@ Apply the resolved installed skill with these spec-kit additions:
 
 ---
 
-## Spec-Kit PR Enhancement (Option 2 only)
+## Step 4 — Status Synchronization
+
+Synchronize `spec.md` only for outcomes this command can directly observe.
+
+### If the user chooses "Push and create a Pull Request"
+
+Update the spec by running:
+
+```bash
+{SCRIPT} --status "In Review"
+```
+
+Only do this after PR creation succeeds.
+If PR creation fails, preserve the previous status, typically `Verified`.
+
+### If the user chooses "Keep the branch as-is"
+
+Do not change status.
+If verification already passed, the feature usually remains `Verified`.
+
+### If the user chooses "Discard this work"
+
+After explicit confirmation and only after discard succeeds, update the spec by
+running:
+
+```bash
+{SCRIPT} --status "Abandoned"
+```
+
+If discard fails, preserve the previous status.
+
+### If the user chooses "Merge back locally"
+
+Do not write `Completed`.
+Preserve the current status.
+
+This bridge intentionally avoids claiming final completion because the dominant
+real-world integration path is GitHub PR creation and later merge, which happens
+outside the current bridge hook surface.
+
+General rules:
+
+- Use the script output as the source of truth for resolved spec path and
+  resulting status
+- Do not overwrite `Abandoned` silently later
+- Do not introduce `Completed` in the current bridge lifecycle model
+
+---
+
+## Step 5 — Spec-Kit PR Enhancement (Option 2 only)
 
 If the user chooses "Push and create a Pull Request", enhance the PR body with
 spec-kit context:

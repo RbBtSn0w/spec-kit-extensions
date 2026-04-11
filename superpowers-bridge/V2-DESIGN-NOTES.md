@@ -304,3 +304,46 @@ It is more coherent because it does one thing well:
 
 That is the core V2 decision, and it is the reason the redesign deliberately
 rejects complete adoption of all Superpowers skills.
+
+## Status Synchronization Follow-Up
+
+A later refinement added bridge-owned lifecycle synchronization to `spec.md`,
+but only for states the bridge can observe directly with its existing hooks and
+manual commands.
+
+The bridge-owned states are:
+
+- `Tasked`
+- `Implementing`
+- `Verified`
+- `In Review`
+- `Abandoned`
+
+Notably excluded:
+
+- `Completed`
+
+Why `Completed` is excluded:
+
+- the dominant integration path is GitHub PR creation followed by merge later
+- that merge event happens outside the current bridge hook surface
+- writing `Completed` at PR creation time would be inaccurate
+
+Why `Abandoned` is still valid:
+
+- discard is executed directly inside `superb.finish`
+- the bridge can observe whether the discard action actually succeeded
+
+This keeps status synchronization aligned with the same core design rule as the
+rest of V2:
+
+> The bridge should only claim lifecycle progress it can directly observe and
+> verify.
+
+In implementation terms, this lifecycle sync is handled by bundled helper
+scripts that:
+
+- resolve the active feature via Spec Kit prerequisite scripts
+- find the current `spec.md`
+- insert or update a canonical `**Status**:` line
+- preserve `Abandoned` as a terminal bridge-owned state

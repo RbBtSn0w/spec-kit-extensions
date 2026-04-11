@@ -4,6 +4,9 @@ description: >
   implementation begins. Produces a spec-coverage matrix, task-quality report,
   and TDD-readiness assessment. Catches missing or under-specified tasks at
   planning time, not delivery time.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Task Coverage Review — After Task Generation
@@ -54,6 +57,9 @@ If `spec.md` is missing, **STOP** and report:
 ERROR: spec.md not found. Cannot perform coverage review without the spec.
 Run speckit.specify first.
 ```
+
+Use the resolved current feature directory as the authoritative path for any
+status synchronization. Do not guess the feature path from the branch name.
 
 ---
 
@@ -202,6 +208,29 @@ TDD violations during implementation.
 
 Recommended action: Fix flagged tasks before running speckit.implement.
 ```
+
+---
+
+### Step 7 — Status Synchronization
+
+If this review is running as the normal `after_tasks` lifecycle step and
+`tasks.md` was generated successfully, synchronize the feature spec status:
+
+- Run:
+  ```bash
+  {SCRIPT} --status "Tasked"
+  ```
+- Use the script output as the source of truth for:
+  - resolved spec path
+  - previous status
+  - new status
+- Report the updated spec path and resulting status in the summary
+
+Do **not** perform this update when:
+
+- `tasks.md` generation failed
+- the active feature spec cannot be resolved reliably
+- the feature is already marked `Abandoned`
 
 ---
 

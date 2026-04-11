@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated command docs to bridge installed local skills from workspace/global roots instead of remote or embedded fallbacks
 - Narrowed `speckit.superb.review` to task coverage and TDD-readiness checks
 - Clarified which capabilities are bridge-native versus superpowers-adapted
+- Added bridge-owned `spec.md` status synchronization for observable lifecycle states: `Tasked`, `Implementing`, `Verified`, `In Review`, and `Abandoned`
+- Explicitly excluded `Completed` from the current bridge status model because GitHub merge completion is outside the current hook surface
 
 ## [1.0.0] - 2026-03-30
 
