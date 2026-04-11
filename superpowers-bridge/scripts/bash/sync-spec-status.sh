@@ -45,6 +45,15 @@ case "$STATE" in
     ;;
 esac
 
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_BIN="python"
+else
+  echo "ERROR: sync-spec-status.sh requires python3 or python on PATH" >&2
+  exit 1
+fi
+
 resolve_feature_json() {
   local output
 
@@ -74,7 +83,7 @@ resolve_feature_json() {
 
 JSON_PAYLOAD="$(resolve_feature_json)"
 
-SPEC_PATH="$(python - "$JSON_PAYLOAD" <<'PY'
+SPEC_PATH="$("$PYTHON_BIN" - "$JSON_PAYLOAD" <<'PY'
 import json
 import os
 import sys
@@ -97,7 +106,7 @@ if [[ -z "$SPEC_PATH" || ! -f "$SPEC_PATH" ]]; then
   exit 1
 fi
 
-python - "$SPEC_PATH" "$STATE" <<'PY'
+"$PYTHON_BIN" - "$SPEC_PATH" "$STATE" <<'PY'
 import json
 import pathlib
 import re

@@ -103,7 +103,10 @@ jobs:
           extension_id = os.environ["EXTENSION_ID"]
           version = os.environ["VERSION"].lstrip("v")
           today = os.environ["TODAY"]
+          github_server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+          github_repository = os.environ["GITHUB_REPOSITORY"]
           tag = f"{extension_id}-v{version}"
+          repo_base_url = f"{github_server_url}/{github_repository}"
           root = Path(extension_id)
 
           extension_file = root / "extension.yml"
@@ -157,8 +160,8 @@ jobs:
           replacement = "## [Unreleased]\n\n" + release_heading + body.strip() + "\n\n"
           changelog_text = changelog_text[:match.start()] + replacement + changelog_text[match.end():]
 
-          unreleased_link = f"[Unreleased]: https://github.com/RbBtSn0w/spec-kit-extensions/compare/{tag}...HEAD"
-          release_link = f"[{version}]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/{tag}"
+          unreleased_link = f"[Unreleased]: {repo_base_url}/compare/{tag}...HEAD"
+          release_link = f"[{version}]: {repo_base_url}/releases/tag/{tag}"
 
           if re.search(r"^\[Unreleased\]: .*?$", changelog_text, re.M):
               changelog_text = re.sub(r"^\[Unreleased\]: .*?$", unreleased_link, changelog_text, count=1, flags=re.M)

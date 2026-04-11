@@ -7,21 +7,25 @@ param(
 $ErrorActionPreference = 'Stop'
 
 function Resolve-FeatureJson {
-    if (-not (Test-Path 'scripts/powershell/check-prerequisites.ps1')) {
+    $scriptPath = 'scripts/powershell/check-prerequisites.ps1'
+
+    if (-not (Test-Path $scriptPath)) {
         throw 'scripts/powershell/check-prerequisites.ps1 not found in project root'
     }
 
-    $commands = @(
-        'scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks',
-        'scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly',
-        'scripts/powershell/check-prerequisites.ps1 -Json'
+    $commandArgsList = @(
+        @('-Json', '-RequireTasks', '-IncludeTasks'),
+        @('-Json', '-PathsOnly'),
+        @('-Json')
     )
 
-    foreach ($command in $commands) {
+    foreach ($commandArgs in $commandArgsList) {
         try {
-            $result = Invoke-Expression $command 2>$null
-            if ($LASTEXITCODE -eq 0 -and $result) {
-                return $result
+            $result = & $scriptPath @commandArgs 2>$null
+            if ($result) {
+                $resultText = [string]::Join([Environment]::NewLine, [string[]]$result)
+                $null = $resultText | ConvertFrom-Json -ErrorAction Stop
+                return $resultText
             }
         } catch {
         }
