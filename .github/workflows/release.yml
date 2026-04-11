@@ -50,42 +50,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Auto-update version in README.md
-        env:
-          EXTENSION_ID: ${{ steps.parse.outputs.extension_id }}
-          VERSION: ${{ steps.parse.outputs.version }}
-        run: |
-          README_FILE="$EXTENSION_ID/README.md"
-          if [[ -f "$README_FILE" ]]; then
-            echo "Updating version strings in $README_FILE to $VERSION"
-            sed -i.bak -E "s|(releases/download/)(${EXTENSION_ID}-v[0-9]+\.[0-9]+\.[0-9]+)(/${EXTENSION_ID}\.zip)|\1${EXTENSION_ID}-v${VERSION}\3|g" "$README_FILE"
-            rm -f "${README_FILE}.bak"
-          else
-            echo "No README.md found at $README_FILE"
-          fi
-
       - name: Create extension zip
         run: |
           cd "${{ steps.parse.outputs.extension_id }}"
           zip -r "../${{ steps.parse.outputs.extension_id }}.zip" . \
             -x '.*' '__pycache__/*'
-
-      - name: Commit and push updates back to main
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        env:
-          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-          GITHUB_REPO: ${{ github.repository }}
-        run: |
-          if git diff --quiet "$EXTENSION_ID/README.md"; then
-            echo "No changes to commit."
-          else
-            git add "$EXTENSION_ID/README.md"
-            git commit -m "docs: auto-update release links to ${{ steps.parse.outputs.version }} [skip ci]"
-            # Use PUSH_TOKEN to push to main branch
-            git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
-            # Attempt to push to main (default)
-            git push origin HEAD:main || echo "Warning: Could not push to main branch (it might have a different name or be protected)"
-          fi
 
       - name: Generate release notes
         id: notes

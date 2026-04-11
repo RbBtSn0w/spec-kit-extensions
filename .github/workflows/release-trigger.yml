@@ -58,7 +58,18 @@ jobs:
             exit 1
           fi
 
+          CHANGELOG="$EXTENSION_ID/CHANGELOG.md"
+          if [[ -f "$CHANGELOG" ]]; then
+            if ! grep -q '^## \[Unreleased\]$' "$CHANGELOG"; then
+              echo "Error: $CHANGELOG must contain a '## [Unreleased]' section" >&2
+              exit 1
+            fi
+          else
+            echo "Warning: $CHANGELOG not found; skipping changelog validation"
+          fi
+
           echo "tag=$TAG" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_ENV"
           echo "Will create tag: $TAG"
 
       - name: Configure Git
@@ -74,6 +85,130 @@ jobs:
             echo "Error: Repository secret PUSH_TOKEN is not set" >&2
             exit 1
           fi
+
+      - name: Prepare release files
+        env:
+          EXTENSION_ID: ${{ github.event.inputs.extension_id }}
+          VERSION: ${{ env.version }}
+        run: |
+          TODAY="$(date -u +%Y-%m-%d)"
+          export TODAY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+
+          extension_id = os.environ["EXTENSION_ID"]
+          version = os.environ["VERSION"].lstrip("v")
+          today = os.environ["TODAY"]
+          github_server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+          github_repository = os.environ["GITHUB_REPOSITORY"]
+          tag = f"{extension_id}-v{version}"
+          repo_base_url = f"{github_server_url}/{github_repository}"
+          root = Path(extension_id)
+
+          extension_file = root / "extension.yml"
+          readme_file = root / "README.md"
+          changelog_file = root / "CHANGELOG.md"
+
+          if not extension_file.exists():
+              raise SystemExit(f"Missing {extension_file}")
+
+          # Update extension.version in the extension metadata block only.
+          lines = extension_file.read_text().splitlines()
+          updated = False
+          in_extension = False
+          extension_indent = None
+          for i, line in enumerate(lines):
+              stripped = line.strip()
+              indent = len(line) - len(line.lstrip(" "))
+
+              if stripped == "extension:":
+                  in_extension = True
+                  extension_indent = indent
+                  continue
+
+              if in_extension:
+                  if stripped and not stripped.startswith("#") and indent <= extension_indent:
+                      in_extension = False
+                      extension_indent = None
+                  elif indent == extension_indent + 2 and re.match(r"^\s*version:\s*", line):
+                      lines[i] = " " * (extension_indent + 2) + f"version: {version}"
+                      updated = True
+                      break
+          if not updated:
+              raise SystemExit("Failed to update extension.version in extension.yml")
+          extension_file.write_text("\n".join(lines) + "\n")
+
+          # Update README release download links if present.
+          if readme_file.exists():
+              readme_text = readme_file.read_text()
+              readme_text = re.sub(
+                  rf"(releases/download/)({re.escape(extension_id)}-v[0-9]+\.[0-9]+\.[0-9]+)(/{re.escape(extension_id)}\.zip)",
+                  rf"\1{tag}\3",
+                  readme_text,
+              )
+              readme_file.write_text(readme_text)
+
+          # Rotate changelog unreleased section into a versioned release section when present.
+          if changelog_file.exists():
+              changelog_text = changelog_file.read_text()
+              match = re.search(r"^## \[Unreleased\]\n(?P<body>.*?)(?=^## \[|\Z)", changelog_text, re.S | re.M)
+              if not match:
+                  raise SystemExit("CHANGELOG.md must contain an '## [Unreleased]' section")
+
+              body = match.group("body").strip("\n")
+              if not body.strip():
+                  raise SystemExit("CHANGELOG.md Unreleased section is empty")
+
+              release_heading = f"## [{version}] - {today}\n"
+              replacement = "## [Unreleased]\n\n" + release_heading + body.strip() + "\n\n"
+              changelog_text = changelog_text[:match.start()] + replacement + changelog_text[match.end():]
+
+              unreleased_link = f"[Unreleased]: {repo_base_url}/compare/{tag}...HEAD"
+              release_link = f"[{version}]: {repo_base_url}/releases/tag/{tag}"
+
+              if re.search(r"^\[Unreleased\]: .*?$", changelog_text, re.M):
+                  changelog_text = re.sub(r"^\[Unreleased\]: .*?$", unreleased_link, changelog_text, count=1, flags=re.M)
+              else:
+                  changelog_text = changelog_text.rstrip() + "\n\n" + unreleased_link + "\n"
+
+              release_ref_pattern = rf"^\[{re.escape(version)}\]: .*?$"
+              if re.search(release_ref_pattern, changelog_text, re.M):
+                  changelog_text = re.sub(release_ref_pattern, release_link, changelog_text, count=1, flags=re.M)
+              else:
+                  changelog_text = changelog_text.rstrip() + "\n" + release_link + "\n"
+
+              changelog_file.write_text(changelog_text)
+          PY
+
+      - name: Commit release metadata
+        env:
+          EXTENSION_ID: ${{ github.event.inputs.extension_id }}
+          VERSION: ${{ env.version }}
+          GITHUB_REPO: ${{ github.repository }}
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        run: |
+          release_files=("$EXTENSION_ID/extension.yml")
+          if [[ -f "$EXTENSION_ID/CHANGELOG.md" ]]; then
+            release_files+=("$EXTENSION_ID/CHANGELOG.md")
+          fi
+          if [[ -f "$EXTENSION_ID/README.md" ]]; then
+            release_files+=("$EXTENSION_ID/README.md")
+          fi
+
+          if git diff --quiet -- "${release_files[@]}"; then
+            echo "Error: release preparation produced no changes" >&2
+            exit 1
+          fi
+
+          git add -- "${release_files[@]}"
+          git commit -m "chore: prepare ${EXTENSION_ID} release v${VERSION} [skip ci]"
+
+          git config --local --unset-all http.https://github.com/.extraheader || true
+          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
+          git push origin HEAD:main
 
       - name: Create and push tag
         env:

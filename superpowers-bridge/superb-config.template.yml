@@ -1,28 +1,32 @@
 # Superpowers Bridge Configuration Template
 #
-# This extension currently works without required runtime configuration.
-# The sections below are optional placeholders for future tuning.
+# This template configures bridge behavior only.
+# It does not define remote fallback rules or bundled skill content.
 
-features:
-  # Enable or disable standalone helper commands in docs/tooling contexts
-  standalone_commands_enabled: true
+discovery:
+  # Search order for installed superpowers skills.
+  # workspace => ./.agents/skills
+  # global    => ~/.agents/skills
+  search_order:
+    - workspace
+    - global
 
-  # If true, command docs should emphasize strict fail-fast behavior
-  strict_mode: true
+requirements:
+  hard:
+    - test-driven-development
+    - verification-before-completion
 
-fallback:
-  # Runtime fallback order used by thin orchestration commands
-  # local: read local superpowers SKILL.md from workspace plugin
-  # remote: fetch from GitHub raw URL
-  # embedded: use minimal hardcoded contract in command file
-  order:
-    - local
-    - remote
-    - embedded
+  optional:
+    - systematic-debugging
+    - receiving-code-review
+    - finishing-a-development-branch
 
-reporting:
-  include_spec_coverage_summary: true
-  include_test_evidence_summary: true
+commands:
+  enable_review: true
+  enable_critique: true
+  enable_debug: true
+  enable_finish: true
+  enable_respond: true
 
 # Local override file (recommended for experimentation, gitignored):
 # superb-config.local.yml

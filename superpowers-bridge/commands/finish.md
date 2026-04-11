@@ -1,13 +1,17 @@
 ---
 description: >
-  Development branch completion protocol. Loads the obra/superpowers
-  finishing-a-development-branch SKILL.md at runtime. Guides the user through
-  structured options (merge, PR, keep, discard) after verification passes.
-   Call manually after speckit.superb.verify succeeds.
+  Development branch completion protocol. Bridges an installed
+  obra/superpowers finishing-a-development-branch skill. Guides the user
+  through structured options (merge, PR, keep, discard) after verification
+  passes. Call manually after speckit.superb.verify succeeds.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Finish — Complete Development Branch
 
+> **Type:** Superpowers-adapted command
 > **Skill origin:** [obra/superpowers `finishing-a-development-branch`](https://github.com/obra/superpowers)
 > **Invocation:** Standalone command. Call after `speckit.superb.verify` confirms all checks pass.
 
@@ -29,22 +33,29 @@ Run /speckit.superb.verify first.
 
 ---
 
-## Step 1 — Load the Authoritative Finishing Skill
+## Step 1 — Resolve Installed Skill
 
-Locate and internalize the superpowers finishing skill using this priority chain:
+Look for `finishing-a-development-branch/SKILL.md` in this exact order:
 
-1. **Local plugin:** Read `skills/finishing-a-development-branch/SKILL.md` from the
-   workspace root (present when superpowers is installed as a plugin).
-2. **Remote fetch:** If the local file does not exist, fetch from
-   `https://raw.githubusercontent.com/obra/superpowers/main/skills/finishing-a-development-branch/SKILL.md`
-3. **Embedded fallback:** If both fail, apply this minimal contract:
-   > 1. Verify tests pass (full suite).
-   > 2. Determine base branch (main/master).
-   > 3. Present exactly 4 options: merge locally / push & create PR / keep as-is / discard.
-   > 4. Execute the chosen option.
-   > 5. Clean up worktree if applicable (options 1 and 4 only).
+1. `./.agents/skills/finishing-a-development-branch/SKILL.md`
+2. `~/.agents/skills/finishing-a-development-branch/SKILL.md`
 
-**You must internalize the full SKILL.md content before proceeding.**
+If the workspace and global copies both exist, use the workspace copy.
+
+If no readable file is found, **STOP**:
+
+```text
+ERROR: Optional superpowers skill `finishing-a-development-branch` not found.
+Run /speckit.superb.check for diagnostics.
+```
+
+Report the source you resolved before continuing:
+
+```text
+Using installed skill: finishing-a-development-branch
+Source: [workspace|global]
+Path: [resolved path]
+```
 
 ---
 
@@ -61,12 +72,17 @@ Locate and internalize the superpowers finishing skill using this priority chain
    ```
 4. Summarize what was implemented — read `spec.md` feature name and the
    verification evidence from the most recent `verify` run.
+5. Resolve the active feature spec path using the same Spec Kit prerequisite
+   script pattern used by follow-up commands:
+   - Prefer `FEATURE_SPEC` when present
+   - Otherwise use `FEATURE_DIR/spec.md`
+   - Do not infer the path from the branch name manually
 
 ---
 
 ## Step 3 — Execute the Finishing Skill
 
-Apply the loaded skill with these spec-kit additions:
+Apply the resolved installed skill with these spec-kit additions:
 
 1. **Final test verification** — run the full test suite one more time (the skill requires this).
 2. **Present structured options** — exactly 4 choices, no open-ended questions:
@@ -85,7 +101,56 @@ Apply the loaded skill with these spec-kit additions:
 
 ---
 
-## Spec-Kit PR Enhancement (Option 2 only)
+## Step 4 — Status Synchronization
+
+Synchronize `spec.md` only for outcomes this command can directly observe.
+
+### If the user chooses "Push and create a Pull Request"
+
+Update the spec by running:
+
+```bash
+{SCRIPT} --status "In Review"
+```
+
+Only do this after PR creation succeeds.
+If PR creation fails, preserve the previous status, typically `Verified`.
+
+### If the user chooses "Keep the branch as-is"
+
+Do not change status.
+If verification already passed, the feature usually remains `Verified`.
+
+### If the user chooses "Discard this work"
+
+After explicit confirmation and only after discard succeeds, update the spec by
+running:
+
+```bash
+{SCRIPT} --status "Abandoned"
+```
+
+If discard fails, preserve the previous status.
+
+### If the user chooses "Merge back locally"
+
+Do not write `Completed`.
+Preserve the current status.
+
+This bridge intentionally avoids claiming final completion because the dominant
+real-world integration path is GitHub PR creation and later merge, which happens
+outside the current bridge hook surface.
+
+General rules:
+
+- Use the script output as the source of truth for resolved spec path and
+  resulting status
+- Do not overwrite `Abandoned` silently later
+- Do not introduce `Completed` in the current bridge lifecycle model
+
+---
+
+## Step 5 — Spec-Kit PR Enhancement (Option 2 only)
 
 If the user chooses "Push and create a Pull Request", enhance the PR body with
 spec-kit context:

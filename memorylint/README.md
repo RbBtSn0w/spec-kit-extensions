@@ -55,6 +55,24 @@ MemoryLint hooks into the `before_constitution` lifecycle to perform bidirection
            │                                 │                                     │
            │                                 │ ─── Tool: write_file ─────────────> │ 📄 constitution.md
            │                                 │                                     │
+═══════════╪═════════════════════════════════╪═════════════════════════════════════╪═══════════════════
+           │                                 │                                     │
+           │ 4. Trigger Plan Pre-hook        │                                     │
+           │ > /speckit.memorylint.load-agents │ (Mandatory load-agents gate)     │
+           ├───────────────────────────────> │ Read load-agents.md                │
+           │                                 │ ─── (Action) Tool: read_file ─────> │ 📄 AGENTS.md (Governed)
+           │                                 │ <── Return core rules context ──────│
+           │                                 │                                     │
+           │ 5. Trigger Planning Command     │                                     │
+           │ > /speckit plan                 │                                     │
+           ├───────────────────────────────> │ Read plan prompt                    │
+           │                                 │ + retrieve core rules from ctx      │
+           │                                 │                                     │
+           │                                 │ LLM: Generate plan & tasks          │
+           │                                 │      strictly following rules       │
+           │                                 │                                     │
+           │                                 │ ─── Tool: write_file ─────────────> │ 📄 plan.md / tasks.md
+           │                                 │                                     │
 ```
 
 ## Features
@@ -116,7 +134,7 @@ When you run `/speckit plan`, the system will automatically execute the `load-ag
 
 ## Requirements
 
-- Spec Kit: `>=0.1.0`
+- Spec Kit: `>=0.5.1`
 
 ## License
 

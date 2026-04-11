@@ -1,0 +1,138 @@
+param(
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Tasked', 'Implementing', 'Verified', 'In Review', 'Abandoned')]
+    [string]$Status
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Resolve-FeatureJson {
+    $scriptPath = 'scripts/powershell/check-prerequisites.ps1'
+
+    if (-not (Test-Path $scriptPath)) {
+        throw 'scripts/powershell/check-prerequisites.ps1 not found in project root'
+    }
+
+    $commandArgsList = @(
+        @('-Json', '-RequireTasks', '-IncludeTasks'),
+        @('-Json', '-PathsOnly'),
+        @('-Json')
+    )
+
+    foreach ($commandArgs in $commandArgsList) {
+        try {
+            $result = & $scriptPath @commandArgs 2>$null
+            if ($result) {
+                $resultText = [string]::Join([Environment]::NewLine, [string[]]$result)
+                $null = $resultText | ConvertFrom-Json -ErrorAction Stop
+                return $resultText
+            }
+        } catch {
+        }
+    }
+
+    throw 'Unable to resolve active feature via scripts/powershell/check-prerequisites.ps1'
+}
+
+$jsonPayload = Resolve-FeatureJson
+$payload = $jsonPayload | ConvertFrom-Json
+
+$specPath = if ($payload.FEATURE_SPEC) {
+    $payload.FEATURE_SPEC
+} elseif ($payload.FEATURE_DIR) {
+    Join-Path $payload.FEATURE_DIR 'spec.md'
+} else {
+    throw 'Feature resolution did not provide FEATURE_SPEC or FEATURE_DIR'
+}
+
+if (-not (Test-Path $specPath)) {
+    throw "Resolved spec file does not exist: $specPath"
+}
+
+$rawContent = [System.IO.File]::ReadAllText($specPath, [System.Text.Encoding]::UTF8)
+$lineEnding = if ($rawContent.Contains("`r`n")) {
+    "`r`n"
+} elseif ($rawContent.Contains("`n")) {
+    "`n"
+} elseif ($rawContent.Contains("`r")) {
+    "`r"
+} else {
+    "`n"
+}
+$hadTrailingNewline = $rawContent.EndsWith("`r`n") -or $rawContent.EndsWith("`n") -or $rawContent.EndsWith("`r")
+$lines = [System.Collections.Generic.List[string]]::new()
+$splitPattern = "\r\n|\n|\r"
+if ($rawContent.Length -gt 0) {
+    $lines.AddRange([string[]]([regex]::Split($rawContent, $splitPattern)))
+    if ($hadTrailingNewline -and $lines.Count -gt 0 -and $lines[$lines.Count - 1] -eq '') {
+        $lines.RemoveAt($lines.Count - 1)
+    }
+}
+$statusPattern = '^\*\*Status\*\*:\s*(.+?)\s*$'
+$matchIndexes = [System.Collections.Generic.List[int]]::new()
+$previousStatus = $null
+
+for ($i = 0; $i -lt $lines.Count; $i++) {
+    if ($lines[$i] -match $statusPattern) {
+        if (-not $previousStatus) {
+            $previousStatus = $Matches[1]
+        }
+        $matchIndexes.Add($i)
+    }
+}
+
+if ($previousStatus -eq 'Abandoned' -and $Status -ne 'Abandoned') {
+    [pscustomobject]@{
+        spec_path = $specPath
+        previous_status = $previousStatus
+        new_status = $previousStatus
+        changed = $false
+        reason = 'preserved_terminal_abandoned'
+    } | ConvertTo-Json -Compress
+    exit 0
+}
+
+$statusLine = "**Status**: $Status"
+
+if ($matchIndexes.Count -gt 0) {
+    $lines[$matchIndexes[0]] = $statusLine
+    for ($i = $matchIndexes.Count - 1; $i -ge 1; $i--) {
+        $lines.RemoveAt($matchIndexes[$i])
+    }
+} else {
+    $headingIndex = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i].StartsWith('# ')) {
+            $headingIndex = $i
+            break
+        }
+    }
+
+    if ($headingIndex -lt 0) {
+        $lines.Insert(0, $statusLine)
+    } else {
+        $insertAt = $headingIndex + 1
+        if ($insertAt -lt $lines.Count -and [string]::IsNullOrWhiteSpace($lines[$insertAt])) {
+            $insertAt++
+        }
+        $lines.Insert($insertAt, $statusLine)
+    }
+}
+
+$content = [string]::Join($lineEnding, [string[]]$lines)
+if ($hadTrailingNewline) {
+    $content += $lineEnding
+}
+
+$changed = $content -ne $rawContent
+if ($changed) {
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($specPath, $content, $utf8NoBom)
+}
+
+[pscustomobject]@{
+    spec_path = $specPath
+    previous_status = $previousStatus
+    new_status = $Status
+    changed = $changed
+} | ConvertTo-Json -Compress
