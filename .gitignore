@@ -18,3 +18,5 @@ superb-config.local.yml
 node_modules/
 dist/
 build/
+
+superpowers-bridge/v/*
