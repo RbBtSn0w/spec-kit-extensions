@@ -88,7 +88,7 @@ specify extension add --dev ./memorylint
 | Command | Type | Purpose |
 |---|---|---|
 | `/speckit.memorylint.run` | Hookable | Prune out-of-bounds rules and enrich missing infrastructure guidelines in `AGENTS.md`. |
-| `/speckit.memorylint.load-agents` | Hookable | Mandatory gate: Load `AGENTS.md` to enforce core rules before implementation. |
+| `/speckit.memorylint.load-agents` | Hookable | Mandatory gate: Load `AGENTS.md` to enforce core rules before planning. |
 
 *(Note: If the interactive hook is skipped in non-TTY environments, you can manually trigger the command above before running `/speckit constitution`.)*
 
@@ -97,7 +97,7 @@ specify extension add --dev ./memorylint
 This extension registers the following hooks:
 
 - `before_constitution` → `run` (optional)
-- `before_implement` → `load-agents` (mandatory)
+- `before_plan` → `load-agents` (mandatory)
 
 ## Usage / Execution Flow
 
