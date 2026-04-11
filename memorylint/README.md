@@ -110,6 +110,10 @@ Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infr
 - **If you select `y`**: The audit will run, govern `AGENTS.md`, and the extracted rules will be incorporated into the new constitution seamlessly.
 - **If you select `n`**: The hook is bypassed and the standard constitution generation proceeds.
 
+When you run `/speckit plan`, the system will automatically execute the `load-agents` hook:
+
+- **Mandatory Gate**: The system will read your `AGENTS.md` file and acknowledge its core rules before starting the planning process. This ensures that the generated `plan.md` and `tasks.md` strictly adhere to your workspace's architectural constraints without needing manual confirmation.
+
 ## Requirements
 
 - Spec Kit: `>=0.1.0`
