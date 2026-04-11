@@ -238,6 +238,7 @@ remote fallbacks or bundled skill content.
 
 - Spec Kit: `>=0.4.3`
 - Installed superpowers-compatible skills in `./.agents/skills/` or `~/.agents/skills/`
+- Optional: the `superpowers` tool, if you use it to install or manage those skills; the bridge itself relies on the installed skill content being present
 
 ## Responsibility Boundaries
 

@@ -20,6 +20,11 @@ STATE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --status)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: Invalid or missing --status value: <empty>" >&2
+        usage >&2
+        exit 1
+      fi
       STATE="${2:-}"
       shift 2
       ;;
