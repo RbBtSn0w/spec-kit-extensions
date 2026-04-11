@@ -6,6 +6,11 @@ usage() {
   cat <<'EOF'
 Usage: sync-spec-status.sh --status <Tasked|Implementing|Verified|In Review|Abandoned>
 
+Note:
+  Multi-word statuses must be quoted or escaped.
+  Example: sync-spec-status.sh --status "In Review"
+           sync-spec-status.sh --status In\ Review
+
 Resolves the active Spec Kit feature spec using the project's own
 check-prerequisites script and synchronizes a canonical:
 
