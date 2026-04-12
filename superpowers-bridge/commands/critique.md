@@ -69,8 +69,12 @@ Read in this exact order:
 5. The current git diff:
 
 ```bash
-# Get the diff since the last review checkpoint (or since branch start)
-git diff [BASE_SHA] HEAD
+# Automatically resolve base to find implementation changes
+BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@' || echo "main")
+BASE_SHA=$(git merge-base origin/$BASE_BRANCH HEAD)
+
+# Get the diff since the last review checkpoint
+git diff $BASE_SHA HEAD
 # Or for staged changes only:
 git diff --cached
 # Or for a specific set of files:
@@ -127,10 +131,10 @@ Evaluate the implementation against the plan's architecture:
 
 For each issue found:
 
-#### 🔴 CRITICAL — Blocks proceeding
+#### 🔴 Critical — Blocks proceeding
 
 ```markdown
-### 🔴 CRITICAL: [Issue title]
+### 🔴 Critical: [Issue title]
 
 **Requirement violated:** spec.md §[section] — "[requirement text]"
 **What was implemented:** [what the code actually does]
@@ -141,23 +145,31 @@ For each issue found:
 This issue must be resolved before any further work. Do not proceed to next task.
 ```
 
-#### 🟡 IMPORTANT — Must fix before merge
+#### 🟠 High — Must fix before merge
 
 ```markdown
-### 🟡 IMPORTANT: [Issue title]
+### 🟠 High: [Issue title]
 
 **What:** [description]
 **Evidence:** [file:line or test output]
 **Fix:** [what to do]
 ```
 
-#### 🔵 MINOR — Note for later
+#### 🟡 Medium — Fix if time permits
 
 ```markdown
-### 🔵 MINOR: [Issue title]
+### 🟡 Medium: [Issue title]
 
 **What:** [description]
 **Suggestion:** [optional improvement]
+```
+
+#### 🔵 Low / Nitpick — Optional polish
+
+```markdown
+### 🔵 Low: [Issue title]
+
+**What:** [minor suggestion or style point]
 ```
 
 ---
@@ -196,16 +208,17 @@ If Critical issues exist:
 Do not write new code or start new tasks until resolved.
 ```
 
-If no Critical issues, Important issues exist:
+If no Critical issues, High or Medium issues exist:
 ```
-🟡 FIX BEFORE MERGE: Address Important issues before creating PR.
+🟠 FIX BEFORE MERGE: Address High issues before creating PR.
+🟡 REASONABLE DEBT: Address Medium issues if they impact long-term maintenance.
 You may continue to the next task but must return to fix these.
 ```
 
-If only Minor issues:
+If only Low issues:
 ```
 ✓ CLEAR TO PROCEED: Implementation meets spec requirements.
-Minor issues tracked. Safe to continue to next task or create PR.
+Low issues tracked. Safe to continue to next task or create PR.
 ```
 
 ---

@@ -41,7 +41,11 @@ EOF
 (
   cd "$TMP_DIR"
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Tasked >/dev/null
+  # Check if it's there
   grep -q '^\*\*Status\*\*: Tasked$' specs/001-demo/spec.md
+  # Check position: line 1 should be heading, line 2 blank, line 3 status
+  [[ "$(head -n 1 specs/001-demo/spec.md)" == "# Demo Feature" ]]
+  [[ "$(sed -n '3p' specs/001-demo/spec.md)" == "**Status**: Tasked" ]]
 
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Verified >/dev/null
   grep -q '^\*\*Status\*\*: Verified$' specs/001-demo/spec.md
@@ -51,6 +55,7 @@ EOF
 
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status In\ Review >/dev/null
   grep -q '^\*\*Status\*\*: Abandoned$' specs/001-demo/spec.md
+
 )
 
 CRLF_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t superb-crlf.XXXXXX)"

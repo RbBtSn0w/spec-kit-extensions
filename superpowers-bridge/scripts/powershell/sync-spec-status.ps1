@@ -34,6 +34,7 @@ function Resolve-FeatureJson {
     throw 'Unable to resolve active feature via scripts/powershell/check-prerequisites.ps1'
 }
 
+# ... (previous code for Resolve-FeatureJson) ...
 $jsonPayload = Resolve-FeatureJson
 $payload = $jsonPayload | ConvertFrom-Json
 
@@ -49,7 +50,25 @@ if (-not (Test-Path $specPath)) {
     throw "Resolved spec file does not exist: $specPath"
 }
 
-$rawContent = [System.IO.File]::ReadAllText($specPath, [System.Text.Encoding]::UTF8)
+# 1. Detect encoding and BOM first
+$fileBytes = [System.IO.File]::ReadAllBytes($specPath)
+$outputEncoding = New-Object System.Text.UTF8Encoding($false) # Default
+
+if ($fileBytes.Length -ge 3 -and $fileBytes[0] -eq 0xEF -and $fileBytes[1] -eq 0xBB -and $fileBytes[2] -eq 0xBF) {
+    $outputEncoding = New-Object System.Text.UTF8Encoding($true)
+} elseif ($fileBytes.Length -ge 4 -and $fileBytes[0] -eq 0xFF -and $fileBytes[1] -eq 0xFE -and $fileBytes[2] -eq 0x00 -and $fileBytes[3] -eq 0x00) {
+    $outputEncoding = New-Object System.Text.UTF32Encoding($false, $true)
+} elseif ($fileBytes.Length -ge 4 -and $fileBytes[0] -eq 0x00 -and $fileBytes[1] -eq 0x00 -and $fileBytes[2] -eq 0xFE -and $fileBytes[3] -eq 0xFF) {
+    $outputEncoding = New-Object System.Text.UTF32Encoding($true, $true)
+} elseif ($fileBytes.Length -ge 2 -and $fileBytes[0] -eq 0xFF -and $fileBytes[1] -eq 0xFE) {
+    $outputEncoding = New-Object System.Text.UnicodeEncoding($false, $true)
+} elseif ($fileBytes.Length -ge 2 -and $fileBytes[0] -eq 0xFE -and $fileBytes[1] -eq 0xFF) {
+    $outputEncoding = New-Object System.Text.UnicodeEncoding($true, $true)
+}
+
+# 2. Read with detected encoding
+$rawContent = [System.IO.File]::ReadAllText($specPath, $outputEncoding)
+
 $lineEnding = if ($rawContent.Contains("`r`n")) {
     "`r`n"
 } elseif ($rawContent.Contains("`n")) {
@@ -111,7 +130,9 @@ if ($matchIndexes.Count -gt 0) {
     if ($headingIndex -lt 0) {
         $lines.Insert(0, $statusLine)
     } else {
-        $lines.Insert($headingIndex, $statusLine)
+        # Insert BELOW the heading
+        $lines.Insert($headingIndex + 1, "")
+        $lines.Insert($headingIndex + 2, $statusLine)
     }
 }
 
@@ -122,23 +143,6 @@ if ($hadTrailingNewline) {
 
 $changed = $content -ne $rawContent
 if ($changed) {
-    $fileBytes = [System.IO.File]::ReadAllBytes($specPath)
-    $outputEncoding = $null
-
-    if ($fileBytes.Length -ge 3 -and $fileBytes[0] -eq 0xEF -and $fileBytes[1] -eq 0xBB -and $fileBytes[2] -eq 0xBF) {
-        $outputEncoding = New-Object System.Text.UTF8Encoding($true)
-    } elseif ($fileBytes.Length -ge 4 -and $fileBytes[0] -eq 0xFF -and $fileBytes[1] -eq 0xFE -and $fileBytes[2] -eq 0x00 -and $fileBytes[3] -eq 0x00) {
-        $outputEncoding = New-Object System.Text.UTF32Encoding($false, $true)
-    } elseif ($fileBytes.Length -ge 4 -and $fileBytes[0] -eq 0x00 -and $fileBytes[1] -eq 0x00 -and $fileBytes[2] -eq 0xFE -and $fileBytes[3] -eq 0xFF) {
-        $outputEncoding = New-Object System.Text.UTF32Encoding($true, $true)
-    } elseif ($fileBytes.Length -ge 2 -and $fileBytes[0] -eq 0xFF -and $fileBytes[1] -eq 0xFE) {
-        $outputEncoding = New-Object System.Text.UnicodeEncoding($false, $true)
-    } elseif ($fileBytes.Length -ge 2 -and $fileBytes[0] -eq 0xFE -and $fileBytes[1] -eq 0xFF) {
-        $outputEncoding = New-Object System.Text.UnicodeEncoding($true, $true)
-    } else {
-        $outputEncoding = New-Object System.Text.UTF8Encoding($false)
-    }
-
     [System.IO.File]::WriteAllText($specPath, $content, $outputEncoding)
 }
 
@@ -148,3 +152,4 @@ if ($changed) {
     new_status = $Status
     changed = $changed
 } | ConvertTo-Json -Compress
+
