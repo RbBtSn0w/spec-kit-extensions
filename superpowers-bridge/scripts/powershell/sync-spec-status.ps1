@@ -7,10 +7,24 @@ param(
 $ErrorActionPreference = 'Stop'
 
 function Resolve-FeatureJson {
-    $scriptPath = 'scripts/powershell/check-prerequisites.ps1'
+    $scriptRelativePath = 'scripts/powershell/check-prerequisites.ps1'
+    $scriptPath = $scriptRelativePath
+
+    # 1. Try relative to current directory (project root)
+    if (-not (Test-Path $scriptPath)) {
+        # 2. Try relative to the script's own location (extension scripts dir)
+        $currentScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+        if ($currentScriptDir) {
+            $scriptPath = Join-Path $currentScriptDir 'check-prerequisites.ps1'
+            if (-not (Test-Path $scriptPath)) {
+                # 3. Fallback to assuming we are in superpowers-bridge/scripts/powershell/
+                $scriptPath = Join-Path $currentScriptDir '../../..' $scriptRelativePath
+            }
+        }
+    }
 
     if (-not (Test-Path $scriptPath)) {
-        throw 'scripts/powershell/check-prerequisites.ps1 not found in project root'
+        throw "scripts/powershell/check-prerequisites.ps1 not found (checked project root and extension scripts dir)"
     }
 
     $commandArgsList = @(
@@ -31,8 +45,9 @@ function Resolve-FeatureJson {
         }
     }
 
-    throw 'Unable to resolve active feature via scripts/powershell/check-prerequisites.ps1'
+    throw "Unable to resolve active feature via $scriptPath"
 }
+
 
 # ... (previous code for Resolve-FeatureJson) ...
 $jsonPayload = Resolve-FeatureJson

@@ -66,28 +66,36 @@ fi
 
 resolve_feature_json() {
   local output
+  local prereq="scripts/bash/check-prerequisites.sh"
+  
+  # Try relative to current dir, then relative to script dir
+  if [[ ! -f "$prereq" ]]; then
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    prereq="$(cd "$script_dir/../.." && pwd)/scripts/bash/check-prerequisites.sh"
+  fi
 
-  if [[ ! -f scripts/bash/check-prerequisites.sh || ! -r scripts/bash/check-prerequisites.sh ]]; then
-    echo "ERROR: scripts/bash/check-prerequisites.sh not found or not readable in project root" >&2
+  if [[ ! -f "$prereq" || ! -r "$prereq" ]]; then
+    echo "ERROR: check-prerequisites.sh not found (checked project root and extension scripts dir)" >&2
     return 1
   fi
 
-  if output=$(bash scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks 2>/dev/null); then
+  if output=$(bash "$prereq" --json --require-tasks --include-tasks 2>/dev/null); then
     printf '%s\n' "$output"
     return 0
   fi
 
-  if output=$(bash scripts/bash/check-prerequisites.sh --json --paths-only 2>/dev/null); then
+  if output=$(bash "$prereq" --json --paths-only 2>/dev/null); then
     printf '%s\n' "$output"
     return 0
   fi
 
-  if output=$(bash scripts/bash/check-prerequisites.sh --json 2>/dev/null); then
+  if output=$(bash "$prereq" --json 2>/dev/null); then
     printf '%s\n' "$output"
     return 0
   fi
 
-  echo "ERROR: Unable to resolve active feature via scripts/bash/check-prerequisites.sh" >&2
+  echo "ERROR: Unable to resolve active feature via $prereq" >&2
   return 1
 }
 
@@ -145,7 +153,8 @@ elif raw_bytes.startswith(b"\xff\xfe\x00\x00") or raw_bytes.startswith(b"\x00\x0
 elif raw_bytes.startswith(b"\xff\xfe") or raw_bytes.startswith(b"\xfe\xff"):
     encoding = "utf-16"
 
-raw_text = raw_bytes.decode(encoding)
+raw_text = raw_bytes.decode(encoding, errors="replace")
+
 line_ending = "\r\n" if "\r\n" in raw_text else ("\n" if "\n" in raw_text else ("\r" if "\r" in raw_text else "\n"))
 had_trailing_newline = raw_text.endswith(("\r\n", "\n", "\r"))
 lines = raw_text.splitlines()
