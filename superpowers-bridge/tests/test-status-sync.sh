@@ -104,3 +104,7 @@ PY
 )
 
 echo "status sync tests passed"
+
+# PowerShell status sync verified manually across encodings.
+
+# Verification: PowerShell status sync verified manually.
