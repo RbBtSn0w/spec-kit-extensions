@@ -68,16 +68,17 @@ resolve_feature_json() {
   local output
   local prereq="scripts/bash/check-prerequisites.sh"
   
-  # Try relative to current dir, then relative to script dir
   if [[ ! -f "$prereq" ]]; then
     local script_dir
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    # Project root is 3 levels up from scripts/bash/
-    prereq="$(cd "$script_dir/../../.." && pwd)/scripts/bash/check-prerequisites.sh"
+    # Try common extension layout relative to script location
+    if [[ -f "$script_dir/../../../scripts/bash/check-prerequisites.sh" ]]; then
+      prereq="$script_dir/../../../scripts/bash/check-prerequisites.sh"
+    fi
   fi
 
   if [[ ! -f "$prereq" || ! -r "$prereq" ]]; then
-    echo "ERROR: check-prerequisites.sh not found (checked project root and extension scripts dir)" >&2
+    echo "ERROR: check-prerequisites.sh not found or not readable (checked project root and extension scripts dir)" >&2
     return 1
   fi
 
@@ -91,7 +92,7 @@ resolve_feature_json() {
     return 0
   fi
 
-  if output=$(bash "$prereq" --json); then
+  if output=$(bash "$prereq" --json 2>/dev/null); then
     printf '%s\n' "$output"
     return 0
   fi
@@ -144,18 +145,7 @@ spec_path = pathlib.Path(sys.argv[1])
 target_status = sys.argv[2]
 status_re = re.compile(r"^\*\*Status\*\*:\s*(.+?)\s*$")
 
-# 1. Detect encoding and BOM
-raw_bytes = spec_path.read_bytes()
-encoding = "utf-8" # Default
-if raw_bytes.startswith(b"\xef\xbb\xbf"):
-    encoding = "utf-8-sig"
-elif raw_bytes.startswith(b"\xff\xfe\x00\x00") or raw_bytes.startswith(b"\x00\x00\xfe\xff"):
-    encoding = "utf-32"
-elif raw_bytes.startswith(b"\xff\xfe") or raw_bytes.startswith(b"\xfe\xff"):
-    encoding = "utf-16"
-
-raw_text = raw_bytes.decode(encoding, errors="replace")
-
+raw_text = spec_path.read_text(encoding="utf-8", newline="")
 line_ending = "\r\n" if "\r\n" in raw_text else ("\n" if "\n" in raw_text else ("\r" if "\r" in raw_text else "\n"))
 had_trailing_newline = raw_text.endswith(("\r\n", "\n", "\r"))
 lines = raw_text.splitlines()
@@ -187,9 +177,7 @@ else:
     if heading_index is None:
         lines.insert(0, status_line)
     else:
-        # Insert BELOW the heading
-        lines.insert(heading_index + 1, "")
-        lines.insert(heading_index + 2, status_line)
+        lines.insert(heading_index, status_line)
 
 new_text = line_ending.join(lines)
 if had_trailing_newline:
@@ -197,8 +185,7 @@ if had_trailing_newline:
 
 changed = new_text != raw_text
 if changed:
-    with open(spec_path, 'w', encoding=encoding, newline='') as f:
-        f.write(new_text)
+    spec_path.write_text(new_text, encoding="utf-8", newline="")
 
 print(json.dumps({
     "spec_path": str(spec_path),
@@ -207,5 +194,3 @@ print(json.dumps({
     "changed": changed,
 }))
 PY
-
-
