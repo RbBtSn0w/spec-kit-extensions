@@ -177,7 +177,8 @@ else:
     if heading_index is None:
         lines.insert(0, status_line)
     else:
-        lines.insert(heading_index, status_line)
+        lines.insert(heading_index + 1, "")
+        lines.insert(heading_index + 2, status_line)
 
 new_text = line_ending.join(lines)
 if had_trailing_newline:

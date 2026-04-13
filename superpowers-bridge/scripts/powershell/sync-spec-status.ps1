@@ -123,7 +123,8 @@ if ($matchIndexes.Count -gt 0) {
     if ($headingIndex -lt 0) {
         $lines.Insert(0, $statusLine)
     } else {
-        $lines.Insert($headingIndex, $statusLine)
+        $lines.Insert($headingIndex + 1, "")
+        $lines.Insert($headingIndex + 2, $statusLine)
     }
 }
 

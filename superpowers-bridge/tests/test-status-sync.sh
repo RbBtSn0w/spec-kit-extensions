@@ -44,8 +44,8 @@ EOF
   # Check if it's there
   grep -q '^\*\*Status\*\*: Tasked$' specs/001-demo/spec.md
   # Check position: line 1 should be heading, line 2 blank, line 3 status
-  [[ "$(head -n 1 specs/001-demo/spec.md)" == "# Demo Feature" ]]
-  [[ "$(sed -n '3p' specs/001-demo/spec.md)" == "**Status**: Tasked" ]]
+  [[ "$(head -n 1 specs/001-demo/spec.md)" == "# Demo Feature" ]] || exit 1
+  [[ "$(sed -n '3p' specs/001-demo/spec.md)" == "**Status**: Tasked" ]] || exit 1
 
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Verified >/dev/null
   grep -q '^\*\*Status\*\*: Verified$' specs/001-demo/spec.md
@@ -69,7 +69,7 @@ echo "No H1 here, just text." >"$NO_H1_DIR/specs/001-demo/spec.md"
   cd "$NO_H1_DIR"
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Tasked >/dev/null
   # Should be at the top
-  [[ "$(head -n 1 specs/001-demo/spec.md)" == "**Status**: Tasked" ]]
+  [[ "$(head -n 1 specs/001-demo/spec.md)" == "**Status**: Tasked" ]] || exit 1
 )
 
 CRLF_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t superb-crlf.XXXXXX)"
@@ -91,7 +91,7 @@ PY
   before_hash="$(file_sha256 specs/001-demo/spec.md)"
   result="$("$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Verified)"
   after_hash="$(file_sha256 specs/001-demo/spec.md)"
-  [[ "$before_hash" == "$after_hash" ]]
+  [[ "$before_hash" == "$after_hash" ]] || exit 1
   printf '%s' "$result" | grep -q '"changed": false'
   python3 - <<'PY'
 from pathlib import Path
