@@ -145,7 +145,8 @@ spec_path = pathlib.Path(sys.argv[1])
 target_status = sys.argv[2]
 status_re = re.compile(r"^\*\*Status\*\*:\s*(.+?)\s*$")
 
-raw_text = spec_path.read_text(encoding="utf-8", newline="")
+with spec_path.open("r", encoding="utf-8", newline="") as spec_file:
+    raw_text = spec_file.read()
 line_ending = "\r\n" if "\r\n" in raw_text else ("\n" if "\n" in raw_text else ("\r" if "\r" in raw_text else "\n"))
 had_trailing_newline = raw_text.endswith(("\r\n", "\n", "\r"))
 lines = raw_text.splitlines()

@@ -61,7 +61,17 @@ if (-not (Test-Path $specPath)) {
     throw "Resolved spec file does not exist: $specPath"
 }
 
-$rawContent = [System.IO.File]::ReadAllText($specPath, [System.Text.Encoding]::UTF8)
+$specStream = [System.IO.File]::OpenRead($specPath)
+try {
+    $reader = [System.IO.StreamReader]::new($specStream, [System.Text.Encoding]::UTF8, $true)
+    try {
+        $rawContent = $reader.ReadToEnd()
+    } finally {
+        $reader.Dispose()
+    }
+} finally {
+    $specStream.Dispose()
+}
 $lineEnding = if ($rawContent.Contains("`r`n")) {
     "`r`n"
 } elseif ($rawContent.Contains("`n")) {
