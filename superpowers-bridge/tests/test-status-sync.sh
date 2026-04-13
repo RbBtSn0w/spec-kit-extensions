@@ -81,8 +81,9 @@ cp "$TMP_DIR/scripts/bash/check-prerequisites.sh" "$CRLF_DIR/scripts/bash/check-
 chmod +x "$CRLF_DIR/scripts/bash/check-prerequisites.sh"
 
 python3 - "$CRLF_DIR/specs/001-demo/spec.md" <<'PY'
+import sys
 from pathlib import Path
-Path(__import__("sys").argv[1]).write_bytes(
+Path(sys.argv[1]).write_bytes(
     b"# Demo Feature\r\n\r\n**Status**: Verified\r\n\r\n## Overview\r\n\r\nTesting status sync.\r\n"
 )
 PY

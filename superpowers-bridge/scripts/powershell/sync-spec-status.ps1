@@ -22,7 +22,7 @@ function Resolve-FeatureJson {
     }
 
     if (-not (Test-Path $scriptPath)) {
-        throw "check-prerequisites.ps1 not found (checked project root and extension scripts dir)"
+        throw "ERROR: check-prerequisites.ps1 not found (checked project root and extension scripts dir)"
     }
 
     $commandArgsList = @(
