@@ -116,7 +116,7 @@ if not extension_file.exists():
     raise SystemExit(f"Missing {extension_file}")
 
 # Update extension.version in the extension metadata block only.
-lines = extension_file.read_text().splitlines()
+lines = extension_file.read_text(encoding="utf-8").splitlines()
 updated = False
 in_extension = False
 extension_indent = None
@@ -139,21 +139,21 @@ for i, line in enumerate(lines):
             break
 if not updated:
     raise SystemExit("Failed to update extension.version in extension.yml")
-extension_file.write_text("\n".join(lines) + "\n")
+extension_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 # Update README release download links if present.
 if readme_file.exists():
-    readme_text = readme_file.read_text()
+    readme_text = readme_file.read_text(encoding="utf-8")
     readme_text = re.sub(
         rf"(releases/download/)({re.escape(extension_id)}-v[0-9]+\.[0-9]+\.[0-9]+)(/{re.escape(extension_id)}\.zip)",
         rf"\1{tag}\3",
         readme_text,
     )
-    readme_file.write_text(readme_text)
+    readme_file.write_text(readme_text, encoding="utf-8")
 
 # Rotate changelog unreleased section into a versioned release section when present.
 if changelog_file.exists():
-    changelog_text = changelog_file.read_text()
+    changelog_text = changelog_file.read_text(encoding="utf-8")
     match = re.search(r"^## \[Unreleased\]\n(?P<body>.*?)(?=^## \[|\Z)", changelog_text, re.S | re.M)
     if not match:
         raise SystemExit("CHANGELOG.md must contain an '## [Unreleased]' section")
@@ -180,7 +180,7 @@ if changelog_file.exists():
     else:
         changelog_text = changelog_text.rstrip() + "\n" + release_link + "\n"
 
-    changelog_file.write_text(changelog_text)
+    changelog_file.write_text(changelog_text, encoding="utf-8")
 PY
 
       - name: Commit release metadata
@@ -208,7 +208,7 @@ PY
 
           git config --local --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
-          git push origin HEAD:${{ github.event.repository.default_branch }}
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
 
       - name: Create and push tag
         env:
