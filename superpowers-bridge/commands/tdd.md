@@ -30,6 +30,9 @@ If no readable file is found, **STOP**:
 ```text
 ERROR: Required superpowers skill `test-driven-development` not found.
 Run /speckit.superb.check for diagnostics.
+
+TIP: Ensure superpowers is installed and its skills are in `./.agents/skills/`
+or `~/.agents/skills/`. You can use the `superpowers` tool to manage skills.
 ```
 
 Report the source you resolved before continuing:

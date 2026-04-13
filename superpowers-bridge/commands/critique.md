@@ -70,7 +70,8 @@ Read in this exact order:
 
 ```bash
 # Automatically resolve base to find implementation changes
-BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@' || echo "main")
+BASE_BRANCH=$(git symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+[ -n "$BASE_BRANCH" ] || BASE_BRANCH="main"
 BASE_SHA=$(git merge-base origin/$BASE_BRANCH HEAD)
 
 # Get the diff since the last review checkpoint

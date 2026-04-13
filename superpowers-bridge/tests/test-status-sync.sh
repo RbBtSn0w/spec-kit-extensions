@@ -58,8 +58,22 @@ EOF
 
 )
 
+# Test insertion without H1 heading
+NO_H1_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t superb-noh1.XXXXXX)"
+mkdir -p "$NO_H1_DIR/scripts/bash" "$NO_H1_DIR/specs/001-demo"
+cp "$TMP_DIR/scripts/bash/check-prerequisites.sh" "$NO_H1_DIR/scripts/bash/check-prerequisites.sh"
+chmod +x "$NO_H1_DIR/scripts/bash/check-prerequisites.sh"
+echo "No H1 here, just text." >"$NO_H1_DIR/specs/001-demo/spec.md"
+
+(
+  cd "$NO_H1_DIR"
+  "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Tasked >/dev/null
+  # Should be at the top
+  [[ "$(head -n 1 specs/001-demo/spec.md)" == "**Status**: Tasked" ]]
+)
+
 CRLF_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t superb-crlf.XXXXXX)"
-trap 'rm -rf "$TMP_DIR" "$CRLF_DIR"' EXIT
+trap 'rm -rf "$TMP_DIR" "$NO_H1_DIR" "$CRLF_DIR"' EXIT
 
 mkdir -p "$CRLF_DIR/scripts/bash" "$CRLF_DIR/specs/001-demo"
 cp "$TMP_DIR/scripts/bash/check-prerequisites.sh" "$CRLF_DIR/scripts/bash/check-prerequisites.sh"

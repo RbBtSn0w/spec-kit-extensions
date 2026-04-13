@@ -49,7 +49,6 @@ function Resolve-FeatureJson {
 }
 
 
-# ... (previous code for Resolve-FeatureJson) ...
 $jsonPayload = Resolve-FeatureJson
 $payload = $jsonPayload | ConvertFrom-Json
 

@@ -72,7 +72,8 @@ resolve_feature_json() {
   if [[ ! -f "$prereq" ]]; then
     local script_dir
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    prereq="$(cd "$script_dir/../.." && pwd)/scripts/bash/check-prerequisites.sh"
+    # Project root is 3 levels up from scripts/bash/
+    prereq="$(cd "$script_dir/../../.." && pwd)/scripts/bash/check-prerequisites.sh"
   fi
 
   if [[ ! -f "$prereq" || ! -r "$prereq" ]]; then
@@ -90,7 +91,7 @@ resolve_feature_json() {
     return 0
   fi
 
-  if output=$(bash "$prereq" --json 2>/dev/null); then
+  if output=$(bash "$prereq" --json); then
     printf '%s\n' "$output"
     return 0
   fi
