@@ -33,8 +33,8 @@ jobs:
           VERSION="${VERSION#v}"
 
           # Validate version format
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Error: Invalid version format '$VERSION'. Must be X.Y.Z" >&2
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9a-zA-Z.]+)?$ ]]; then
+            echo "Error: Invalid version format '$VERSION'. Must be X.Y.Z or X.Y.Z-suffix" >&2
             exit 1
           fi
 
@@ -145,7 +145,7 @@ jobs:
           if readme_file.exists():
               readme_text = readme_file.read_text(encoding="utf-8")
               readme_text = re.sub(
-                  rf"(releases/download/)({re.escape(extension_id)}-v[0-9]+\.[0-9]+\.[0-9]+)(/{re.escape(extension_id)}\.zip)",
+                  rf"(releases/download/)({re.escape(extension_id)}-v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9a-zA-Z.]+)?)(/{re.escape(extension_id)}\.zip)",
                   rf"\1{tag}\3",
                   readme_text,
               )

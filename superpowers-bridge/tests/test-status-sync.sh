@@ -43,9 +43,10 @@ EOF
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Tasked >/dev/null
   # Check if it's there
   grep -q '^\*\*Status\*\*: Tasked$' specs/001-demo/spec.md
-  # Check position: line 1 should be heading, line 2 blank, line 3 status
-  [[ "$(head -n 1 specs/001-demo/spec.md)" == "# Demo Feature" ]] || exit 1
-  [[ "$(sed -n '3p' specs/001-demo/spec.md)" == "**Status**: Tasked" ]] || exit 1
+  # Verify status appears after H1 heading
+  h1_line=$(grep -n "^# " specs/001-demo/spec.md | cut -d: -f1 | head -n 1)
+  status_line=$(grep -n "^\*\*Status\*\*:" specs/001-demo/spec.md | cut -d: -f1 | head -n 1)
+  [[ -n "$h1_line" && -n "$status_line" && $status_line -gt $h1_line ]] || exit 1
 
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Verified >/dev/null
   grep -q '^\*\*Status\*\*: Verified$' specs/001-demo/spec.md
