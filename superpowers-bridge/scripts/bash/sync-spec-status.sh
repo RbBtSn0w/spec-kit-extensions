@@ -186,7 +186,8 @@ if had_trailing_newline:
 
 changed = new_text != raw_text
 if changed:
-    spec_path.write_text(new_text, encoding="utf-8", newline="")
+    with spec_path.open("w", encoding="utf-8", newline="") as spec_file:
+        spec_file.write(new_text)
 
 print(json.dumps({
     "spec_path": str(spec_path),

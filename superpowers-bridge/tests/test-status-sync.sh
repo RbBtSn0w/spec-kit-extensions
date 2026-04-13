@@ -60,6 +60,7 @@ EOF
 
 # Test insertion without H1 heading
 NO_H1_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t superb-noh1.XXXXXX)"
+trap 'rm -rf "$TMP_DIR" "$NO_H1_DIR"' EXIT
 mkdir -p "$NO_H1_DIR/scripts/bash" "$NO_H1_DIR/specs/001-demo"
 cp "$TMP_DIR/scripts/bash/check-prerequisites.sh" "$NO_H1_DIR/scripts/bash/check-prerequisites.sh"
 chmod +x "$NO_H1_DIR/scripts/bash/check-prerequisites.sh"

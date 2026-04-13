@@ -54,7 +54,7 @@ provides:
       description: >
         Persistent spec-aligned code-review agent. Loads spec.md, plan.md, and
         tasks.md, then reviews every diff against the declared requirements,
-        reporting issues by severity (Critical / Important / Minor).
+        reporting issues by severity (Critical / High / Medium / Low).
         Bridge-native command.
 
     - name: speckit.superb.debug
