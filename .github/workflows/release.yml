@@ -23,8 +23,8 @@ jobs:
           VERSION="${TAG#*-v}"
 
           # Validate version format
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9a-zA-Z.]+)?$ ]]; then
-            echo "Error: Invalid version format '$VERSION'. Must be X.Y.Z or X.Y.Z-suffix" >&2
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Error: Invalid version format '$VERSION'. Must be SemVer: X.Y.Z, optionally with -prerelease and/or +build metadata" >&2
             exit 1
           fi
 

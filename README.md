@@ -6,7 +6,7 @@ A collection of high-performance extensions for [Spec Kit](https://github.com/gi
 
 | Extension | Version | Description |
 |---|---|---|
-| [Superpowers Bridge](./superpowers-bridge) | 2.0.0 | Orchestrates obra/superpowers skills inside Spec Kit workflow. |
+| [Superpowers Bridge](./superpowers-bridge) | 2.0.0 | Bridges selected installed quality-control skills into Spec Kit workflows and adds bridge-native utilities. |
 | [MemoryLint](./memorylint) | 2.0.0 | Agent memory governance tool: Bidirectional audit and boundary management between AGENTS.md and the constitution. |
 
 ## Installation
