@@ -16,7 +16,8 @@ function Resolve-FeatureJson {
             # Try extension scripts dir and project root relative to script location
             $scriptPath = Join-Path $currentScriptDir 'check-prerequisites.ps1'
             if (-not (Test-Path $scriptPath)) {
-                $scriptPath = Join-Path $currentScriptDir '../../..' $scriptRelativePath
+                $projectRootPath = Join-Path $currentScriptDir '../../..'
+                $scriptPath = Join-Path $projectRootPath $scriptRelativePath
             }
         }
     }

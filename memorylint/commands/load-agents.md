@@ -14,7 +14,7 @@ Your task is to load the `AGENTS.md` file from the workspace root directory into
 
 # Output Protocol
 If `AGENTS.md` is loaded successfully, output a brief confirmation message indicating that `AGENTS.md` has been successfully loaded and that its rules will be enforced. For example:
-`AGENTS.md` loaded successfully. Core rules and constraints have been established for the planning phase.`
+`AGENTS.md` loaded successfully. Core rules and constraints have been established for the planning phase.
 
 If `AGENTS.md` cannot be loaded, output a clear failure message and stop. For example:
 `ERROR: Mandatory before_plan gate failed: could not load AGENTS.md from the workspace root. Planning cannot proceed. Remediation: ensure AGENTS.md exists, is readable, and that the workspace root is correct, then retry.`

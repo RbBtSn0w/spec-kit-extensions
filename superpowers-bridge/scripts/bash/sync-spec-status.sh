@@ -101,7 +101,7 @@ resolve_feature_json() {
   return 1
 }
 
-JSON_PAYLOAD="$(resolve_feature_json)"
+JSON_PAYLOAD="$(resolve_feature_json)" || exit 1
 
 if ! SPEC_PATH="$("$PYTHON_BIN" - "$JSON_PAYLOAD" <<'PY'
 import json
