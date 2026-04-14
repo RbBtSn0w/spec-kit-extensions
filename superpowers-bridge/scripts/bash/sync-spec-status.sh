@@ -181,6 +181,8 @@ else:
     heading_index = next((i for i, line in enumerate(lines) if line.startswith("# ")), None)
     if heading_index is None:
         lines.insert(0, status_line)
+        if len(lines) > 1 and lines[1].strip():
+            lines.insert(1, "")
     else:
         lines.insert(heading_index + 1, "")
         lines.insert(heading_index + 2, status_line)

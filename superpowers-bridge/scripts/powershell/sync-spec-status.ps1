@@ -133,6 +133,9 @@ if ($matchIndexes.Count -gt 0) {
 
     if ($headingIndex -lt 0) {
         $lines.Insert(0, $statusLine)
+        if ($lines.Count -gt 1 -and -not [string]::IsNullOrWhiteSpace($lines[1])) {
+            $lines.Insert(1, "")
+        }
     } else {
         $lines.Insert($headingIndex + 1, "")
         $lines.Insert($headingIndex + 2, $statusLine)

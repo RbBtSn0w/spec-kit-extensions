@@ -38,7 +38,8 @@ User Context:
 $ARGUMENTS
 ```
 
-If no argument is provided, review the full implementation against the complete spec.
+If no argument is provided, or if $ARGUMENTS is empty or only whitespace, review the full implementation against the complete spec.
+Do not assume any specific task number unless explicitly provided in $ARGUMENTS.
 
 ---
 
@@ -70,7 +71,7 @@ Read in this exact order:
 
 ```bash
 # Automatically resolve base to find implementation changes
-if [ -z "$BASE_BRANCH" ]; then
+if [ -z "${BASE_BRANCH:-}" ]; then
   if git show-ref --verify --quiet refs/remotes/origin/main; then
     BASE_BRANCH="main"
   elif git show-ref --verify --quiet refs/remotes/origin/master; then

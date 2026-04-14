@@ -17,6 +17,19 @@ file_sha256() {
   fi
 }
 
+find_python3() {
+  if command -v python3 >/dev/null 2>&1; then
+    echo "python3"
+  elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(0 if sys.version_info[0] >= 3 else 1)' >/dev/null 2>&1; then
+    echo "python"
+  else
+    echo "ERROR: test-status-sync.sh requires Python 3 on PATH" >&2
+    exit 1
+  fi
+}
+
+PYTHON_BIN=$(find_python3)
+
 mkdir -p "$TMP_DIR/scripts/bash" "$TMP_DIR/specs/001-demo"
 
 cat >"$TMP_DIR/scripts/bash/check-prerequisites.sh" <<'EOF'
@@ -81,7 +94,7 @@ mkdir -p "$CRLF_DIR/scripts/bash" "$CRLF_DIR/specs/001-demo"
 cp "$TMP_DIR/scripts/bash/check-prerequisites.sh" "$CRLF_DIR/scripts/bash/check-prerequisites.sh"
 chmod +x "$CRLF_DIR/scripts/bash/check-prerequisites.sh"
 
-python3 - "$CRLF_DIR/specs/001-demo/spec.md" <<'PY'
+"$PYTHON_BIN" - "$CRLF_DIR/specs/001-demo/spec.md" <<'PY'
 import sys
 from pathlib import Path
 Path(sys.argv[1]).write_bytes(
@@ -96,7 +109,7 @@ PY
   after_hash="$(file_sha256 specs/001-demo/spec.md)"
   [[ "$before_hash" == "$after_hash" ]] || exit 1
   printf '%s' "$result" | grep -q '"changed": false'
-  python3 - <<'PY'
+  "$PYTHON_BIN" - <<'PY'
 from pathlib import Path
 data = Path("specs/001-demo/spec.md").read_bytes()
 assert b"\r\n" in data
