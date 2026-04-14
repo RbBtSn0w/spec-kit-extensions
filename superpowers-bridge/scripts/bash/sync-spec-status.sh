@@ -145,8 +145,12 @@ spec_path = pathlib.Path(sys.argv[1])
 target_status = sys.argv[2]
 status_re = re.compile(r"^\*\*Status\*\*:\s*(.+?)\s*$")
 
-with spec_path.open("r", encoding="utf-8", newline="") as spec_file:
-    raw_text = spec_file.read()
+# Detect BOM and line endings
+raw_bytes = spec_path.read_bytes()
+has_bom = raw_bytes.startswith(b"\xef\xbb\xbf")
+encoding = "utf-8-sig" if has_bom else "utf-8"
+
+raw_text = raw_bytes.decode(encoding)
 line_ending = "\r\n" if "\r\n" in raw_text else ("\n" if "\n" in raw_text else ("\r" if "\r" in raw_text else "\n"))
 had_trailing_newline = raw_text.endswith(("\r\n", "\n", "\r"))
 lines = raw_text.splitlines()
@@ -187,7 +191,8 @@ if had_trailing_newline:
 
 changed = new_text != raw_text
 if changed:
-    with spec_path.open("w", encoding="utf-8", newline="") as spec_file:
+    output_encoding = "utf-8-sig" if has_bom else "utf-8"
+    with spec_path.open("w", encoding=output_encoding, newline="") as spec_file:
         spec_file.write(new_text)
 
 print(json.dumps({

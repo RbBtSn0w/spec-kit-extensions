@@ -70,12 +70,19 @@ Read in this exact order:
 
 ```bash
 # Automatically resolve base to find implementation changes
-BASE_BRANCH=$(git symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
-[ -n "$BASE_BRANCH" ] || BASE_BRANCH="main"
-BASE_SHA=$(git merge-base origin/$BASE_BRANCH HEAD)
+if [ -z "$BASE_BRANCH" ]; then
+  if git show-ref --verify --quiet refs/remotes/origin/main; then
+    BASE_BRANCH="main"
+  elif git show-ref --verify --quiet refs/remotes/origin/master; then
+    BASE_BRANCH="master"
+  else
+    BASE_BRANCH="main"
+  fi
+fi
+BASE_SHA=$(git merge-base "origin/$BASE_BRANCH" HEAD)
 
 # Get the diff since the last review checkpoint
-git diff $BASE_SHA HEAD
+git diff "$BASE_SHA" HEAD
 # Or for staged changes only:
 git diff --cached
 # Or for a specific set of files:
