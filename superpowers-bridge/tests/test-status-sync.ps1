@@ -81,9 +81,16 @@ Testing status sync.
         & $SyncScript -Status 'Tasked' | Out-Null
         $Content = Get-Content $SpecFile -Raw
         Assert-ContainsLine -Content $Content -ExpectedLine '**Status**: Tasked' -FailureMessage 'Test 1 failed: Status line not found or incorrect.'
-        # Verify it's after H1
-        $Matches = [regex]::Matches($Content, "^(# |\*\*Status\*\*:) ", [System.Text.RegularExpressions.RegexOptions]::Multiline)
-        if ($Matches.Count -lt 2 -or $Matches[0].Value -ne "# " -or $Matches[1].Value -ne "**Status**:") {
+        # Verify the inserted status sits directly below the fixture's H1 block.
+        $Lines = Get-Content $SpecFile
+        if (
+            $Lines.Count -lt 5 -or
+            $Lines[0] -ne "# Demo Feature" -or
+            $Lines[1] -ne "" -or
+            $Lines[2] -ne "**Status**: Tasked" -or
+            $Lines[3] -ne "" -or
+            $Lines[4] -ne "## Overview"
+        ) {
             throw "Test 1 failed: Status line sequence incorrect."
         }
     } finally {
