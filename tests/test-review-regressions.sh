@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 
 root = Path(sys.argv[1])
+ci = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
 release = (root / ".github/workflows/release-trigger.yml").read_text(encoding="utf-8")
 critique = (root / "superpowers-bridge/commands/critique.md").read_text(encoding="utf-8")
 ps_test = (root / "superpowers-bridge/tests/test-status-sync.ps1").read_text(encoding="utf-8")
@@ -19,6 +20,14 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit(message)
 
 
+require(
+    "windows-latest" in ci and "pwsh" in ci,
+    "ci.yml must include a windows-latest pwsh job for PowerShell coverage",
+)
+require(
+    "ubuntu-latest" in ci and "test-review-regressions.sh" in ci,
+    "ci.yml must include the existing shell regression coverage on ubuntu-latest",
+)
 require(
     'git checkout -B "$DEFAULT_BRANCH" "origin/$DEFAULT_BRANCH"' in release,
     "release-trigger.yml must switch to origin/$DEFAULT_BRANCH before preparing release files",
