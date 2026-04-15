@@ -70,17 +70,31 @@ Read in this exact order:
 5. The current git diff:
 
 ```bash
-# Automatically resolve base to find implementation changes
-if [ -z "${BASE_BRANCH:-}" ]; then
-  if git show-ref --verify --quiet refs/remotes/origin/main; then
-    BASE_BRANCH="main"
-  elif git show-ref --verify --quiet refs/remotes/origin/master; then
-    BASE_BRANCH="master"
+# Automatically resolve a usable base ref for implementation changes.
+if [ -n "${BASE_REF:-}" ]; then
+  :
+elif [ -n "${BASE_BRANCH:-}" ]; then
+  if git show-ref --verify --quiet "refs/remotes/origin/$BASE_BRANCH"; then
+    BASE_REF="origin/$BASE_BRANCH"
+  elif git show-ref --verify --quiet "refs/heads/$BASE_BRANCH"; then
+    BASE_REF="$BASE_BRANCH"
   else
-    BASE_BRANCH="main"
+    echo "ERROR: BASE_BRANCH '$BASE_BRANCH' was not found on origin or as a local branch" >&2
+    exit 1
   fi
+elif git show-ref --verify --quiet refs/remotes/origin/main; then
+  BASE_REF="origin/main"
+elif git show-ref --verify --quiet refs/remotes/origin/master; then
+  BASE_REF="origin/master"
+elif git show-ref --verify --quiet refs/heads/main; then
+  BASE_REF="main"
+elif git show-ref --verify --quiet refs/heads/master; then
+  BASE_REF="master"
+else
+  echo "ERROR: Could not resolve a review base. Set BASE_REF to a reachable ref (for example origin/main or main)." >&2
+  exit 1
 fi
-BASE_SHA=$(git merge-base "origin/$BASE_BRANCH" HEAD)
+BASE_SHA=$(git merge-base "$BASE_REF" HEAD)
 
 # Get the diff since the last review checkpoint
 git diff "$BASE_SHA" HEAD
@@ -154,31 +168,23 @@ For each issue found:
 This issue must be resolved before any further work. Do not proceed to next task.
 ```
 
-#### 🟠 High — Must fix before merge
+#### 🟠 Important — Must fix before merge
 
 ```markdown
-### 🟠 High: [Issue title]
+### 🟠 Important: [Issue title]
 
 **What:** [description]
 **Evidence:** [file:line or test output]
 **Fix:** [what to do]
 ```
 
-#### 🟡 Medium — Fix if time permits
+#### 🔵 Minor — Track for follow-up
 
 ```markdown
-### 🟡 Medium: [Issue title]
+### 🔵 Minor: [Issue title]
 
 **What:** [description]
 **Suggestion:** [optional improvement]
-```
-
-#### 🔵 Low / Nitpick — Optional polish
-
-```markdown
-### 🔵 Low: [Issue title]
-
-**What:** [minor suggestion or style point]
 ```
 
 ---
@@ -217,17 +223,16 @@ If Critical issues exist:
 Do not write new code or start new tasks until resolved.
 ```
 
-If no Critical issues, High or Medium issues exist:
+If no Critical issues, Important issues exist:
 ```
-🟠 FIX BEFORE MERGE: Address High issues before creating PR.
-🟡 REASONABLE DEBT: Address Medium issues if they impact long-term maintenance.
+🟠 FIX BEFORE MERGE: Address Important issues before creating PR.
 You may continue to the next task but must return to fix these.
 ```
 
-If only Low issues:
+If only Minor issues:
 ```
 ✓ CLEAR TO PROCEED: Implementation meets spec requirements.
-Low issues tracked. Safe to continue to next task or create PR.
+Minor issues tracked. Safe to continue to next task or create PR.
 ```
 
 ---

@@ -77,6 +77,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Switch to default branch tip
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout -B "$DEFAULT_BRANCH" "origin/$DEFAULT_BRANCH"
+
       - name: Validate PUSH_TOKEN secret
         env:
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
@@ -185,6 +192,7 @@ jobs:
 
       - name: Commit release metadata
         env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           EXTENSION_ID: ${{ github.event.inputs.extension_id }}
           VERSION: ${{ env.version }}
           GITHUB_REPO: ${{ github.repository }}
@@ -208,7 +216,7 @@ jobs:
 
           git config --local --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
-          git push origin "HEAD:${{ github.event.repository.default_branch }}"
+          git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
 
       - name: Create and push tag
         env:

@@ -10,6 +10,47 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $BridgeDir = Split-Path -Parent $ScriptDir
 $SyncScript = Join-Path $BridgeDir 'scripts/powershell/sync-spec-status.ps1'
 
+function Set-MockFeatureSpec {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$MockPrereqPath,
+        [Parameter(Mandatory = $true)]
+        [string]$SpecPath
+    )
+
+    $FeatureDir = Split-Path -Parent $SpecPath
+    $EscapedFeatureDir = $FeatureDir -replace '\\', '\\'
+    $EscapedSpecPath = $SpecPath -replace '\\', '\\'
+
+@"
+param([switch]`$Json)
+if (`$Json) {
+    @{
+        FEATURE_DIR = '$EscapedFeatureDir'
+        FEATURE_SPEC = '$EscapedSpecPath'
+    } | ConvertTo-Json -Compress
+    exit 0
+}
+exit 1
+"@ | Set-Content $MockPrereqPath -Encoding utf8
+}
+
+function Assert-ContainsLine {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Content,
+        [Parameter(Mandatory = $true)]
+        [string]$ExpectedLine,
+        [Parameter(Mandatory = $true)]
+        [string]$FailureMessage
+    )
+
+    $Pattern = "^{0}$" -f [regex]::Escape($ExpectedLine)
+    if (-not [regex]::IsMatch($Content, $Pattern, [System.Text.RegularExpressions.RegexOptions]::Multiline)) {
+        throw $FailureMessage
+    }
+}
+
 # Create a temporary working directory
 $TmpDir = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName())
 New-Item -ItemType Directory -Path $TmpDir | Out-Null
@@ -18,18 +59,6 @@ try {
     # 1. Setup mock check-prerequisites.ps1
     $MockScriptsDir = New-Item -ItemType Directory -Path (Join-Path $TmpDir 'scripts/powershell')
     $MockPrereq = Join-Path $MockScriptsDir 'check-prerequisites.ps1'
-    
-    @"
-param([switch]`$Json)
-if (`$Json) {
-    @{
-        FEATURE_DIR = '$(Join-Path $TmpDir 'specs/001-demo' | ForEach-Object { $_ -replace '\\', '\\' })'
-        FEATURE_SPEC = '$(Join-Path $TmpDir 'specs/001-demo/spec.md' | ForEach-Object { $_ -replace '\\', '\\' })'
-    } | ConvertTo-Json -Compress
-    exit 0
-}
-exit 1
-"@ | Set-Content $MockPrereq
 
     # 2. Setup initial spec.md
     $SpecDir = New-Item -ItemType Directory -Path (Join-Path $TmpDir 'specs/001-demo')
@@ -43,6 +72,7 @@ exit 1
 Testing status sync.
 "@
     $InitialContent | Set-Content $SpecFile -Encoding utf8
+    Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $SpecFile
 
     # 3. Test: Initial Insertion
     Write-Host "Running Test 1: Initial Insertion..."
@@ -50,9 +80,7 @@ Testing status sync.
     try {
         & $SyncScript -Status 'Tasked' | Out-Null
         $Content = Get-Content $SpecFile -Raw
-        if ($Content -notmatch '^\*\*Status\*\*: Tasked$') {
-            throw "Test 1 failed: Status line not found or incorrect."
-        }
+        Assert-ContainsLine -Content $Content -ExpectedLine '**Status**: Tasked' -FailureMessage 'Test 1 failed: Status line not found or incorrect.'
         # Verify it's after H1
         $Matches = [regex]::Matches($Content, "^(# |\*\*Status\*\*:) ", [System.Text.RegularExpressions.RegexOptions]::Multiline)
         if ($Matches.Count -lt 2 -or $Matches[0].Value -ne "# " -or $Matches[1].Value -ne "**Status**:") {
@@ -68,9 +96,7 @@ Testing status sync.
     try {
         & $SyncScript -Status 'Verified' | Out-Null
         $Content = Get-Content $SpecFile -Raw
-        if ($Content -notmatch '^\*\*Status\*\*: Verified$') {
-            throw "Test 2 failed: Status not updated to Verified."
-        }
+        Assert-ContainsLine -Content $Content -ExpectedLine '**Status**: Verified' -FailureMessage 'Test 2 failed: Status not updated to Verified.'
     } finally {
         Pop-Location
     }
@@ -79,9 +105,7 @@ Testing status sync.
     Write-Host "Running Test 3: No H1 Insertion..."
     $NoH1File = Join-Path $SpecDir 'spec_noh1.md'
     "Just some text without an H1 heading." | Set-Content $NoH1File -Encoding utf8
-    # Update mock to point here temporarily
-    $MockPrereqContent = Get-Content $MockPrereq -Raw
-    $MockPrereqContent -replace 'spec\.md', 'spec_noh1.md' | Set-Content $MockPrereq
+    Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $NoH1File
     
     Push-Location $TmpDir
     try {
@@ -99,11 +123,10 @@ Testing status sync.
 
     # 6. Test: Encoding Preservation (UTF-8 with BOM)
     Write-Host "Running Test 4: BOM Preservation..."
-    # Update mock back
-    $MockPrereqContent -replace 'spec_noh1\.md', 'spec_bom.md' | Set-Content $MockPrereq
     $BomFile = Join-Path $SpecDir 'spec_bom.md'
     $Utf8WithBom = New-Object System.Text.UTF8Encoding($true)
     [System.IO.File]::WriteAllText($BomFile, $InitialContent, $Utf8WithBom)
+    Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $BomFile
 
     Push-Location $TmpDir
     try {
