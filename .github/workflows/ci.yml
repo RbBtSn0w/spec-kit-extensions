@@ -21,6 +21,7 @@ jobs:
         shell: bash
         run: |
           bash tests/test-review-regressions.sh
+          bash tests/test-release-workflow.sh
           bash superpowers-bridge/tests/test-status-sync.sh
 
   powershell-status-sync:

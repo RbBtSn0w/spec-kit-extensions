@@ -218,16 +218,49 @@ jobs:
           git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
           git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
 
-      - name: Create and push tag
+      - name: Create extension zip
         env:
-          GITHUB_REPO: ${{ github.repository }}
-          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          EXTENSION_ID: ${{ github.event.inputs.extension_id }}
         run: |
-          # Use a personal access token (stored in secrets.PUSH_TOKEN) to push so the push can trigger other workflows.
-          # Create the tag locally and push via HTTPS using the token. Ensure you set repository secret PUSH_TOKEN with a PAT that has repo access.
-          git tag "$tag"
-          # Ensure checkout's default auth header does not override PAT auth.
-          git config --local --unset-all http.https://github.com/.extraheader || true
-          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
-          git push origin "$tag"
-          echo "Pushed tag $tag via PUSH_TOKEN — release workflow should trigger"
+          rm -f "${EXTENSION_ID}.zip"
+          cd "$EXTENSION_ID"
+          zip -r "../${EXTENSION_ID}.zip" . \
+            -x '.*' '__pycache__/*'
+
+      - name: Generate release notes
+        id: notes
+        env:
+          EXTENSION_ID: ${{ github.event.inputs.extension_id }}
+          VERSION: ${{ env.version }}
+        run: |
+          CHANGELOG="$EXTENSION_ID/CHANGELOG.md"
+
+          {
+            echo 'body<<EOF'
+            if [[ -f "$CHANGELOG" ]]; then
+              awk -v ver="$VERSION" '
+                /^## \[/ {
+                  if (found) exit
+                  if (index($0, ver)) found=1
+                }
+                found { print }
+              ' "$CHANGELOG"
+            else
+              echo "Release $EXTENSION_ID v$VERSION"
+            fi
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          EXTENSION_ID: ${{ github.event.inputs.extension_id }}
+          VERSION: ${{ env.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_COMMIT="$(git rev-parse HEAD)"
+
+          gh release create "$tag" \
+            "${EXTENSION_ID}.zip" \
+            --title "$EXTENSION_ID v$VERSION" \
+            --notes "${{ steps.notes.outputs.body }}" \
+            --target "$RELEASE_COMMIT"
