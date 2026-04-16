@@ -110,6 +110,7 @@ jobs:
           repo_base_url = f"{github_server_url}/{github_repository}"
           root = Path(extension_id)
 
+          root_readme_file = Path("README.md")
           extension_file = root / "extension.yml"
           readme_file = root / "README.md"
           changelog_file = root / "CHANGELOG.md"
@@ -148,10 +149,26 @@ jobs:
               readme_text = readme_file.read_text(encoding="utf-8")
               readme_text = re.sub(
                   rf"(releases/download/)({re.escape(extension_id)}-v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)(/{re.escape(extension_id)}\.zip)",
-                  rf"\1{tag}\3",
+                  rf"\g<1>{tag}\g<3>",
                   readme_text,
               )
               readme_file.write_text(readme_text, encoding="utf-8")
+
+          # Update the root README extension version table.
+          if root_readme_file.exists():
+              root_readme_text = root_readme_file.read_text(encoding="utf-8")
+              root_row_pattern = re.compile(
+                  rf"^(\|\s*\[[^\]]+\]\(\./{re.escape(extension_id)}\)\s*\|\s*)([^|]+?)(\s*\|.*)$",
+                  re.M,
+              )
+              root_readme_text, updated_rows = root_row_pattern.subn(
+                  rf"\g<1>{version}\g<3>",
+                  root_readme_text,
+                  count=1,
+              )
+              if updated_rows != 1:
+                  raise SystemExit(f"Failed to update {root_readme_file} version row for {extension_id}")
+              root_readme_file.write_text(root_readme_text, encoding="utf-8")
 
           # Rotate changelog unreleased section into a versioned release section when present.
           if changelog_file.exists():
@@ -200,6 +217,9 @@ jobs:
           if [[ -f "$EXTENSION_ID/README.md" ]]; then
             release_files+=("$EXTENSION_ID/README.md")
           fi
+          if [[ -f "README.md" ]]; then
+            release_files+=("README.md")
+          fi
 
           if git diff --quiet -- "${release_files[@]}"; then
             echo "Error: release preparation produced no changes" >&2
@@ -228,6 +248,9 @@ jobs:
               candidate = Path(extension_id) / relative_path
               if candidate.exists():
                   release_files.append(candidate)
+          root_readme = Path("README.md")
+          if root_readme.exists():
+              release_files.append(root_readme)
 
           additions = []
           for path in release_files:
