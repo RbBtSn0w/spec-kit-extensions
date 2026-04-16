@@ -8,22 +8,48 @@ $ErrorActionPreference = 'Stop'
 
 function Resolve-FeatureJson {
     $scriptRelativePath = 'scripts/powershell/check-prerequisites.ps1'
-    $scriptPath = $scriptRelativePath
+    $scriptCandidates = [System.Collections.Generic.List[string]]::new()
+    $scriptPath = $null
 
-    if (-not (Test-Path $scriptPath)) {
-        $currentScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-        if ($currentScriptDir) {
-            # Try extension scripts dir and project root relative to script location
-            $scriptPath = Join-Path $currentScriptDir 'check-prerequisites.ps1'
-            if (-not (Test-Path $scriptPath)) {
-                $projectRootPath = Join-Path $currentScriptDir '../../..'
-                $scriptPath = Join-Path $projectRootPath $scriptRelativePath
-            }
+    if ((Get-Location).Path) {
+        $scriptCandidates.Add((Join-Path (Get-Location).Path $scriptRelativePath))
+    }
+
+    $currentScriptDir = if ($PSScriptRoot) {
+        $PSScriptRoot
+    } elseif ($PSCommandPath) {
+        Split-Path -Parent $PSCommandPath
+    } else {
+        $null
+    }
+
+    if ($currentScriptDir) {
+        # Try extension scripts dir and project root relative to script location
+        $scriptCandidates.Add((Join-Path $currentScriptDir 'check-prerequisites.ps1'))
+        $projectRootPath = Join-Path $currentScriptDir '../../..'
+        $scriptCandidates.Add((Join-Path $projectRootPath $scriptRelativePath))
+    }
+
+    foreach ($candidate in $scriptCandidates) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
+            $scriptPath = (Resolve-Path -LiteralPath $candidate).ProviderPath
+            break
         }
     }
 
-    if (-not (Test-Path $scriptPath)) {
-        throw "ERROR: check-prerequisites.ps1 not found (checked project root and extension scripts dir)"
+    if (-not $scriptPath) {
+        $checkedCandidates = @($scriptCandidates | Where-Object { $_ })
+        $checkedLocations = if ($checkedCandidates.Count -gt 0) {
+            [string]::Join(', ', $checkedCandidates)
+        } else {
+            'none'
+        }
+        throw "ERROR: check-prerequisites.ps1 not found (checked: $checkedLocations)"
+    }
+
+    $powerShellExecutable = (Get-Process -Id $PID).Path
+    if (-not $powerShellExecutable) {
+        throw 'ERROR: Unable to determine current PowerShell executable for child script execution'
     }
 
     $commandArgsList = @(
@@ -31,17 +57,40 @@ function Resolve-FeatureJson {
         @('-Json', '-PathsOnly'),
         @('-Json')
     )
+    $lastResolutionError = $null
 
     foreach ($commandArgs in $commandArgsList) {
         try {
-            $result = & $scriptPath @commandArgs 2>$null
-            if ($result) {
-                $resultText = [string]::Join([Environment]::NewLine, [string[]]$result)
+            $result = & $powerShellExecutable -NoProfile -NonInteractive -File $scriptPath @commandArgs 2>&1
+            $exitCode = $LASTEXITCODE
+            $resultText = if ($result) {
+                [string]::Join([Environment]::NewLine, [string[]]$result)
+            } else {
+                ''
+            }
+
+            if ($exitCode -eq 0 -and $resultText) {
                 $null = $resultText | ConvertFrom-Json -ErrorAction Stop
                 return $resultText
             }
+
+            $lastResolutionError = if ($resultText) {
+                "exit code ${exitCode}: $resultText"
+            } else {
+                "exit code ${exitCode}: no output"
+            }
         } catch {
+            $lastResolutionError = $_
         }
+    }
+
+    if ($lastResolutionError) {
+        $detail = if ($lastResolutionError -is [System.Management.Automation.ErrorRecord]) {
+            $lastResolutionError.Exception.Message
+        } else {
+            [string]$lastResolutionError
+        }
+        throw "Unable to resolve active feature via ${scriptPath}: $detail"
     }
 
     throw "Unable to resolve active feature via $scriptPath"
