@@ -41,6 +41,11 @@ function Resolve-FeatureJson {
         throw "ERROR: check-prerequisites.ps1 not found (checked project root and extension scripts dir)"
     }
 
+    $powerShellExecutable = (Get-Process -Id $PID).Path
+    if (-not $powerShellExecutable) {
+        throw 'ERROR: Unable to determine current PowerShell executable for child script execution'
+    }
+
     $commandArgsList = @(
         @('-Json', '-RequireTasks', '-IncludeTasks'),
         @('-Json', '-PathsOnly'),
@@ -50,11 +55,23 @@ function Resolve-FeatureJson {
 
     foreach ($commandArgs in $commandArgsList) {
         try {
-            $result = & $scriptPath @commandArgs 2>$null
-            if ($result) {
-                $resultText = [string]::Join([Environment]::NewLine, [string[]]$result)
+            $result = & $powerShellExecutable -NoProfile -NonInteractive -File $scriptPath @commandArgs 2>&1
+            $exitCode = $LASTEXITCODE
+            $resultText = if ($result) {
+                [string]::Join([Environment]::NewLine, [string[]]$result)
+            } else {
+                ''
+            }
+
+            if ($exitCode -eq 0 -and $resultText) {
                 $null = $resultText | ConvertFrom-Json -ErrorAction Stop
                 return $resultText
+            }
+
+            $lastResolutionError = if ($resultText) {
+                "exit code ${exitCode}: $resultText"
+            } else {
+                "exit code ${exitCode}: no output"
             }
         } catch {
             $lastResolutionError = $_
@@ -62,7 +79,12 @@ function Resolve-FeatureJson {
     }
 
     if ($lastResolutionError) {
-        throw "Unable to resolve active feature via ${scriptPath}: $($lastResolutionError.Exception.Message)"
+        $detail = if ($lastResolutionError -is [System.Management.Automation.ErrorRecord]) {
+            $lastResolutionError.Exception.Message
+        } else {
+            [string]$lastResolutionError
+        }
+        throw "Unable to resolve active feature via ${scriptPath}: $detail"
     }
 
     throw "Unable to resolve active feature via $scriptPath"
