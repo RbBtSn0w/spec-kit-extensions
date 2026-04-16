@@ -51,8 +51,16 @@ require(
     "release-trigger.yml must switch to origin/$DEFAULT_BRANCH before preparing release files",
 )
 require(
-    'git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"' in release,
-    "release-trigger.yml must push only to refs/heads/$DEFAULT_BRANCH",
+    "createCommitOnBranch" in release and "gh api graphql" in release,
+    "release-trigger.yml must create release metadata commits through GitHub GraphQL",
+)
+require(
+    "--verify-tag" in release,
+    "release-trigger.yml must verify the release tag before publishing the GitHub Release",
+)
+require(
+    'git commit -m "' not in release,
+    "release-trigger.yml must not fall back to unsigned local git commits for release metadata",
 )
 
 require(

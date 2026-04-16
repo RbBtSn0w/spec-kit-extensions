@@ -15,10 +15,20 @@ checks = [
     (r"^\s*- name: Create extension zip$", "Release Trigger must build the extension zip itself."),
     (r"^\s*- name: Generate release notes$", "Release Trigger must generate release notes itself."),
     (r"gh release create", "Release Trigger must create the GitHub Release itself."),
+    (r"createCommitOnBranch", "Release Trigger must create the release metadata commit via GitHub GraphQL."),
+    (r"gh api graphql", "Release Trigger must call GitHub GraphQL when preparing the release commit."),
+    (r"--verify-tag", "Release Trigger must verify that the release tag already exists before publishing."),
 ]
 
 for pattern, message in checks:
     if not re.search(pattern, trigger_text, re.MULTILINE):
+        print(message, file=sys.stderr)
+        sys.exit(1)
+
+for pattern, message in [
+    (r"git commit -m ", "Release Trigger must not create an unsigned local git commit for release metadata."),
+]:
+    if re.search(pattern, trigger_text, re.MULTILINE):
         print(message, file=sys.stderr)
         sys.exit(1)
 

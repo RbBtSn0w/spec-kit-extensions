@@ -72,11 +72,6 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_ENV"
           echo "Will create tag: $TAG"
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
       - name: Switch to default branch tip
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -190,13 +185,13 @@ jobs:
               changelog_file.write_text(changelog_text, encoding="utf-8")
           PY
 
-      - name: Commit release metadata
+      - name: Create release metadata commit and tag
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           EXTENSION_ID: ${{ github.event.inputs.extension_id }}
           VERSION: ${{ env.version }}
           GITHUB_REPO: ${{ github.repository }}
-          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
           release_files=("$EXTENSION_ID/extension.yml")
           if [[ -f "$EXTENSION_ID/CHANGELOG.md" ]]; then
@@ -211,12 +206,84 @@ jobs:
             exit 1
           fi
 
-          git add -- "${release_files[@]}"
-          git commit -m "chore: prepare ${EXTENSION_ID} release v${VERSION} [skip ci]"
+          EXPECTED_HEAD_OID="$(git rev-parse HEAD)"
+          PAYLOAD_FILE="$(mktemp)"
+          export EXPECTED_HEAD_OID PAYLOAD_FILE
 
-          git config --local --unset-all http.https://github.com/.extraheader || true
-          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPO}.git"
-          git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          extension_id = os.environ["EXTENSION_ID"]
+          version = os.environ["VERSION"]
+          repository = os.environ["GITHUB_REPO"]
+          default_branch = os.environ["DEFAULT_BRANCH"]
+          expected_head_oid = os.environ["EXPECTED_HEAD_OID"]
+          payload_file = Path(os.environ["PAYLOAD_FILE"])
+
+          release_files = [Path(extension_id) / "extension.yml"]
+          for relative_path in ("CHANGELOG.md", "README.md"):
+              candidate = Path(extension_id) / relative_path
+              if candidate.exists():
+                  release_files.append(candidate)
+
+          additions = []
+          for path in release_files:
+              additions.append(
+                  {
+                      "path": path.as_posix(),
+                      "contents": base64.b64encode(path.read_bytes()).decode("ascii"),
+                  }
+              )
+
+          payload = {
+              "query": """
+          mutation CreateReleaseCommit($input: CreateCommitOnBranchInput!) {
+            createCommitOnBranch(input: $input) {
+              commit {
+                oid
+              }
+            }
+          }
+          """,
+              "input": {
+                  "branch": {
+                      "repositoryNameWithOwner": repository,
+                      "branchName": default_branch,
+                  },
+                  "message": {
+                      "headline": f"chore: prepare {extension_id} release v{version} [skip ci]",
+                  },
+                  "fileChanges": {
+                      "additions": additions,
+                  },
+                  "expectedHeadOid": expected_head_oid,
+              },
+          }
+
+          payload_file.write_text(json.dumps(payload), encoding="utf-8")
+          PY
+
+          RELEASE_COMMIT="$(
+            gh api graphql \
+              --input "$PAYLOAD_FILE" \
+              --jq '.data.createCommitOnBranch.commit.oid'
+          )"
+
+          if [[ -z "$RELEASE_COMMIT" ]]; then
+            echo "Error: failed to create release metadata commit" >&2
+            exit 1
+          fi
+
+          gh api "repos/${GITHUB_REPO}/git/refs" \
+            --method POST \
+            -f ref="refs/tags/$tag" \
+            -f sha="$RELEASE_COMMIT" \
+            --silent
+
+          echo "release_commit=$RELEASE_COMMIT" >> "$GITHUB_ENV"
 
       - name: Create extension zip
         env:
@@ -257,10 +324,8 @@ jobs:
           VERSION: ${{ env.version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_COMMIT="$(git rev-parse HEAD)"
-
           gh release create "$tag" \
             "${EXTENSION_ID}.zip" \
             --title "$EXTENSION_ID v$VERSION" \
             --notes "${{ steps.notes.outputs.body }}" \
-            --target "$RELEASE_COMMIT"
+            --verify-tag
