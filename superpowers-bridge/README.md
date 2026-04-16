@@ -96,7 +96,7 @@ The V2 redesign rationale is documented in
 Install directly from the release asset:
 
 ```bash
-specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v2.0.0/superpowers-bridge.zip
+specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.1.0/superpowers-bridge.zip
 ```
 
 ### Install from GitHub Repository (Development)
