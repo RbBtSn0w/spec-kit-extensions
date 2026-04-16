@@ -7,10 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.0] - 2026-04-16
-### Added
+### Changed
 
-## [2.0.0] - 2026-04-12
+- No extension payload changes since `1.1.0`; the next published release republishes the current bridge package to realign release metadata and distribution versioning.
+
+## [1.1.0] - 2026-04-16
 
 ### Changed
 
@@ -29,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Upgrade Notes
 
 - Users upgrading from `1.0.0` must stop relying on the `before_specify` clarify bridge and migrate to the remaining supported hook surface.
-- Because this release removes a previously supported hook/command path, the next published release should be treated as `2.0.0`.
+- This release removes a previously supported hook/command path; treat upgrades from `1.0.0` as a breaking change even though the published tag is `1.1.0`.
 
 ## [1.0.0] - 2026-03-30
 
@@ -59,6 +60,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 [Unreleased]: https://github.com/RbBtSn0w/spec-kit-extensions/compare/superpowers-bridge-v1.1.0...HEAD
-[2.0.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/superpowers-bridge-v2.0.0
 [1.0.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/superpowers-bridge-v1.0.0
 [1.1.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/superpowers-bridge-v1.1.0
