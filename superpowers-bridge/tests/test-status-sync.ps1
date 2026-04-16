@@ -45,8 +45,8 @@ function Assert-ContainsLine {
         [string]$FailureMessage
     )
 
-    $Pattern = "^{0}$" -f [regex]::Escape($ExpectedLine)
-    if (-not [regex]::IsMatch($Content, $Pattern, [System.Text.RegularExpressions.RegexOptions]::Multiline)) {
+    $Lines = [regex]::Split($Content, "\r\n|\n|\r")
+    if (-not ($Lines -contains $ExpectedLine)) {
         throw $FailureMessage
     }
 }
