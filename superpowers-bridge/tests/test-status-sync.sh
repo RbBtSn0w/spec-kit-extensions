@@ -64,6 +64,9 @@ EOF
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Verified >/dev/null
   grep -q '^\*\*Status\*\*: Verified$' specs/001-demo/spec.md
 
+  "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status In\ Review >/dev/null
+  grep -q '^\*\*Status\*\*: In Review$' specs/001-demo/spec.md
+
   "$ROOT_DIR/scripts/bash/sync-spec-status.sh" --status Abandoned >/dev/null
   grep -q '^\*\*Status\*\*: Abandoned$' specs/001-demo/spec.md
 
@@ -120,4 +123,3 @@ PY
 echo "status sync tests passed"
 
 # PowerShell status sync verified manually across encodings.
-

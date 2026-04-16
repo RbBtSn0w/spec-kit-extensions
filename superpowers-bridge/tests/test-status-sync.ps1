@@ -146,6 +146,63 @@ Testing status sync.
         Pop-Location
     }
 
+    # 5. Test: In Review Status Update
+    Write-Host "Running Test 5: In Review Status Update..."
+    $InReviewFile = Join-Path $SpecDir 'spec_in_review.md'
+    $InReviewContent = @"
+# Demo Feature
+
+**Status**: Tasked
+
+## Overview
+
+Testing status sync.
+"@
+    $InReviewContent | Set-Content $InReviewFile -Encoding utf8
+    Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $InReviewFile
+
+    Push-Location $TmpDir
+    try {
+        & $SyncScript -Status 'In Review' | Out-Null
+        $Content = Get-Content $InReviewFile -Raw
+        Assert-ContainsLine -Content $Content -ExpectedLine '**Status**: In Review' -FailureMessage 'Test 5 failed: Status not updated to In Review.'
+    } finally {
+        Pop-Location
+    }
+
+    # 6. Test: Abandoned Preservation
+    Write-Host "Running Test 6: Abandoned Preservation..."
+    $AbandonedFile = Join-Path $SpecDir 'spec_abandoned.md'
+    $AbandonedContent = @"
+# Demo Feature
+
+**Status**: Abandoned
+
+## Overview
+
+Testing status sync.
+"@
+    $AbandonedContent | Set-Content $AbandonedFile -Encoding utf8
+    Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $AbandonedFile
+
+    Push-Location $TmpDir
+    try {
+        $Result = & $SyncScript -Status 'Verified' | ConvertFrom-Json
+        $Content = Get-Content $AbandonedFile -Raw
+        Assert-ContainsLine -Content $Content -ExpectedLine '**Status**: Abandoned' -FailureMessage 'Test 6 failed: Abandoned status was overwritten.'
+        if ($Result.changed -ne $false) {
+            throw 'Test 6 failed: changed was not false when preserving Abandoned.'
+        }
+        if ($Result.reason -ne 'preserved_terminal_abandoned') {
+            throw 'Test 6 failed: preservation reason was not emitted.'
+        }
+        if ($Result.new_status -ne 'Abandoned') {
+            throw 'Test 6 failed: new_status did not remain Abandoned.'
+        }
+    } finally {
+        Pop-Location
+    }
+
     Write-Host "`nAll PowerShell sync-spec-status tests PASSED." -ForegroundColor Green
 
 } finally {
