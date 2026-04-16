@@ -46,7 +46,7 @@ function Assert-ContainsLine {
     )
 
     $Lines = [regex]::Split($Content, "\r\n|\n|\r")
-    if (-not ($Lines -contains $ExpectedLine)) {
+    if (-not ($Lines -ccontains $ExpectedLine)) {
         throw $FailureMessage
     }
 }

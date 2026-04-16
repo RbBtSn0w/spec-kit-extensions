@@ -38,7 +38,13 @@ function Resolve-FeatureJson {
     }
 
     if (-not $scriptPath) {
-        throw "ERROR: check-prerequisites.ps1 not found (checked project root and extension scripts dir)"
+        $checkedCandidates = @($scriptCandidates | Where-Object { $_ })
+        $checkedLocations = if ($checkedCandidates.Count -gt 0) {
+            [string]::Join(', ', $checkedCandidates)
+        } else {
+            'none'
+        }
+        throw "ERROR: check-prerequisites.ps1 not found (checked: $checkedLocations)"
     }
 
     $powerShellExecutable = (Get-Process -Id $PID).Path
