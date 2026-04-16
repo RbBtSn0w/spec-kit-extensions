@@ -4,7 +4,7 @@ extension:
   id: superb
   name: Superpowers Bridge
   version: 2.0.0
-  description: "Bridges superpower quality-control skills into Spec Kit and adds native review utilities."
+  description: "Bridges superpowers quality-control skills into Spec Kit and adds native review utilities."
   author: rbbtsn0w
   repository: https://github.com/RbBtSn0w/spec-kit-extensions
   license: MIT

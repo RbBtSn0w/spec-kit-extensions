@@ -74,7 +74,7 @@ Testing status sync.
     $InitialContent | Set-Content $SpecFile -Encoding utf8
     Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $SpecFile
 
-    # 3. Test: Initial Insertion
+    # 1. Test: Initial Insertion
     Write-Host "Running Test 1: Initial Insertion..."
     Push-Location $TmpDir
     try {
@@ -97,7 +97,7 @@ Testing status sync.
         Pop-Location
     }
 
-    # 4. Test: Status Update
+    # 2. Test: Status Update
     Write-Host "Running Test 2: Status Update..."
     Push-Location $TmpDir
     try {
@@ -108,7 +108,7 @@ Testing status sync.
         Pop-Location
     }
 
-    # 5. Test: Insertion Without H1
+    # 3. Test: Insertion Without H1
     Write-Host "Running Test 3: No H1 Insertion..."
     $NoH1File = Join-Path $SpecDir 'spec_noh1.md'
     "Just some text without an H1 heading." | Set-Content $NoH1File -Encoding utf8
@@ -128,7 +128,7 @@ Testing status sync.
         Pop-Location
     }
 
-    # 6. Test: Encoding Preservation (UTF-8 with BOM)
+    # 4. Test: Encoding Preservation (UTF-8 with BOM)
     Write-Host "Running Test 4: BOM Preservation..."
     $BomFile = Join-Path $SpecDir 'spec_bom.md'
     $Utf8WithBom = New-Object System.Text.UTF8Encoding($true)
