@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- No extension payload changes since `1.1.0`; the next published release republishes the current bridge package to realign release metadata and distribution versioning.
+- No extension payload changes since `1.1.0`; current unreleased work only corrects release metadata wording for the existing bridge package.
 
 ## [1.1.0] - 2026-04-16
 
