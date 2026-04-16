@@ -8,21 +8,36 @@ $ErrorActionPreference = 'Stop'
 
 function Resolve-FeatureJson {
     $scriptRelativePath = 'scripts/powershell/check-prerequisites.ps1'
-    $scriptPath = $scriptRelativePath
+    $scriptCandidates = [System.Collections.Generic.List[string]]::new()
+    $scriptPath = $null
 
-    if (-not (Test-Path $scriptPath)) {
-        $currentScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-        if ($currentScriptDir) {
-            # Try extension scripts dir and project root relative to script location
-            $scriptPath = Join-Path $currentScriptDir 'check-prerequisites.ps1'
-            if (-not (Test-Path $scriptPath)) {
-                $projectRootPath = Join-Path $currentScriptDir '../../..'
-                $scriptPath = Join-Path $projectRootPath $scriptRelativePath
-            }
+    if ((Get-Location).Path) {
+        $scriptCandidates.Add((Join-Path (Get-Location).Path $scriptRelativePath))
+    }
+
+    $currentScriptDir = if ($PSScriptRoot) {
+        $PSScriptRoot
+    } elseif ($PSCommandPath) {
+        Split-Path -Parent $PSCommandPath
+    } else {
+        $null
+    }
+
+    if ($currentScriptDir) {
+        # Try extension scripts dir and project root relative to script location
+        $scriptCandidates.Add((Join-Path $currentScriptDir 'check-prerequisites.ps1'))
+        $projectRootPath = Join-Path $currentScriptDir '../../..'
+        $scriptCandidates.Add((Join-Path $projectRootPath $scriptRelativePath))
+    }
+
+    foreach ($candidate in $scriptCandidates) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
+            $scriptPath = (Resolve-Path -LiteralPath $candidate).ProviderPath
+            break
         }
     }
 
-    if (-not (Test-Path $scriptPath)) {
+    if (-not $scriptPath) {
         throw "ERROR: check-prerequisites.ps1 not found (checked project root and extension scripts dir)"
     }
 
@@ -31,6 +46,7 @@ function Resolve-FeatureJson {
         @('-Json', '-PathsOnly'),
         @('-Json')
     )
+    $lastResolutionError = $null
 
     foreach ($commandArgs in $commandArgsList) {
         try {
@@ -41,7 +57,12 @@ function Resolve-FeatureJson {
                 return $resultText
             }
         } catch {
+            $lastResolutionError = $_
         }
+    }
+
+    if ($lastResolutionError) {
+        throw "Unable to resolve active feature via ${scriptPath}: $($lastResolutionError.Exception.Message)"
     }
 
     throw "Unable to resolve active feature via $scriptPath"
