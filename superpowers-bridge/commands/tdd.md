@@ -1,33 +1,47 @@
 ---
 description: >
-  Mandatory pre-implement TDD gate. Loads the obra/superpowers
-  test-driven-development SKILL.md at runtime and binds it to spec-kit's
-  tasks.md task structure. Enforces RED-GREEN-REFACTOR for every task.
+  Mandatory pre-implement TDD gate. Bridges an installed obra/superpowers
+  test-driven-development skill into spec-kit's tasks.md task structure and
+  enforces RED-GREEN-REFACTOR for every task.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # TDD Enforcement Gate — Before Implementation
 
+> **Type:** Superpowers-adapted command
 > **Skill origin:** [obra/superpowers `test-driven-development`](https://github.com/obra/superpowers)
 > **Invocation:** Mandatory pre-hook for `speckit.implement`. Cannot be skipped.
 
 ---
 
-## Step 1 — Load the Authoritative TDD Skill
+## Step 1 — Resolve Installed Skill
 
-Locate and internalize the superpowers TDD skill using this priority chain:
+Look for `test-driven-development/SKILL.md` in this exact order:
 
-1. **Local plugin:** Read `skills/test-driven-development/SKILL.md` from the
-   workspace root (present when superpowers is installed as a plugin).
-2. **Remote fetch:** If the local file does not exist, fetch from
-   `https://raw.githubusercontent.com/obra/superpowers/main/skills/test-driven-development/SKILL.md`
-3. **Embedded fallback:** If both fail, apply this minimal contract:
-   > NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST.
-   > For every task: RED (write failing test) → GREEN (minimal code to pass) →
-   > REFACTOR (clean up, tests still green) → COMMIT.
-   > If you wrote code before seeing a test fail, delete that code and restart.
+1. `./.agents/skills/test-driven-development/SKILL.md`
+2. `~/.agents/skills/test-driven-development/SKILL.md`
 
-**You must internalize the full SKILL.md content before proceeding.** Its rules
-are non-negotiable for this implementation session.
+If the workspace and global copies both exist, use the workspace copy.
+
+If no readable file is found, **STOP**:
+
+```text
+ERROR: Required superpowers skill `test-driven-development` not found.
+Run /speckit.superb.check for diagnostics.
+
+TIP: Ensure superpowers is installed and its skills are in `./.agents/skills/`
+or `~/.agents/skills/`. You can use the `superpowers` tool to manage skills.
+```
+
+Report the source you resolved before continuing:
+
+```text
+Using installed skill: test-driven-development
+Source: [workspace|global]
+Path: [resolved path]
+```
 
 ---
 
@@ -50,16 +64,37 @@ If the baseline has unexpected failures, **STOP** and report them before proceed
    as declared in `tasks.md`. These are your RED-phase targets — do not invent
    new test locations unless the plan specifies a reason.
 
+Also resolve the current feature spec path using the same Spec Kit feature
+resolution used by follow-up commands:
+
+- Prefer `FEATURE_SPEC` when the prerequisite script exposes it
+- Otherwise use `FEATURE_DIR/spec.md`
+
+Do not infer the feature path from the current branch name manually.
+
 ---
 
 ## Step 3 — Execute
 
-Apply the loaded TDD skill to every task in `tasks.md`:
+Apply the resolved installed TDD skill to every task in `tasks.md`:
 
 - Follow the RED → GREEN → REFACTOR → COMMIT cycle exactly as the skill defines.
 - Paste evidence of each RED failure and each GREEN pass inline.
 - If any task starts with production code before a failing test, delete the code
   and restart from RED. **No exceptions without explicit user permission.**
+
+When the implementation phase is formally entered, synchronize the feature spec
+status to:
+
+```bash
+{SCRIPT} --status "Implementing"
+```
+
+Status sync rules:
+
+- Use the script output as the source of truth for resolved spec path and
+  resulting status
+- Preserve `Abandoned` if the feature has already been explicitly discarded
 
 ---
 

@@ -3,12 +3,12 @@ schema_version: "1.0"
 extension:
   id: "memorylint"
   name: "MemoryLint"
-  version: "1.0.0"
+  version: "2.0.0"
   description: "Agent memory governance tool: Automatically audits and fixes boundary conflicts between AGENTS.md and the constitution."
   author: "Spec-kit Community"
 
 requires:
-  speckit_version: ">=0.1.0"
+  speckit_version: ">=0.5.1"
 
 provides:
   commands:

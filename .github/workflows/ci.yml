@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: shell-regressions
+            shell: bash
+            command: |
+              bash tests/test-review-regressions.sh
+              bash superpowers-bridge/tests/test-status-sync.sh
+          - os: windows-latest
+            name: powershell-status-sync
+            shell: pwsh
+            command: |
+              pwsh -File superpowers-bridge/tests/test-status-sync.ps1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        shell: ${{ matrix.shell }}
+        run: ${{ matrix.command }}

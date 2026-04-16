@@ -3,8 +3,8 @@ schema_version: "1.0"
 extension:
   id: superb
   name: Superpowers Bridge
-  version: 1.0.0
-  description: "Orchestrates obra/superpowers skills inside Spec Kit workflow. Provides commands for intent clarification, TDD, task review, verification, critique, debugging, branch completion, and code review."
+  version: 2.0.0
+  description: "Bridges superpower quality-control skills into Spec Kit and adds native review utilities."
   author: rbbtsn0w
   repository: https://github.com/RbBtSn0w/spec-kit-extensions
   license: MIT
@@ -19,61 +19,66 @@ requires:
 
 provides:
   commands:
-    - name: speckit.superb.clarify
-      file: commands/clarify.md
+    - name: speckit.superb.check
+      file: commands/check.md
       description: >
-        Orchestrates the superpowers brainstorming skill within the spec-kit
-        specify workflow. Loads the authoritative SKILL.md at runtime, binds
-        spec-kit context, and produces an intent summary for speckit.specify.
+        Bridge-native diagnostics command. Verifies that required and optional
+        superpowers skills are installed in workspace or global skill roots and
+        reports which hooks are ready to run.
 
     - name: speckit.superb.tdd
       file: commands/tdd.md
       description: >
-        Mandatory pre-implement gate. Loads the superpowers TDD skill at
-        runtime and binds it to spec-kit's tasks.md task structure. Enforces
-        RED-GREEN-REFACTOR for every task.
+        Mandatory pre-implement gate. Bridges an installed superpowers
+        test-driven-development skill into spec-kit's tasks.md task structure
+        and enforces RED-GREEN-REFACTOR for every task.
 
     - name: speckit.superb.review
       file: commands/review.md
       description: >
         Verify the generated tasks.md covers every requirement in spec.md.
-        Produces a gap report before implementation begins so missing coverage
-        is caught at planning time, not delivery time. Bridge-original command.
+        Produces a gap report and TDD-readiness check before implementation
+        begins so missing coverage is caught at planning time, not delivery
+        time. Bridge-native command.
 
     - name: speckit.superb.verify
       file: commands/verify.md
       description: >
-        Mandatory completion gate. Loads the superpowers verification skill
-        at runtime and extends it with spec-kit's spec-coverage checklist.
-        No task may be marked done without fresh evidence.
+        Mandatory completion gate. Bridges an installed superpowers
+        verification-before-completion skill and extends it with spec-kit's
+        spec-coverage checklist. No task may be marked done without fresh
+        evidence.
 
     - name: speckit.superb.critique
       file: commands/critique.md
       description: >
         Persistent spec-aligned code-review agent. Loads spec.md, plan.md, and
         tasks.md, then reviews every diff against the declared requirements,
-        reporting issues by severity (Critical / Important / Minor). Bridge-original command.
+        reporting issues by severity (Critical / High / Medium / Low).
+        Bridge-native command.
 
     - name: speckit.superb.debug
       file: commands/debug.md
       description: >
-        Systematic debugging protocol. Loads the superpowers systematic-debugging
-        skill at runtime. Enforces root-cause investigation before any fix attempt.
-        Escalation path from the TDD gate when 2+ fixes fail.
+        Systematic debugging protocol. Bridges an installed superpowers
+        systematic-debugging skill. Enforces root-cause investigation before any
+        fix attempt. Escalation path from the TDD gate when 2+ fixes fail.
 
     - name: speckit.superb.finish
       file: commands/finish.md
       description: >
-        Development branch completion. Loads the superpowers finishing skill at
-        runtime. Presents structured options (merge / PR / keep / discard) after
-        verification passes. Call after verify succeeds.
+        Development branch completion. Bridges an installed superpowers
+        finishing-a-development-branch skill. Presents structured options
+        (merge / PR / keep / discard) after verification passes. Call after
+        verify succeeds.
 
     - name: speckit.superb.respond
       file: commands/respond.md
       description: >
-        Code review response protocol. Loads the superpowers receiving-code-review
-        skill at runtime. Enforces technical verification before implementing
-        feedback. Pairs with critique as the implementer counterpart.
+        Code review response protocol. Bridges an installed superpowers
+        receiving-code-review skill. Enforces technical verification before
+        implementing feedback. Pairs with critique as the implementer
+        counterpart.
 
   config:
     - name: superb-config.yml
@@ -82,43 +87,36 @@ provides:
       required: false
 
 hooks:
-  before_specify:
-    command: speckit.superb.clarify
-    optional: true
-    prompt: "Run intent-clarification before writing the spec? (recommended for new features)"
-    description: >
-      Socratic design refinement via the superpowers brainstorming skill.
-      Ensures the spec captures the real requirement, not just the stated one.
-
   before_implement:
     command: speckit.superb.tdd
     optional: false
     description: >
-      Mandatory TDD gate. Loads the superpowers test-driven-development skill
-      and binds it to the spec-kit task structure before any code is written.
+      Mandatory TDD gate. Bridges an installed superpowers
+      test-driven-development skill into the spec-kit task structure before any
+      code is written.
 
   after_tasks:
     command: speckit.superb.review
     optional: true
-    prompt: "Review tasks.md against spec.md for coverage gaps before implementation?"
+    prompt: "Review tasks.md for coverage and TDD-readiness before implementation?"
     description: >
       Catches missing or under-specified tasks at planning time. Produces a
-      spec-coverage matrix with gap identification. Bridge-original logic.
+      requirement coverage and TDD-readiness report. Bridge-native logic.
 
   after_implement:
     command: speckit.superb.verify
     optional: false
     description: >
-      Mandatory completion gate. Loads the superpowers verification skill and
-      extends it with spec-kit spec-coverage checks. Prevents false completions.
+      Mandatory completion gate. Bridges an installed superpowers
+      verification-before-completion skill and extends it with spec-kit
+      spec-coverage checks. Prevents false completions.
 
 tags:
-  - methodology
+  - quality-gates
   - tdd
   - code-review
   - workflow
   - superpowers
-  - brainstorming
   - verification
   - debugging
   - branch-management
