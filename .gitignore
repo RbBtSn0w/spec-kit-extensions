@@ -20,3 +20,6 @@ dist/
 build/
 
 superpowers-bridge/v/*
+.antigravitycli/
+.specify/
+docs/
