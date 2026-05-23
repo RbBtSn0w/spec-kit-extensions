@@ -4,21 +4,19 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: archive-evidence.sh --feature-name <name> --build-status <status> --test-output <output> --checklist <checklist> [--commit-hash <hash>]
+Usage: archive-evidence.sh --feature-name <name> --build-status <status> [--commit-hash <hash>]
+
+Reads the checklist and test output from standard input, separated by the line "---OUTPUT---".
 
 Options:
   --feature-name   The name of the feature being verified
   --build-status   The build/lint status (e.g. PASS, FAIL, N/A)
-  --test-output    The stdout/stderr output of the test suite
-  --checklist      The markdown spec-coverage checklist
   --commit-hash    (Optional) The git commit hash. Auto-resolved if not provided.
 EOF
 }
 
 FEATURE_NAME=""
 BUILD_STATUS=""
-TEST_OUTPUT=""
-CHECKLIST=""
 COMMIT_HASH=""
 
 while [[ $# -gt 0 ]]; do
@@ -29,14 +27,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --build-status)
       BUILD_STATUS="${2:-}"
-      shift 2
-      ;;
-    --test-output)
-      TEST_OUTPUT="${2:-}"
-      shift 2
-      ;;
-    --checklist)
-      CHECKLIST="${2:-}"
       shift 2
       ;;
     --commit-hash)
@@ -60,8 +50,36 @@ if [[ -z "$FEATURE_NAME" ]]; then
   exit 1
 fi
 
+if [[ -z "$BUILD_STATUS" ]]; then
+  echo "ERROR: --build-status is required" >&2
+  exit 1
+fi
+
 if [[ -z "$COMMIT_HASH" ]]; then
   COMMIT_HASH=$(git rev-parse HEAD 2>/dev/null || echo "N/A")
+fi
+
+# Read stdin into variables
+CHECKLIST=""
+TEST_OUTPUT=""
+READING_OUTPUT=false
+
+while IFS= read -r line || [[ -n "$line" ]]; do
+  if [[ "$line" == "---OUTPUT---" ]]; then
+    READING_OUTPUT=true
+    continue
+  fi
+  
+  if [ "$READING_OUTPUT" = true ]; then
+    TEST_OUTPUT="${TEST_OUTPUT}${line}"$'\n'
+  else
+    CHECKLIST="${CHECKLIST}${line}"$'\n'
+  fi
+done
+
+if [[ -z "$CHECKLIST" && -z "$TEST_OUTPUT" ]]; then
+  echo "ERROR: Standard input is empty. Checklist and test output are required." >&2
+  exit 1
 fi
 
 EVIDENCE_DIR=".specify/evidence"

@@ -5,17 +5,35 @@ param (
     [Parameter(Mandatory=$true)]
     [string]$BuildStatus,
     
-    [Parameter(Mandatory=$true)]
-    [string]$TestOutput,
-    
-    [Parameter(Mandatory=$true)]
-    [string]$Checklist,
-    
     [Parameter(Mandatory=$false)]
     [string]$CommitHash = ""
 )
 
 $ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($BuildStatus)) {
+    Write-Error "ERROR: -BuildStatus is required"
+    exit 1
+}
+
+# Read from pipeline
+$InputData = @($Input) -join "`n"
+
+if ([string]::IsNullOrWhiteSpace($InputData)) {
+    Write-Error "ERROR: Standard input is empty. Checklist and test output are required."
+    exit 1
+}
+
+$Separator = "---OUTPUT---"
+$Parts = $InputData -split $Separator, 2
+
+if ($Parts.Length -lt 2) {
+    Write-Error "ERROR: Separator '---OUTPUT---' not found in input."
+    exit 1
+}
+
+$Checklist = $Parts[0].Trim()
+$TestOutput = $Parts[1].Trim()
 
 if ([string]::IsNullOrWhiteSpace($CommitHash)) {
     try {

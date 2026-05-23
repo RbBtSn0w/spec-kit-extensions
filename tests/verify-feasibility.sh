@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 EVIDENCE_DIR=".specify/evidence"
 mkdir -p "$EVIDENCE_DIR"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)

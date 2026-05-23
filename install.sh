@@ -20,13 +20,12 @@ fi
 # Get the directory where this script is located (the project root)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Define the extensions to register
-EXTENSIONS=("superpowers-bridge" "memorylint")
+# Define the extensions to register by discovering extension.yml files
 REGISTERED_COUNT=0
 
-for ext in "${EXTENSIONS[@]}"; do
-    EXT_DIR="$SCRIPT_DIR/$ext"
-    if [ -d "$EXT_DIR" ] && [ -f "$EXT_DIR/extension.yml" ]; then
+for EXT_DIR in "$SCRIPT_DIR"/*/ ; do
+    if [ -f "${EXT_DIR}extension.yml" ]; then
+        ext=$(basename "$EXT_DIR")
         echo "Found extension: $ext"
         echo "Registering $ext via 'specify extension add --dev'..."
         if specify extension add --dev "$EXT_DIR"; then
@@ -36,8 +35,6 @@ for ext in "${EXTENSIONS[@]}"; do
             echo "ERROR: Failed to register $ext." >&2
             exit 1
         fi
-    else
-        echo "Warning: Extension directory '$ext' not found or missing 'extension.yml' under '$SCRIPT_DIR'." >&2
     fi
 done
 

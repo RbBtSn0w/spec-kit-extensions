@@ -9,8 +9,13 @@ Provide a centralized installer script `install.sh` at the root of the repositor
 ### Features
 - Detect if `specify` is installed.
 - Auto-detect the project root.
-- Register `superpowers-bridge` and `memorylint`.
-- Provide a one-liner: `curl -sSL https://raw.githubusercontent.com/RbBtSn0w/spec-kit-extensions/main/install.sh | bash`
+- Register all extensions discovered via `extension.yml`.
+- Provide a clear instruction sequence:
+  ```bash
+  git clone https://github.com/RbBtSn0w/spec-kit-extensions.git
+  cd spec-kit-extensions
+  ./install.sh
+  ```
 
 ## Technical Feasibility Verification
 

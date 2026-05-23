@@ -10,11 +10,34 @@ echo ">>> Running SDD Pre-Commit Hook..."
 
 # Find spec.md or active feature spec
 SPEC_FILE=""
-if [ -f "spec.md" ]; then
+if [ -n "${FEATURE_SPEC:-}" ] && [ -f "$FEATURE_SPEC" ]; then
+    SPEC_FILE="$FEATURE_SPEC"
+elif [ -f "spec.md" ]; then
     SPEC_FILE="spec.md"
 else
-    # Search in common directories
-    SPEC_FILE=$(find . -maxdepth 3 -name "spec.md" | head -n 1)
+    # Try to find a spec.md related to the staged files first
+    STAGED_DIRS=$(git diff --cached --name-only | xargs -I {} dirname {} | sort -u)
+    for DIR in $STAGED_DIRS; do
+        if [ -f "$DIR/spec.md" ]; then
+            SPEC_FILE="$DIR/spec.md"
+            break
+        fi
+        # Check parent directories up to root
+        PARENT="$DIR"
+        while [ "$PARENT" != "." ] && [ "$PARENT" != "/" ]; do
+            PARENT=$(dirname "$PARENT")
+            if [ -f "$PARENT/spec.md" ]; then
+                SPEC_FILE="$PARENT/spec.md"
+                break
+            fi
+        done
+        if [ -n "$SPEC_FILE" ]; then break; fi
+    done
+    
+    # Fallback: search the workspace, silencing errors
+    if [ -z "$SPEC_FILE" ]; then
+        SPEC_FILE=$(find . -name "spec.md" 2>/dev/null | head -n 1 || true)
+    fi
 fi
 
 if [ -z "$SPEC_FILE" ]; then
@@ -27,10 +50,10 @@ echo "Found specification: $SPEC_FILE"
 # Detect Python
 if command -v python3 >/dev/null 2>&1; then
   PYTHON_BIN="python3"
-elif command -v python >/dev/null 2>&1; then
+elif command -v python >/dev/null 2>&1 && python -c 'import sys; exit(0 if sys.version_info.major >= 3 else 1)'; then
   PYTHON_BIN="python"
 else
-  echo "Warning: Python not found. Basic regex matching will be used instead."
+  echo "Warning: Python 3 not found. Basic regex matching will be used instead."
   PYTHON_BIN=""
 fi
 
@@ -81,7 +104,7 @@ if [ -f "$TASKS_FILE" ]; then
     
     # If status is Verified, ensure there are no uncompleted tasks [ ] in tasks.md
     if [ "$STATUS" = "Verified" ]; then
-        UNCOMPLETED=$(grep -E '^\s*-\s*\[ \]' "$TASKS_FILE" | wc -l | xargs || true)
+        UNCOMPLETED=$(grep -E '^\s*[-*]\s*\[\s*\]' "$TASKS_FILE" | wc -l | xargs || true)
         if [ "$UNCOMPLETED" -ne 0 ]; then
             echo "ERROR: Spec status is 'Verified' but tasks.md contains $UNCOMPLETED uncompleted tasks [ ]." >&2
             echo "Please complete all tasks or revert status before committing." >&2

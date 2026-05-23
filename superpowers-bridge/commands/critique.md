@@ -216,16 +216,19 @@ correct work is noise.
 ### Required Action
 ```
 
-If Critical or Important issues exist:
-1. Output the verdict:
+If Critical issues exist:
 ```
-🔴 BLOCKED: Fix all Critical/Important issues above before continuing.
+🔴 BLOCKED: Fix all Critical issues above before continuing.
 Do not write new code or start new tasks until resolved.
 ```
 2. **Auto-Plan for Fixes**: Automatically write a fix plan to a new temporary file `.specify/plan-fix.md` (or append to the existing `plan.md` under a dedicated "Critique Fixes" section) detailing the exact tasks and files that must be modified to resolve the identified drifts.
 3. Present this generated fix plan to the user in your output.
 
-If only Minor issues:
+If no Critical issues, but Important issues exist:
+```
+🟠 FIX BEFORE MERGE: Address Important issues before creating PR.
+You may continue to the next task but must return to fix these.
+```
 ```
 ✓ CLEAR TO PROCEED: Implementation meets spec requirements.
 Minor issues tracked. Safe to continue to next task or create PR.
