@@ -7,6 +7,13 @@ TIMESTAMP=$(date +%Y%m%d%H%M%S)
 FEATURE_NAME="feasibility-test"
 FILE_PATH="$EVIDENCE_DIR/${TIMESTAMP}-${FEATURE_NAME}-verify.md"
 
+cleanup() {
+  rm -f "$FILE_PATH"
+  rmdir "$EVIDENCE_DIR" 2>/dev/null || true
+  rmdir ".specify" 2>/dev/null || true
+}
+trap cleanup EXIT
+
 cat <<EOF > "$FILE_PATH"
 # Verification Evidence
 - Feature: $FEATURE_NAME

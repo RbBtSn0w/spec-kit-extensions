@@ -16,12 +16,13 @@ elif [ -f "spec.md" ]; then
     SPEC_FILE="spec.md"
 else
     # Try to find a spec.md related to the staged files first
-    STAGED_DIRS=$(git diff --cached --name-only | xargs -I {} dirname {} | sort -u)
-    for DIR in $STAGED_DIRS; do
+    while IFS= read -r -d '' STAGED_PATH; do
+        DIR=$(dirname "$STAGED_PATH")
         if [ -f "$DIR/spec.md" ]; then
             SPEC_FILE="$DIR/spec.md"
             break
         fi
+
         # Check parent directories up to root
         PARENT="$DIR"
         while [ "$PARENT" != "." ] && [ "$PARENT" != "/" ]; do
@@ -32,7 +33,7 @@ else
             fi
         done
         if [ -n "$SPEC_FILE" ]; then break; fi
-    done
+    done < <(git diff --cached --name-only -z)
     
     # Fallback: search the workspace, silencing errors
     if [ -z "$SPEC_FILE" ]; then
