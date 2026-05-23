@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: archive-evidence.sh --feature-name <name> --build-status <status> [--commit-hash <hash>]
+Usage: archive-evidence.sh --feature-name <name> --build-status <PASS|FAIL|N/A> [--commit-hash <hash>]
 
 Reads the checklist and test output from standard input, separated by the line "---OUTPUT---".
 
@@ -45,15 +45,23 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$FEATURE_NAME" ]]; then
+if [[ -z "${FEATURE_NAME//[[:space:]]/}" ]]; then
   echo "ERROR: --feature-name is required" >&2
   exit 1
 fi
 
-if [[ -z "$BUILD_STATUS" ]]; then
-  echo "ERROR: --build-status is required" >&2
-  exit 1
-fi
+case "$BUILD_STATUS" in
+  "PASS"|"FAIL"|"N/A")
+    ;;
+  "")
+    echo "ERROR: --build-status is required" >&2
+    exit 1
+    ;;
+  *)
+    echo "ERROR: --build-status must be one of PASS, FAIL, or N/A" >&2
+    exit 1
+    ;;
+esac
 
 if [[ -z "$COMMIT_HASH" ]]; then
   COMMIT_HASH=$(git rev-parse HEAD 2>/dev/null || echo "N/A")
@@ -77,8 +85,18 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   fi
 done
 
-if [[ -z "$CHECKLIST" && -z "$TEST_OUTPUT" ]]; then
-  echo "ERROR: Standard input is empty. Checklist and test output are required." >&2
+if [[ "$READING_OUTPUT" != true ]]; then
+  echo "ERROR: Separator '---OUTPUT---' not found in input." >&2
+  exit 1
+fi
+
+if [[ -z "${CHECKLIST//[[:space:]]/}" ]]; then
+  echo "ERROR: Checklist is required before the '---OUTPUT---' separator." >&2
+  exit 1
+fi
+
+if [[ -z "${TEST_OUTPUT//[[:space:]]/}" ]]; then
+  echo "ERROR: Test output is required after the '---OUTPUT---' separator." >&2
   exit 1
 fi
 

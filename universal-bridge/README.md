@@ -1,6 +1,8 @@
 # SDD Universal Bridge
 
-The **SDD Universal Bridge** abstracts the core Subagent-Driven Development (SDD) governance rules and protocols from Spec Kit into a platform-agnostic specification and hook suite. This allows you to apply rigorous SDD discipline when using other AI editors (such as Cursor, Windsurf) or running CI/CD pipelines.
+The **SDD Universal Bridge** is an experimental toolkit for carrying the repository's evidence-first discipline outside Spec Kit.
+
+It is not currently published as a Spec Kit extension. Treat it as a portable hook and schema prototype while the main `superpowers-bridge` workflow proves the completion-evidence gate in real Spec Kit projects.
 
 ## SDD Protocol JSON Schemas
 
@@ -20,7 +22,7 @@ This pre-commit hook acts as an automated quality gate. It verifies the followin
 1. **Spec Identification**: Locates the active `spec.md` in the workspace.
 2. **Status Constraints**:
    - If the specification's status is `Verified`, it ensures that `tasks.md` does not contain any uncompleted tasks (`- [ ]`).
-   - If the status is `Verified`, it checks that evidence has been archived in `.specify/evidence/`.
+   - If the status is `Verified`, it checks that matching evidence for the active feature has been archived in `.specify/evidence/`.
 3. **Safety warnings**: Issues warnings if commits are attempted on an `Abandoned` specification.
 
 ### Installation
@@ -44,3 +46,7 @@ Example GitHub Actions step:
   run: |
     bash universal-bridge/hooks/pre-commit-sdd
 ```
+
+## Promotion Criteria
+
+Universal Bridge should remain deferred until the Spec Kit-native evidence gate has real usage. Promote it only when the hook proves it can identify the active feature, reject stale evidence, and run in CI without weakening the evidence contract.

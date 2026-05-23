@@ -23,14 +23,19 @@ jobs:
           bash tests/test-review-regressions.sh
           bash tests/test-release-workflow.sh
           bash superpowers-bridge/tests/test-status-sync.sh
+          bash superpowers-bridge/tests/test-archive-evidence.sh
+          bash universal-bridge/tests/test-pre-commit.sh
+          bash tests/verify-feasibility.sh
 
-  powershell-status-sync:
-    name: powershell-status-sync
+  powershell-bridge-tests:
+    name: powershell-bridge-tests
     runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run PowerShell status sync tests
+      - name: Run PowerShell bridge tests
         shell: pwsh
-        run: pwsh -File superpowers-bridge/tests/test-status-sync.ps1
+        run: |
+          pwsh -File superpowers-bridge/tests/test-status-sync.ps1
+          pwsh -File superpowers-bridge/tests/test-archive-evidence.ps1

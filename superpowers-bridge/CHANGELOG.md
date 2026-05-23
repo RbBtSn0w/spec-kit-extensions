@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added evidence archiving scripts for Bash and PowerShell so `/speckit.superb.verify` can persist verification output under `.specify/evidence/`.
+- Added regression coverage for evidence archive creation, missing checklist/test output, missing separators, and invalid build statuses.
+
+### Changed
+
+- Updated `/speckit.superb.verify` so `Verified` status synchronization happens only after evidence archiving succeeds.
+- Tightened `/speckit.superb.critique` around requirement mapping, side-effect detection, and fix-plan generation for critical drift.
+- Wired evidence archive tests into CI.
+
 ## [1.3.0] - 2026-04-16
 ### Changed
 

@@ -27,6 +27,7 @@ ci = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
 release = (root / ".github/workflows/release-trigger.yml").read_text(encoding="utf-8")
 critique = (root / "superpowers-bridge/commands/critique.md").read_text(encoding="utf-8")
 ps_test = (root / "superpowers-bridge/tests/test-status-sync.ps1").read_text(encoding="utf-8")
+verify = (root / "superpowers-bridge/commands/verify.md").read_text(encoding="utf-8")
 
 
 def require(condition: bool, message: str) -> None:
@@ -45,6 +46,14 @@ require(
 require(
     "ubuntu-latest" in ci and "test-review-regressions.sh" in ci,
     "ci.yml must include the existing shell regression coverage on ubuntu-latest",
+)
+require(
+    "test-archive-evidence.sh" in ci and "test-pre-commit.sh" in ci,
+    "ci.yml must include evidence archiving and universal pre-commit regression coverage",
+)
+require(
+    "test-archive-evidence.ps1" in ci,
+    "ci.yml must include PowerShell evidence archiving regression coverage",
 )
 require(
     'git checkout -B "$DEFAULT_BRANCH" "origin/$DEFAULT_BRANCH"' in release,
@@ -70,6 +79,11 @@ require(
 require(
     'git merge-base "$BASE_REF" HEAD' in critique,
     "critique.md must resolve a concrete BASE_REF before calling git merge-base",
+)
+require(
+    "archive_sh: scripts/bash/archive-evidence.sh" in verify
+    and "archive_ps: scripts/powershell/archive-evidence.ps1" in verify,
+    "verify.md must declare evidence archiving scripts in frontmatter",
 )
 require(
     "#### 🟠 Important" in critique and "#### 🔵 Minor" in critique,

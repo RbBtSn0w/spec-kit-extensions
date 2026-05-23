@@ -1,6 +1,8 @@
 # Spec Kit Extensions
 
-A collection of high-performance extensions for [Spec Kit](https://github.com/github/spec-kit) (SDD Workflow).
+Evidence-first extensions for [Spec Kit](https://github.com/github/spec-kit) workflows.
+
+The current wedge is trustable AI-agent completion: when an agent says an implementation is complete, the workflow should have fresh tests, requirement coverage, and durable evidence to prove it. Broader AI governance and cross-tool portability are roadmap items, not the first product promise.
 
 ## Extensions
 
@@ -11,15 +13,29 @@ A collection of high-performance extensions for [Spec Kit](https://github.com/gi
 
 ## Installation
 
-Since this is a collection of extensions, you should clone this repository and install the specific extension you need:
+Install a single extension from a published release:
+
+```bash
+specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.3.0/superpowers-bridge.zip
+specify extension add memorylint --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/memorylint-v1.3.0/memorylint.zip
+```
+
+For local development, clone this repository and either install a specific extension or register every top-level extension discovered by `install.sh`:
 
 ```bash
 git clone https://github.com/RbBtSn0w/spec-kit-extensions.git
 cd spec-kit-extensions
 
-# Install the extension you want
 specify extension add --dev ./superpowers-bridge
+# or
+./install.sh
 ```
+
+## Product Direction
+
+- **Now:** evidence-based completion gates, status synchronization, and requirement drift review for Spec Kit users.
+- **Next:** MemoryLint semantic audits for long-lived agent instructions.
+- **Later:** Universal Bridge portability once the Spec Kit loop proves useful in real repositories.
 
 ## Development
 

@@ -1,6 +1,8 @@
 # Superpowers Bridge
 
-Bridges selected installed [obra/superpowers](https://github.com/obra/superpowers) quality-control skills into the Spec Kit workflow and adds a small set of bridge-native review utilities.
+Bridges selected installed [obra/superpowers](https://github.com/obra/superpowers) quality-control skills into the Spec Kit workflow and adds bridge-native evidence and review gates.
+
+The current product promise is narrow: when `/speckit.implement` claims a feature is complete, `/speckit.superb.verify` must require fresh verification evidence before the feature can be treated as `Verified`.
 
 This extension combines:
 
@@ -57,6 +59,20 @@ It does **not** replace the Spec Kit main flow. The main flow remains:
 - Root-cause debugging escalation (`debug`)
 - Structured branch completion options (`finish`)
 - Technical response workflow for review feedback (`respond`)
+
+## Evidence-First Completion
+
+`/speckit.superb.verify` archives completion evidence to `.specify/evidence/` before it synchronizes the active `spec.md` status to `Verified`.
+
+Each evidence archive records:
+
+- UTC timestamp
+- git commit hash
+- build/lint status
+- spec-coverage checklist
+- full test output
+
+If the checklist, test output, or archive step is missing, the previous status is preserved.
 
 ## What This Bridge Does Not Do
 

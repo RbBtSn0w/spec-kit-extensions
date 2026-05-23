@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- No extension payload changes since `1.3.0`; current unreleased work backfills changelog coverage for historical releases and future release-workflow compatibility.
+- Added semantic audit instructions to `speckit.memorylint.run` for contradiction, redundancy, and obsolescence reporting.
+- Added an optional `after_constitution` hook that can re-run MemoryLint after constitution generation.
+- Kept `extension.version` at `1.3.0` until the release workflow publishes the next version.
 
 ## [1.3.0] - 2026-04-16
 

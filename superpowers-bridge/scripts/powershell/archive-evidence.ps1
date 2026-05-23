@@ -11,8 +11,18 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+if ([string]::IsNullOrWhiteSpace($FeatureName)) {
+    Write-Error "ERROR: -FeatureName is required"
+    exit 1
+}
+
 if ([string]::IsNullOrWhiteSpace($BuildStatus)) {
     Write-Error "ERROR: -BuildStatus is required"
+    exit 1
+}
+
+if ($BuildStatus -notin @("PASS", "FAIL", "N/A")) {
+    Write-Error "ERROR: -BuildStatus must be one of PASS, FAIL, or N/A"
     exit 1
 }
 
@@ -34,6 +44,16 @@ if ($Parts.Length -lt 2) {
 
 $Checklist = $Parts[0].Trim()
 $TestOutput = $Parts[1].Trim()
+
+if ([string]::IsNullOrWhiteSpace($Checklist)) {
+    Write-Error "ERROR: Checklist is required before the '---OUTPUT---' separator."
+    exit 1
+}
+
+if ([string]::IsNullOrWhiteSpace($TestOutput)) {
+    Write-Error "ERROR: Test output is required after the '---OUTPUT---' separator."
+    exit 1
+}
 
 if ([string]::IsNullOrWhiteSpace($CommitHash)) {
     try {

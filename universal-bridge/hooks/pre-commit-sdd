@@ -82,6 +82,26 @@ fi
 
 echo "Current Spec Status: $STATUS"
 
+resolve_feature_name() {
+    local spec_file="$1"
+    local spec_dir
+    spec_dir=$(dirname "$spec_file")
+
+    if [ "$spec_dir" = "." ]; then
+        if git rev-parse --show-toplevel >/dev/null 2>&1; then
+            basename "$(git rev-parse --show-toplevel)"
+        else
+            basename "$(pwd)"
+        fi
+    else
+        basename "$spec_dir"
+    fi
+}
+
+safe_name() {
+    echo "$1" | sed 's/[^a-zA-Z0-9_-]/_/g'
+}
+
 if [ "$STATUS" = "Abandoned" ]; then
     echo "Warning: Feature status is set to Abandoned. Commits are permitted but discouraged."
     exit 0
@@ -116,12 +136,22 @@ fi
 # If status is Verified, ensure evidence is archived
 if [ "$STATUS" = "Verified" ]; then
     EVIDENCE_DIR=".specify/evidence"
-    if [ ! -d "$EVIDENCE_DIR" ] || [ -z "$(ls -A "$EVIDENCE_DIR" 2>/dev/null)" ]; then
-        echo "ERROR: Spec status is 'Verified' but no verification evidence found in $EVIDENCE_DIR." >&2
+    FEATURE_NAME=$(resolve_feature_name "$SPEC_FILE")
+    SAFE_FEATURE_NAME=$(safe_name "$FEATURE_NAME")
+
+    if [ ! -d "$EVIDENCE_DIR" ]; then
+        echo "ERROR: Spec status is 'Verified' but no verification evidence found in $EVIDENCE_DIR for feature '$FEATURE_NAME'." >&2
         echo "Please run verification and archive evidence before committing." >&2
         exit 1
     fi
-    echo "Verification evidence confirmed."
+
+    MATCHING_EVIDENCE=$(find "$EVIDENCE_DIR" -type f -name "*-${SAFE_FEATURE_NAME}-verify.md" 2>/dev/null | head -n 1 || true)
+    if [ -z "$MATCHING_EVIDENCE" ]; then
+        echo "ERROR: Spec status is 'Verified' but no verification evidence found in $EVIDENCE_DIR for feature '$FEATURE_NAME'." >&2
+        echo "Please run verification and archive evidence before committing." >&2
+        exit 1
+    fi
+    echo "Verification evidence confirmed: $MATCHING_EVIDENCE"
 fi
 
 echo ">>> SDD check passed successfully!"

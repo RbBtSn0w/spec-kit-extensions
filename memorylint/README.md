@@ -2,7 +2,7 @@
 
 MemoryLint is a Spec-kit extension designed for AI memory governance and boundary checking. 
 
-This extension serves as an "infrastructure guardian," ensuring that project-specific architecture rules stay in the constitution, while automatically supplementing missing general workflows in the global agent configuration.
+This extension serves as an "infrastructure guardian," ensuring that project-specific architecture rules stay in the constitution, while automatically supplementing missing general workflows in the global agent configuration. It is a secondary governance layer behind evidence-first completion gates.
 
 ## Problem Statement
 In Spec-Driven Development (SDD), AI Agents rely on two core long-term memory files:
@@ -16,6 +16,7 @@ Over time, developers or AI assistants may mistakenly write "architectural const
 MemoryLint hooks into the `before_constitution` lifecycle to perform bidirectional governance:
 1. **Prune (Clean up)**: Automatically audits `AGENTS.md`, extracts out-of-bounds architectural specifications, and seamlessly hands them over to `constitution.md` via conversational context.
 2. **Enrich (Supplement)**: Analyzes the workspace (e.g., `package.json`, `Makefile`) to infer and supplement `AGENTS.md` with missing essential infrastructure guidelines (like standard test/build commands or Git commit conventions).
+3. **Semantic Audit**: Reports contradictions, redundancies, and obsolete rules across `AGENTS.md` and `.specify/memory/constitution.md`.
 
 ## Workflow Architecture
 
@@ -80,6 +81,7 @@ MemoryLint hooks into the `before_constitution` lifecycle to perform bidirection
 - **Boundary Auditing**: Detects architecture leakage in `AGENTS.md`.
 - **Context Handoff**: Passes extracted rules cleanly without destructive overwrites of `constitution.md`.
 - **Infrastructure Enrichment**: Automatically detects missing test/build/git workflows and injects them into `AGENTS.md`.
+- **Semantic Audit Reporting**: Identifies conflicting, redundant, or obsolete long-lived instructions.
 
 ## Installation
 
@@ -115,6 +117,7 @@ specify extension add --dev ./memorylint
 This extension registers the following hooks:
 
 - `before_constitution` → `run` (optional)
+- `after_constitution` → `run` (optional)
 - `before_plan` → `load-agents` (mandatory)
 
 ## Usage / Execution Flow

@@ -6,6 +6,8 @@ description: >
 scripts:
   sh: scripts/bash/sync-spec-status.sh
   ps: scripts/powershell/sync-spec-status.ps1
+  archive_sh: scripts/bash/archive-evidence.sh
+  archive_ps: scripts/powershell/archive-evidence.ps1
 ---
 
 # Verification Before Completion — After Implementation
@@ -101,7 +103,7 @@ Unmet requirements: [list them]
 
 ## Step 5 — Archiving Evidence
 
-Archive the verification results to `.specify/evidence/` by executing the archiving script. The test output and checklist should be passed via stdin to avoid command-line argument size limits.
+Archive the verification results to `.specify/evidence/` by executing the archiving script. The test output and checklist must both be present and should be passed via stdin to avoid command-line argument size limits.
 
 On Unix-like systems (sh):
 ```bash
@@ -123,11 +125,11 @@ $EvidenceContent = @"
 ---OUTPUT---
 [test-output]
 "@
-$EvidenceContent | powershell -ExecutionPolicy Bypass -File "$ArchiveScript" -FeatureName "[feature-name]" -BuildStatus "[build-status]"
+$EvidenceContent | pwsh -NoProfile -File "$ArchiveScript" -FeatureName "[feature-name]" -BuildStatus "[build-status]"
 ```
 
 Replace the arguments with:
-- `[feature-name]`: The directory name or display name of the active feature (resolved from Step 2).
+- `[feature-name]`: The active feature directory name resolved from Step 2. If `spec.md` is at the repository root, use the repository directory name.
 - `[build-status]`: "PASS", "FAIL", or "N/A" depending on the build / lint / type-check status.
 - `[test-output]`: The full stdout/stderr of the test suite (from Step 3).
 - `[checklist]`: The completed markdown Spec Verification Checklist (from Step 4).

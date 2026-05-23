@@ -52,5 +52,41 @@ else
     echo "  -> Passed: Script correctly failed."
 fi
 
+# Test 3: Missing separator
+echo "Test 3: Missing Separator"
+if printf '%s\n' "- [x] R01" | bash "$SCRIPT_PATH" --feature-name "test-feature" --build-status "PASS" 2>/dev/null; then
+    echo "  -> Failed: Script should have failed due to missing separator."
+    exit 1
+else
+    echo "  -> Passed: Script correctly failed."
+fi
+
+# Test 4: Missing checklist
+echo "Test 4: Missing Checklist"
+if printf '%s\n' "---OUTPUT---" "Tests passing: 5" | bash "$SCRIPT_PATH" --feature-name "test-feature" --build-status "PASS" 2>/dev/null; then
+    echo "  -> Failed: Script should have failed due to missing checklist."
+    exit 1
+else
+    echo "  -> Passed: Script correctly failed."
+fi
+
+# Test 5: Missing test output
+echo "Test 5: Missing Test Output"
+if printf '%s\n' "- [x] R01" "---OUTPUT---" | bash "$SCRIPT_PATH" --feature-name "test-feature" --build-status "PASS" 2>/dev/null; then
+    echo "  -> Failed: Script should have failed due to missing test output."
+    exit 1
+else
+    echo "  -> Passed: Script correctly failed."
+fi
+
+# Test 6: Invalid build status
+echo "Test 6: Invalid Build Status"
+if printf '%s\n' "- [x] R01" "---OUTPUT---" "Tests passing: 5" | bash "$SCRIPT_PATH" --feature-name "test-feature" --build-status "BROKEN" 2>/dev/null; then
+    echo "  -> Failed: Script should have failed due to invalid build status."
+    exit 1
+else
+    echo "  -> Passed: Script correctly failed."
+fi
+
 echo "All tests passed successfully."
 rm -rf "$EVIDENCE_DIR"
