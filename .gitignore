@@ -24,6 +24,5 @@ superpowers-bridge/v/*
 # Local agent/tool state
 .antigravitycli/
 batch-fix.json
-.specify/extensions.yml
-.specify/extensions/.registry
-.specify/evidence/
+.specify/
+docs/
