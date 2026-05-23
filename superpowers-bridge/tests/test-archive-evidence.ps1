@@ -22,7 +22,27 @@ Tests passing: 5
 Tests failing: 0
 "@
 
-$InputData | & $PowerShellExe -NoProfile -NonInteractive -File "$ScriptPath" -FeatureName "test-feature" -BuildStatus "PASS" -CommitHash "12345abc"
+function Invoke-ArchiveEvidence {
+    param(
+        [string]$InputData,
+        [string[]]$Arguments
+    )
+
+    $InputFile = New-TemporaryFile
+    try {
+        Set-Content -LiteralPath $InputFile.FullName -Value $InputData -NoNewline
+        & $PowerShellExe -NoProfile -NonInteractive -File "$ScriptPath" @Arguments -InputFile "$($InputFile.FullName)" *> $null
+        return $LASTEXITCODE
+    } finally {
+        Remove-Item -LiteralPath $InputFile.FullName -Force -ErrorAction SilentlyContinue
+    }
+}
+
+$ExitCode = Invoke-ArchiveEvidence $InputData @("-FeatureName", "test-feature", "-BuildStatus", "PASS", "-CommitHash", "12345abc")
+if ($ExitCode -ne 0) {
+    Write-Error "Failed: Script exited with status $ExitCode."
+    exit 1
+}
 
 $ArchivedFiles = Get-ChildItem -Path $EvidenceDir -Filter "*.md"
 if ($ArchivedFiles.Count -gt 0) {
@@ -57,8 +77,8 @@ function Assert-Fails {
     )
 
     Write-Host $Name
-    $InputData | & $PowerShellExe -NoProfile -NonInteractive -File "$ScriptPath" @Arguments *> $null
-    if ($LASTEXITCODE -eq 0) {
+    $ExitCode = Invoke-ArchiveEvidence $InputData $Arguments
+    if ($ExitCode -eq 0) {
         Write-Error "Failed: Script should have failed."
         exit 1
     }

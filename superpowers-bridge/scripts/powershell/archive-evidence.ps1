@@ -9,6 +9,9 @@ param (
     [Parameter(Mandatory=$false)]
     [string]$CommitHash = "",
 
+    [Parameter(Mandatory=$false)]
+    [string]$InputFile = "",
+
     [Parameter(ValueFromPipeline=$true)]
     [AllowEmptyString()]
     [string]$PipelineInput
@@ -42,6 +45,19 @@ end {
     }
 
     $InputData = $InputLines -join "`n"
+
+    if ([string]::IsNullOrWhiteSpace($InputData) -and -not [string]::IsNullOrWhiteSpace($InputFile)) {
+        if (!(Test-Path -LiteralPath $InputFile -PathType Leaf)) {
+            Write-Error "ERROR: -InputFile does not exist or is not a file."
+            exit 1
+        }
+
+        $InputData = Get-Content -LiteralPath $InputFile -Raw
+    }
+
+    if ([string]::IsNullOrWhiteSpace($InputData) -and [Console]::IsInputRedirected) {
+        $InputData = [Console]::In.ReadToEnd()
+    }
 
     if ([string]::IsNullOrWhiteSpace($InputData)) {
         Write-Error "ERROR: Standard input is empty. Checklist and test output are required."
