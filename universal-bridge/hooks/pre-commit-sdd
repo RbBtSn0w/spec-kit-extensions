@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+# Portable SDD Hook
+# Enforces Subagent-Driven Development (SDD) discipline.
+# Checks spec.md status, task completeness, and evidence archiving before committing.
+
+set -euo pipefail
+
+echo ">>> Running SDD Pre-Commit Hook..."
+
+# Find spec.md or active feature spec
+SPEC_FILE=""
+if [ -f "spec.md" ]; then
+    SPEC_FILE="spec.md"
+else
+    # Search in common directories
+    SPEC_FILE=$(find . -maxdepth 3 -name "spec.md" | head -n 1)
+fi
+
+if [ -z "$SPEC_FILE" ]; then
+    echo "Info: No spec.md found in workspace. Skipping SDD checks."
+    exit 0
+fi
+
+echo "Found specification: $SPEC_FILE"
+
+# Detect Python
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_BIN="python"
+else
+  echo "Warning: Python not found. Basic regex matching will be used instead."
+  PYTHON_BIN=""
+fi
+
+# Extract status
+STATUS=""
+if [ -n "$PYTHON_BIN" ]; then
+    STATUS=$($PYTHON_BIN - "$SPEC_FILE" <<'PY'
+import sys
+import re
+from pathlib import Path
+try:
+    content = Path(sys.argv[1]).read_text(encoding='utf-8')
+    match = re.search(r'\*\*Status\*\*:\s*([^\r\n]+)', content)
+    if match:
+        print(match.group(1).strip())
+    else:
+        print("")
+except Exception as e:
+    print(f"ERROR: {e}", file=sys.stderr)
+    sys.exit(1)
+PY
+)
+else
+    STATUS=$(grep -i "\*\*Status\*\*:" "$SPEC_FILE" | head -n 1 | cut -d: -f2 | xargs || true)
+fi
+
+echo "Current Spec Status: $STATUS"
+
+if [ "$STATUS" = "Abandoned" ]; then
+    echo "Warning: Feature status is set to Abandoned. Commits are permitted but discouraged."
+    exit 0
+fi
+
+# Check tasks.md if it exists
+TASKS_FILE=""
+if [ -f "tasks.md" ]; then
+    TASKS_FILE="tasks.md"
+else
+    # Search in the same directory as the spec
+    SPEC_DIR=$(dirname "$SPEC_FILE")
+    if [ -f "$SPEC_DIR/tasks.md" ]; then
+        TASKS_FILE="$SPEC_DIR/tasks.md"
+    fi
+fi
+
+if [ -f "$TASKS_FILE" ]; then
+    echo "Found tasks checklist: $TASKS_FILE"
+    
+    # If status is Verified, ensure there are no uncompleted tasks [ ] in tasks.md
+    if [ "$STATUS" = "Verified" ]; then
+        UNCOMPLETED=$(grep -E '^\s*-\s*\[ \]' "$TASKS_FILE" | wc -l | xargs || true)
+        if [ "$UNCOMPLETED" -ne 0 ]; then
+            echo "ERROR: Spec status is 'Verified' but tasks.md contains $UNCOMPLETED uncompleted tasks [ ]." >&2
+            echo "Please complete all tasks or revert status before committing." >&2
+            exit 1
+        fi
+    fi
+fi
+
+# If status is Verified, ensure evidence is archived
+if [ "$STATUS" = "Verified" ]; then
+    EVIDENCE_DIR=".specify/evidence"
+    if [ ! -d "$EVIDENCE_DIR" ] || [ -z "$(ls -A "$EVIDENCE_DIR" 2>/dev/null)" ]; then
+        echo "ERROR: Spec status is 'Verified' but no verification evidence found in $EVIDENCE_DIR." >&2
+        echo "Please run verification and archive evidence before committing." >&2
+        exit 1
+    fi
+    echo "Verification evidence confirmed."
+fi
+
+echo ">>> SDD check passed successfully!"
+exit 0

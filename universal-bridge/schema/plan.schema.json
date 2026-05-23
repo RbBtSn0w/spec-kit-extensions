@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SDDPlan",
+  "description": "JSON Schema for Spec Kit Subagent-Driven Development (SDD) Implementation Plans",
+  "type": "object",
+  "required": ["goal", "tech_stack", "proposed_changes", "verification_plan"],
+  "properties": {
+    "goal": {
+      "type": "string",
+      "description": "Description of the problem and the goals of the plan"
+    },
+    "tech_stack": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of technologies, tools, and languages used"
+    },
+    "proposed_changes": {
+      "type": "array",
+      "description": "Group of files and directories to modify, create, or delete",
+      "items": {
+        "type": "object",
+        "required": ["component", "files"],
+        "properties": {
+          "component": {
+            "type": "string",
+            "description": "Component or package name"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["action", "path"],
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": ["MODIFY", "NEW", "DELETE"]
+                },
+                "path": {
+                  "type": "string",
+                  "description": "Absolute or relative path to the file"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "verification_plan": {
+      "type": "object",
+      "required": ["automated_tests", "manual_verification"],
+      "properties": {
+        "automated_tests": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of commands for running automated tests"
+        },
+        "manual_verification": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Steps for manual verification"
+        }
+      }
+    }
+  }
+}

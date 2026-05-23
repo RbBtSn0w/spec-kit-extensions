@@ -24,6 +24,10 @@ hooks:
     command: "speckit.memorylint.run"
     optional: true
     prompt: "Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infrastructure guidelines in AGENTS.md?"
+  after_constitution:
+    command: "speckit.memorylint.run"
+    optional: true
+    prompt: "Run MemoryLint to perform semantic auditing and redundancy pruning on the generated constitution?"
   before_plan:
     command: "speckit.memorylint.load-agents"
     optional: false

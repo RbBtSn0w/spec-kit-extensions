@@ -117,7 +117,31 @@ Status sync rules:
 
 ---
 
-## Step 6 — Completion Report
+## Step 6 — Archiving Evidence
+
+Archive the verification results to `.specify/evidence/` by executing the archiving script:
+
+On Unix-like systems (sh):
+```bash
+ARCHIVE_SCRIPT="$(dirname "{SCRIPT}")/archive-evidence.sh"
+bash "$ARCHIVE_SCRIPT" --feature-name "[feature-name]" --build-status "[build-status]" --test-output "[test-output]" --checklist "[checklist]"
+```
+
+On Windows (PowerShell):
+```powershell
+$ArchiveScript = Join-Path (Split-Path "{SCRIPT}") "archive-evidence.ps1"
+powershell -ExecutionPolicy Bypass -File "$ArchiveScript" -FeatureName "[feature-name]" -BuildStatus "[build-status]" -TestOutput "[test-output]" -Checklist "[checklist]"
+```
+
+Replace the arguments with:
+- `[feature-name]`: The directory name or display name of the active feature (resolved from Step 2).
+- `[build-status]`: "PASS", "FAIL", or "N/A" depending on the build / lint / type-check status.
+- `[test-output]`: The full stdout/stderr of the test suite (from Step 3).
+- `[checklist]`: The completed markdown Spec Verification Checklist (from Step 4).
+
+---
+
+## Step 7 — Completion Report
 
 When all checks pass, output:
 

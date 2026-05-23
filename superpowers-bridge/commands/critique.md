@@ -114,23 +114,22 @@ git diff HEAD [files]
 
 ---
 
-### Phase 2 — Spec Compliance Review
+### Phase 2 — Spec Compliance & Requirement Mapping Review
 
-For each requirement in `spec.md`:
+Evaluate every code change in the git diff against the requirements and plan:
 
-1. Find the corresponding task(s) in `tasks.md`
-2. Find the corresponding code change(s) in the diff
-3. Evaluate: does the implementation match the requirement?
+1. **Requirement Mapping**: Every modified or added line of code must be directly linked to a specific requirement in `spec.md` or a technical task in `tasks.md`. Identify any code changes that do not map to any requirement.
+2. **Side-Effect Analysis**: Inspect the diff for unintended changes, "hidden" side effects, or undocumented additions (e.g. debugging code left behind, commented-out logic, accidental modification of unrelated files, or implementation of unrequested features).
+3. **Spec Alignment Check**: For each requirement in `spec.md`, evaluate whether the implementation matches it fully and without drift.
 
 Compliance table:
 
 ```markdown
-| Req  | Requirement                        | Task | Status      | Notes |
-|------|------------------------------------|------|-------------|-------|
-| R01  | [description]                      | T3   | ✓ Met       |       |
-| R02  | [description]                      | T4   | ✗ Not met   | [why] |
-| R03  | [description]                      | —    | ✗ Missing   | No task, no code |
-| R04  | [description]                      | T6   | ~ Partial   | [what's missing] |
+| Req/File | Requirement / Code Change Description | Task | Status      | Notes / Mapping / Side-Effects |
+|----------|---------------------------------------|------|-------------|--------------------------------|
+| R01      | [description]                         | T3   | ✓ Met       | Mapped to [file]:[line]        |
+| R02      | [description]                         | T4   | ✗ Not met   | [why]                          |
+| [file]   | [unmapped code change or side-effect] | —    | ✗ Drift     | Unintended side-effect: [why]   |
 ```
 
 ---
@@ -217,17 +216,14 @@ correct work is noise.
 ### Required Action
 ```
 
-If Critical issues exist:
+If Critical or Important issues exist:
+1. Output the verdict:
 ```
-🔴 BLOCKED: Fix all Critical issues above before continuing.
+🔴 BLOCKED: Fix all Critical/Important issues above before continuing.
 Do not write new code or start new tasks until resolved.
 ```
-
-If no Critical issues, Important issues exist:
-```
-🟠 FIX BEFORE MERGE: Address Important issues before creating PR.
-You may continue to the next task but must return to fix these.
-```
+2. **Auto-Plan for Fixes**: Automatically write a fix plan to a new temporary file `.specify/plan-fix.md` (or append to the existing `plan.md` under a dedicated "Critique Fixes" section) detailing the exact tasks and files that must be modified to resolve the identified drifts.
+3. Present this generated fix plan to the user in your output.
 
 If only Minor issues:
 ```

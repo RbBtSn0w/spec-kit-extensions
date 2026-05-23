@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SDDEvidence",
+  "description": "JSON Schema for Spec Kit Subagent-Driven Development (SDD) Verification Evidence",
+  "type": "object",
+  "required": ["timestamp", "feature_name", "commit_hash", "build_status", "checklist", "test_output"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of the verification run"
+    },
+    "feature_name": {
+      "type": "string",
+      "description": "The name of the feature being verified"
+    },
+    "commit_hash": {
+      "type": "string",
+      "description": "The git commit hash at verification time"
+    },
+    "build_status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "N/A"],
+      "description": "The build/lint status"
+    },
+    "checklist": {
+      "type": "array",
+      "description": "Checklist of requirements mapped to tests",
+      "items": {
+        "type": "object",
+        "required": ["requirement_id", "status", "verified_by"],
+        "properties": {
+          "requirement_id": {
+            "type": "string",
+            "pattern": "^R[0-9]+$"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["MET", "NOT_MET", "PARTIAL"]
+          },
+          "verified_by": {
+            "type": "string",
+            "description": "The test file/case that verifies the requirement (e.g. test_file.py::test_name)"
+          }
+        }
+      }
+    },
+    "test_output": {
+      "type": "string",
+      "description": "Raw output from the test suite execution"
+    }
+  }
+}

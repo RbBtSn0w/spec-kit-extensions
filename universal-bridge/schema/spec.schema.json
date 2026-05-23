@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SDDSpecification",
+  "description": "JSON Schema for Spec Kit Subagent-Driven Development (SDD) Specifications",
+  "type": "object",
+  "required": ["title", "status", "version", "requirements"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the feature or spec"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Tasked", "Implementing", "Verified", "In Review", "Abandoned"],
+      "description": "Current lifecycle status of the specification"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version of the specification"
+    },
+    "requirements": {
+      "type": "array",
+      "description": "List of requirements that define the feature",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "priority"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^R[0-9]+$",
+            "description": "Unique identifier of the requirement (e.g., R01, R02)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of what is required"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2", "P3"],
+            "description": "Implementation priority"
+          }
+        }
+      }
+    }
+  }
+}
