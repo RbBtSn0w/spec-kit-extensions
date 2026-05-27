@@ -57,14 +57,14 @@ require(
 )
 
 # Each command file: reference must point to an existing file
-for cmd_file in re.findall(r'file:\s*"(commands/[^"]+)"', extension):
+for cmd_file in re.findall(r'file:\s*["\'\s]?(commands/[^"\'\s]+)["\'\s]?', extension):
     require(
         (root / "memorylint" / cmd_file).exists(),
         f"extension.yml references {cmd_file} but the file does not exist",
     )
 
 # Description length
-desc_match = re.search(r'^\s{2}description:\s*"([^"]+)"$', extension, re.MULTILINE)
+desc_match = re.search(r'^\s*description:\s*["\']?([^"\']+)["\']?$', extension, re.MULTILINE)
 require(desc_match is not None, "extension.yml must have an extension description")
 require(
     len(desc_match.group(1)) <= 200,
@@ -149,6 +149,7 @@ require(
 require("Instruction Map" in audit, "audit.md must include Instruction Map section")
 require("Findings" in audit, "audit.md must include Findings section")
 require("Metrics" in audit, "audit.md must include Metrics section")
+require("Source Metadata" in audit, "audit.md must include Source Metadata section")
 
 # ── apply.md ─────────────────────────────────────────────────────────────────
 

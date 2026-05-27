@@ -122,7 +122,7 @@ For each drift instance, determine:
 
 # Step 5 — Report Generation
 
-Produce the Drift Report as Markdown with exactly these sections:
+Produce the Drift Report as Markdown with exactly these sections: `Instruction Map`, `Findings`, `Summary`, `Metrics`, and `Source Metadata`.
 
 ## MemoryLint Drift Report
 
@@ -181,6 +181,13 @@ Report these trust metrics for the audit run:
 | Medium-confidence findings | |
 | Low-confidence findings | |
 | Files that would be modified by suggested actions | |
+
+### Source Metadata
+
+A table listing the content hashes of the scanned source files to enable staleness checks during apply:
+
+| File Path | Content Hash (SHA-256) |
+|-----------|------------------------|
 
 ---
 

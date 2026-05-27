@@ -20,7 +20,6 @@ PYTHON_BIN=$(find_python3)
 
 "$PYTHON_BIN" - "$FIXTURES_DIR" <<'PY'
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -33,7 +32,7 @@ VALID_CONFIDENCES = {"high", "medium", "low"}
 fixture_count = 0
 
 for fixture in sorted(fixtures_dir.iterdir()):
-    if not fixture.is_dir():
+    if not fixture.is_dir() or fixture.name.startswith('.') or fixture.name.startswith('_'):
         continue
 
     fixture_count += 1
@@ -56,9 +55,12 @@ for fixture in sorted(fixtures_dir.iterdir()):
         if not isinstance(entry, dict):
             raise SystemExit(f"FAIL: {prefix} must be a JSON object")
 
-        for field in ("drift_type", "severity", "confidence"):
+        for field in ("drift_type", "severity", "confidence", "description"):
             if field not in entry:
                 raise SystemExit(f"FAIL: {prefix} is missing required field '{field}'")
+
+        if not isinstance(entry["description"], str) or not entry["description"].strip():
+            raise SystemExit(f"FAIL: {prefix} description must be a non-empty string")
 
         dt = entry["drift_type"]
         if dt not in VALID_DRIFT_TYPES:

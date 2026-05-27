@@ -41,9 +41,10 @@ stop and report the failure without making changes.
    instruct the user to run `speckit.memorylint.audit` first.
 
 2. **Staleness check**: For every instruction file that would be modified,
-   verify it has not changed since the report was generated. Compare file
-   modification timestamps or content hashes. If a file has been modified,
-   report the staleness and refuse to apply changes to that file.
+   verify it has not changed since the report was generated. Compare the file's
+   current SHA-256 hash with the content hash recorded in the report's **Source
+   Metadata** section. If the hashes do not match, report the staleness and
+   refuse to apply changes to that file.
 
 3. **Change preview**: List the exact set of changes that will be made:
    - For each file: the finding ID, the lines affected, and the change
@@ -91,12 +92,10 @@ After applying changes, run every check below. If **any** check fails, revert
 
 - Verify `AGENTS.md` is valid Markdown (no broken headings, no orphaned list
   items).
-- Verify all critical sections still exist. At minimum, check for:
-  - Repository Shape
-  - Validation Commands
-  - Git and Review Hygiene
-  - Release Workflow Rules
-  - Changelog and Versioning Policy
+- Verify all critical sections still exist. At minimum, check for sections covering:
+  - Build / Validation Commands
+  - Git Workflow / Hygiene
+  - Release Process / Workflow Rules
 
 ### 2. Constitution Integrity
 
@@ -113,7 +112,9 @@ After applying changes, run every check below. If **any** check fails, revert
 
 ### 4. Repository Validation Commands
 
-- Run the validation commands listed in `AGENTS.md`:
+- Run the validation commands listed in `AGENTS.md` (such as test, build, or
+  lint commands). If no specific commands are listed, run a default safety
+  check:
   - `git diff --check`
 - Report the results.
 
