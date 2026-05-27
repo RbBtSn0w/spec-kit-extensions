@@ -21,7 +21,8 @@ only through the separate `speckit.memorylint.apply` command.
 4. **Drift Detection** — detect boundary, reality, conflict, and redundancy
    drift across all sources.
 5. **Report Generation** — produce a structured Drift Report with an
-   Instruction Map, itemised Findings, Summary, and Metrics section.
+   Instruction Map, itemised Findings, Summary, Metrics, and Source Metadata
+   section, plus a machine-readable `memorylint-report.json` block.
 
 ---
 
@@ -122,7 +123,7 @@ For each drift instance, determine:
 
 # Step 5 — Report Generation
 
-Produce the Drift Report as Markdown with exactly these sections: `Instruction Map`, `Findings`, `Summary`, `Metrics`, and `Source Metadata`.
+Produce the Drift Report as Markdown with exactly these sections: `Instruction Map`, `Findings`, `Summary`, `Metrics`, `Source Metadata`, and `Machine-Readable Report`.
 
 ## MemoryLint Drift Report
 
@@ -188,6 +189,57 @@ A table listing the content hashes of the scanned source files to enable stalene
 
 | File Path | Content Hash (SHA-256) |
 |-----------|------------------------|
+
+### Machine-Readable Report
+
+Also include the same audit result as a fenced JSON artifact named
+`memorylint-report.json`. This block is the authoritative input for
+`speckit.memorylint.apply`; the Markdown report is for human review.
+
+```memorylint-report.json
+{
+  "schema_version": "1.0",
+  "workspace_root": "<workspace path>",
+  "source_metadata": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "<sha256>"
+    }
+  ],
+  "instruction_map": [
+    {
+      "rule_id": "R-001",
+      "source": "AGENTS.md",
+      "line_range": "10-12",
+      "summary": "<rule summary>",
+      "category": "infrastructure",
+      "status": "ok"
+    }
+  ],
+  "findings": [
+    {
+      "id": "ML-001",
+      "drift_type": "boundary",
+      "severity": "warning",
+      "confidence": "high",
+      "source": "AGENTS.md:15-19",
+      "evidence": "<direct file or command evidence>",
+      "recommended_destination": ".specify/memory/constitution.md",
+      "suggested_action": "move",
+      "detail": "<finding detail>"
+    }
+  ],
+  "metrics": {
+    "total_instruction_sources_scanned": 0,
+    "total_rules_catalogued": 0,
+    "total_findings": 0,
+    "high_confidence_findings": 0,
+    "medium_confidence_findings": 0,
+    "low_confidence_findings": 0,
+    "files_that_would_be_modified": []
+  }
+}
+```
 
 ---
 

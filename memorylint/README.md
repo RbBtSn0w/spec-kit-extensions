@@ -42,6 +42,7 @@ MemoryLint follows a strict pipeline that separates audit from apply:
            ▼
 ┌─────────────────────┐
 │ Drift Report         │  Structured, reviewable report (read-only)
+│                     │  Markdown + memorylint-report.json
 └──────────┬──────────┘
            ▼
 ┌─────────────────────┐
@@ -90,6 +91,18 @@ After applying, MemoryLint validates:
 
 If any validation fails, **all changes are automatically reverted**.
 
+## Report Contract
+
+Every audit produces two synchronized outputs:
+
+- A human-readable Markdown Drift Report for review.
+- A fenced `memorylint-report.json` artifact that tools can parse.
+
+The JSON artifact is the authoritative input for `speckit.memorylint.apply`.
+It includes `schema_version`, `source_metadata`, `instruction_map`, `findings`,
+and `metrics`. `source_metadata` records SHA-256 hashes for scanned files so the
+apply gate can reject stale reports before changing anything.
+
 ## Rule Classification
 
 Every rule is classified into one of eight categories:
@@ -132,6 +145,15 @@ MemoryLint includes a regression corpus of nine fixture repos under `tests/fixtu
 | `monorepo-nested` | Nested instruction file support |
 | `multi-source` | Multi-tool instruction scanning |
 | `post-apply-breakage` | Apply safety validation |
+
+The fixture corpus is executable. `memorylint/scripts/scan_fixtures.py --check`
+generates deterministic findings for every fixture and compares them with each
+fixture's `expected-findings.json`.
+
+## Design
+
+See [DESIGN.md](DESIGN.md) for the product boundary, trust model, audit/apply
+pipeline, machine-readable report contract, and release criteria.
 
 ## Installation
 

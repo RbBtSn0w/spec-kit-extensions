@@ -55,12 +55,22 @@ for fixture in sorted(fixtures_dir.iterdir()):
         if not isinstance(entry, dict):
             raise SystemExit(f"FAIL: {prefix} must be a JSON object")
 
-        for field in ("drift_type", "severity", "confidence", "description"):
+        for field in (
+            "drift_type",
+            "severity",
+            "confidence",
+            "description",
+            "source",
+            "evidence",
+            "recommended_destination",
+            "suggested_action",
+        ):
             if field not in entry:
                 raise SystemExit(f"FAIL: {prefix} is missing required field '{field}'")
 
-        if not isinstance(entry["description"], str) or not entry["description"].strip():
-            raise SystemExit(f"FAIL: {prefix} description must be a non-empty string")
+        for field in ("description", "source", "evidence", "recommended_destination", "suggested_action"):
+            if not isinstance(entry[field], str) or not entry[field].strip():
+                raise SystemExit(f"FAIL: {prefix} {field} must be a non-empty string")
 
         dt = entry["drift_type"]
         if dt not in VALID_DRIFT_TYPES:

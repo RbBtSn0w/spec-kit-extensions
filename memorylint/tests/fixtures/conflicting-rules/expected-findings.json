@@ -3,6 +3,10 @@
     "drift_type": "conflict",
     "severity": "critical",
     "confidence": "high",
-    "description": "AGENTS.md mandates Conventional Commits while constitution.md mandates a custom [JIRA-ID] format — these are mutually exclusive commit message policies"
+    "description": "AGENTS.md mandates Conventional Commits while constitution.md mandates a custom [JIRA-ID] format — these are mutually exclusive commit message policies",
+    "source": "AGENTS.md + .specify/memory/constitution.md",
+    "evidence": "AGENTS.md requires Conventional Commits while constitution.md forbids feat:/fix: prefixes.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "rewrite"
   }
 ]

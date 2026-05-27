@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trust metrics section in audit report output.
 - Regression test suite (`test-memorylint-regressions.sh`).
 - Fixture validation suite (`test-fixture-validation.sh`).
+- Deterministic fixture scanner (`memorylint/scripts/scan_fixtures.py`) that
+  generates findings for the regression corpus and compares them with
+  `expected-findings.json`.
+- Machine-readable `memorylint-report.json` audit artifact contract for
+  apply-safe parsing and staleness checks.
 - Nine regression corpus fixtures covering clean, bloated, stale, conflicting,
   redundant, missing-constitution, monorepo, multi-source, and post-apply
   breakage scenarios.

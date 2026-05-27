@@ -27,7 +27,11 @@ extension = (root / "memorylint/extension.yml").read_text(encoding="utf-8")
 audit = (root / "memorylint/commands/audit.md").read_text(encoding="utf-8")
 apply_cmd = (root / "memorylint/commands/apply.md").read_text(encoding="utf-8")
 load_agents = (root / "memorylint/commands/load-agents.md").read_text(encoding="utf-8")
+design_path = root / "memorylint/DESIGN.md"
+design = design_path.read_text(encoding="utf-8") if design_path.exists() else ""
 check_boundaries_path = root / "memorylint/commands/check-boundaries.md"
+fixture_scanner_path = root / "memorylint/scripts/scan_fixtures.py"
+fixture_scanner_test_path = root / "memorylint/tests/test-fixture-scanner.sh"
 
 
 def require(condition: bool, message: str) -> None:
@@ -150,6 +154,14 @@ require("Instruction Map" in audit, "audit.md must include Instruction Map secti
 require("Findings" in audit, "audit.md must include Findings section")
 require("Metrics" in audit, "audit.md must include Metrics section")
 require("Source Metadata" in audit, "audit.md must include Source Metadata section")
+require(
+    "memorylint-report.json" in audit,
+    "audit.md must include machine-readable memorylint-report.json output",
+)
+require(
+    "schema_version" in audit and "source_metadata" in audit,
+    "audit.md must describe the machine-readable report schema",
+)
 
 # ── apply.md ─────────────────────────────────────────────────────────────────
 
@@ -174,6 +186,10 @@ require("AGENTS.md" in apply_cmd and "Integrity" in apply_cmd, "apply.md must in
 require(
     "Hook Consistency" in apply_cmd or "hook" in apply_cmd.lower(),
     "apply.md must include hook consistency check",
+)
+require(
+    "memorylint-report.json" in apply_cmd,
+    "apply.md must consume the machine-readable memorylint-report.json artifact",
 )
 
 # ── load-agents.md ───────────────────────────────────────────────────────────
@@ -203,6 +219,30 @@ require(
     not check_boundaries_path.exists(),
     "check-boundaries.md must NOT exist (old command was removed)",
 )
+
+# ── deterministic fixture scanner ───────────────────────────────────────────
+
+require(
+    fixture_scanner_path.exists(),
+    "memorylint/scripts/scan_fixtures.py must exist",
+)
+require(
+    fixture_scanner_test_path.exists(),
+    "memorylint/tests/test-fixture-scanner.sh must exist",
+)
+
+# ── design document ─────────────────────────────────────────────────────────
+
+require(design_path.exists(), "memorylint/DESIGN.md must exist")
+for phrase in [
+    "Product Boundary",
+    "Trust Model",
+    "Audit Pipeline",
+    "Apply Gate",
+    "Machine-Readable Report",
+    "Regression Corpus",
+]:
+    require(phrase in design, f"memorylint/DESIGN.md must include '{phrase}'")
 
 print("memorylint regression checks passed")
 PY

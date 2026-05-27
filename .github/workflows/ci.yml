@@ -28,6 +28,7 @@ jobs:
           bash tests/verify-feasibility.sh
           bash memorylint/tests/test-memorylint-regressions.sh
           bash memorylint/tests/test-fixture-validation.sh
+          bash memorylint/tests/test-fixture-scanner.sh
 
   powershell-bridge-tests:
     name: powershell-bridge-tests

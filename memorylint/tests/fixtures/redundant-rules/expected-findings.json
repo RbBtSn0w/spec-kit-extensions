@@ -3,6 +3,10 @@
     "drift_type": "redundancy",
     "severity": "info",
     "confidence": "high",
-    "description": "Command naming convention rule appears in both AGENTS.md and constitution.md with near-identical wording"
+    "description": "Command naming convention rule appears in both AGENTS.md and constitution.md with near-identical wording",
+    "source": "AGENTS.md + .specify/memory/constitution.md",
+    "evidence": "Both files contain the same speckit command naming pattern.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "merge"
   }
 ]

@@ -11,7 +11,9 @@ explicit user confirmation or an explicit mode override.
 
 # Objective
 
-1. Parse the most recent MemoryLint Drift Report.
+1. Parse the most recent MemoryLint Drift Report. Prefer the fenced
+   `memorylint-report.json` artifact as the authoritative source; use the
+   Markdown report only for human-readable context.
 2. Determine the apply mode.
 3. Execute the appropriate fixes with pre-apply and post-apply validation.
 4. Revert all changes if any validation step fails.
@@ -37,14 +39,16 @@ Before modifying any file, perform these checks in order. If any check fails,
 stop and report the failure without making changes.
 
 1. **Report existence**: Verify that a MemoryLint Drift Report exists in the
-   current conversation context or was passed as an argument. If not found,
-   instruct the user to run `speckit.memorylint.audit` first.
+   current conversation context or was passed as an argument. The report must
+   include a fenced `memorylint-report.json` artifact with `schema_version:
+   "1.0"`, `source_metadata`, and `findings`. If not found, instruct the user
+   to run `speckit.memorylint.audit` first.
 
 2. **Staleness check**: For every instruction file that would be modified,
    verify it has not changed since the report was generated. Compare the file's
-   current SHA-256 hash with the content hash recorded in the report's **Source
-   Metadata** section. If the hashes do not match, report the staleness and
-   refuse to apply changes to that file.
+   current SHA-256 hash with the content hash recorded in
+   `memorylint-report.json` under `source_metadata`. If the hashes do not match,
+   report the staleness and refuse to apply changes to that file.
 
 3. **Change preview**: List the exact set of changes that will be made:
    - For each file: the finding ID, the lines affected, and the change

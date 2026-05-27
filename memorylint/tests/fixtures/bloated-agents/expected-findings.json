@@ -3,18 +3,30 @@
     "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Architecture rule 'Use MVC pattern' in AGENTS.md belongs in constitution.md"
+    "description": "Architecture rule 'Use MVC pattern' in AGENTS.md belongs in constitution.md",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md contains an architecture pattern rule outside the constitution.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
   },
   {
     "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Architecture rule 'State management via Redux' in AGENTS.md belongs in constitution.md"
+    "description": "Architecture rule 'State management via Redux' in AGENTS.md belongs in constitution.md",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md contains a state-management architecture rule outside the constitution.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
   },
   {
     "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Architecture rule 'API design must follow REST principles' in AGENTS.md belongs in constitution.md"
+    "description": "Architecture rule 'API design must follow REST principles' in AGENTS.md belongs in constitution.md",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md contains an API design rule outside the constitution.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
   }
 ]
