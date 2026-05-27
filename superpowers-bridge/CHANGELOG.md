@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stage integration.
 - Clarified the autonomous agent execution contract for required hooks,
   optional hooks, manual commands, and borrowed disciplines.
+- Reframed the open-source product positioning around evidence-first trust
+  gates for Spec Kit agent workflows, including ICP and first-success adoption
+  guidance.
 - Documented the Goal mode prompt pattern for opting into optional superb hooks
   while preserving the baseline required/optional policy.
 - Expanded bridge diagnostics and configuration templates for optional

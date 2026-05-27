@@ -8,7 +8,7 @@ The current wedge is trustable AI-agent completion: when an agent says an implem
 
 | Extension | Version | Description |
 |---|---|---|
-| [Superpowers Bridge](./superpowers-bridge) | 1.4.0 | Bridges selected installed quality-control skills into Spec Kit workflows and adds bridge-native utilities. |
+| [Superpowers Bridge](./superpowers-bridge) | 1.4.0 | Evidence-first trust gates for Spec Kit agent workflows: TDD, spec coverage, and verification evidence before completion. |
 | [MemoryLint](./memorylint) | 1.4.0 | Agent memory governance tool: Bidirectional audit and boundary management between AGENTS.md and the constitution. |
 
 ## Installation

@@ -4,7 +4,7 @@ extension:
   id: superb
   name: Superpowers Bridge
   version: 1.4.0
-  description: "Bridges superpowers quality-control skills into Spec Kit and adds native review utilities."
+  description: "Adds evidence-first trust gates to Spec Kit so agent implementations require TDD, spec coverage, and verification evidence."
   author: rbbtsn0w
   repository: https://github.com/RbBtSn0w/spec-kit-extensions
   license: MIT

@@ -1,8 +1,15 @@
 # Superpowers Bridge
 
-Bridges selected installed [obra/superpowers](https://github.com/obra/superpowers) quality-control skills into the Spec Kit workflow and adds bridge-native evidence and review gates.
+Evidence-first trust gates for [Spec Kit](https://github.com/github/spec-kit)
+agent workflows.
 
-The current product promise is narrow: when `/speckit.implement` claims a feature is complete, `/speckit.superb.verify` must require fresh verification evidence before the feature can be treated as `Verified`.
+Superpowers Bridge makes Spec Kit implementation claims verifiable: TDD before
+code, review against `spec.md` / `plan.md` / `tasks.md`, and fresh evidence
+before a feature can be treated as `Verified`.
+
+The current product promise is narrow: no agent should mark a Spec Kit feature
+complete without fresh verification evidence, mapped spec coverage, and a
+durable evidence archive.
 
 This extension combines:
 
@@ -13,6 +20,39 @@ This extension combines:
 It does **not** replace the Spec Kit main flow. The main flow remains:
 
 `/speckit.specify -> /speckit.clarify -> /speckit.plan -> /speckit.tasks -> /speckit.analyze | /speckit.checklist -> /speckit.implement`
+
+## Who This Is For
+
+Use this extension when:
+
+- You use Spec Kit as the source of truth for `spec.md`, `plan.md`, and
+  `tasks.md`.
+- You let an autonomous coding agent implement features and need proof that it
+  did not skip tests, requirements, or verification.
+- You want selected Superpowers development discipline without adopting the
+  entire Superpowers workflow as a second owner.
+
+It is not a general-purpose code-review bot, a replacement for Spec Kit, or a
+standalone Superpowers workflow runner.
+
+## Open Source Adoption Path
+
+The fastest way to validate the extension is one real feature, not a synthetic
+demo:
+
+1. Install the extension and the hard-required local Superpowers skills.
+2. Run `/speckit.superb.check` and confirm `test-driven-development` and
+   `verification-before-completion` are `READY`.
+3. Run one normal Spec Kit feature through `specify`, `plan`, `tasks`, and
+   `implement`.
+4. Let `/speckit.superb.tdd` run before implementation and
+   `/speckit.superb.verify` run after implementation.
+5. Treat the first success as real only when `.specify/evidence/` contains a
+   fresh archive with test output and a spec-coverage checklist.
+
+The extension is proving value when it blocks a false completion, exposes a
+missing requirement-to-task link, or leaves durable evidence that another
+reviewer can inspect later.
 
 ## Bridge Model
 

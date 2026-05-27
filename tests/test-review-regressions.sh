@@ -23,6 +23,7 @@ import sys
 import re
 
 root = Path(sys.argv[1])
+root_readme = (root / "README.md").read_text(encoding="utf-8")
 review_regressions = (root / "tests/test-review-regressions.sh").read_text(encoding="utf-8")
 ci = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
 release = (root / ".github/workflows/release-trigger.yml").read_text(encoding="utf-8")
@@ -77,6 +78,25 @@ optional_skills = config_requirement_skills("optional")
 require(
     "find_python3()" in review_regressions and '"$PYTHON_BIN" - "$ROOT_DIR"' in review_regressions,
     "test-review-regressions.sh must resolve a Python 3 interpreter before running its Python checks",
+)
+require(
+    "Evidence-first trust gates for Spec Kit agent workflows" in root_readme
+    and "TDD, spec coverage, and verification evidence before completion" in root_readme,
+    "root README must position Superpowers Bridge as evidence-first trust gates for agent workflows",
+)
+require(
+    "Evidence-first trust gates for [Spec Kit](https://github.com/github/spec-kit)" in readme
+    and "makes Spec Kit implementation claims verifiable" in readme
+    and "no agent should mark a Spec Kit feature" in readme
+    and "## Who This Is For" in readme
+    and "## Open Source Adoption Path" in readme
+    and "The extension is proving value when it blocks a false completion" in readme,
+    "Superpowers Bridge README must explain the open-source wedge, ICP, and first-success path",
+)
+require(
+    "description: \"Adds evidence-first trust gates to Spec Kit" in extension
+    and len(re.search(r'^\s{2}description: "([^"]+)"$', extension, re.MULTILINE).group(1)) <= 200,
+    "extension.yml description must use the evidence-first trust-gate positioning and stay within catalog limits",
 )
 require(
     "windows-latest" in ci and "pwsh" in ci,
