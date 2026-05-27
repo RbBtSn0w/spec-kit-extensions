@@ -95,9 +95,43 @@ with tempfile.TemporaryDirectory() as tmpdir:
             schema_version: "1.0"
             extension:
               id: superb
+              name: Superpowers Bridge
               version: 1.0.0
+            requires:
+              speckit_version: ">=0.4.3"
+            provides:
+              commands:
+                - name: speckit.superb.check
+                  file: commands/check.md
+              config: []
+            hooks:
+              after_tasks:
+                command: speckit.superb.check
             """
         ),
+        encoding="utf-8",
+    )
+    (root / "catalog.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "extensions": {
+                    "superb": {
+                        "name": "Superpowers Bridge",
+                        "id": "superb",
+                        "version": "1.0.0",
+                        "download_url": "https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.0.0/superpowers-bridge.zip",
+                        "provides": {
+                            "commands": 0,
+                            "hooks": 0,
+                        },
+                        "updated_at": "2026-04-01T00:00:00Z",
+                    }
+                },
+            },
+            indent=2,
+        )
+        + "\n",
         encoding="utf-8",
     )
     (extension_dir / "README.md").write_text(
@@ -157,6 +191,18 @@ with tempfile.TemporaryDirectory() as tmpdir:
         print("Release Trigger must not update unrelated extension release download links.", file=sys.stderr)
         sys.exit(1)
 
+    catalog = json.loads((root / "catalog.json").read_text(encoding="utf-8"))
+    catalog_entry = catalog["extensions"]["superb"]
+    if catalog_entry["version"] != "1.3.0":
+        print("Release Trigger must update catalog.json for the released extension.", file=sys.stderr)
+        sys.exit(1)
+    if catalog_entry["download_url"] != "https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.3.0/superpowers-bridge.zip":
+        print("Release Trigger must update catalog.json release download URLs for the released extension.", file=sys.stderr)
+        sys.exit(1)
+    if catalog_entry["provides"] != {"commands": 1, "hooks": 1}:
+        print("Release Trigger must refresh catalog.json provides counts from extension.yml.", file=sys.stderr)
+        sys.exit(1)
+
     payload_file = root / "release-payload.json"
     env.update(
         {
@@ -193,6 +239,10 @@ with tempfile.TemporaryDirectory() as tmpdir:
         sys.exit(1)
     if mutation_input["expectedHeadOid"] != env["EXPECTED_HEAD_OID"]:
         print("Release commit payload must preserve expectedHeadOid.", file=sys.stderr)
+        sys.exit(1)
+    payload_paths = {entry["path"] for entry in mutation_input["fileChanges"]["additions"]}
+    if "catalog.json" not in payload_paths:
+        print("Release commit payload must include catalog.json when it is updated.", file=sys.stderr)
         sys.exit(1)
 
 print("release workflow checks passed")

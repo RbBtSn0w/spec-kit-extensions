@@ -98,6 +98,7 @@ jobs:
 
           python3 - <<'PY'
           from pathlib import Path
+          import json
           import os
           import re
 
@@ -114,6 +115,7 @@ jobs:
           extension_file = root / "extension.yml"
           readme_file = root / "README.md"
           changelog_file = root / "CHANGELOG.md"
+          catalog_file = Path("catalog.json")
 
           if not extension_file.exists():
               raise SystemExit(f"Missing {extension_file}")
@@ -143,6 +145,95 @@ jobs:
           if not updated:
               raise SystemExit("Failed to update extension.version in extension.yml")
           extension_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+          def read_extension_field(field_name):
+              in_extension_block = False
+              block_indent = None
+              for line in lines:
+                  stripped = line.strip()
+                  indent = len(line) - len(line.lstrip(" "))
+                  if stripped == "extension:":
+                      in_extension_block = True
+                      block_indent = indent
+                      continue
+                  if in_extension_block:
+                      if stripped and not stripped.startswith("#") and indent <= block_indent:
+                          in_extension_block = False
+                          block_indent = None
+                      elif indent == block_indent + 2:
+                          match = re.match(rf"^\s*{re.escape(field_name)}:\s*(.*?)\s*$", line)
+                          if match:
+                              return match.group(1).strip().strip('"').strip("'")
+              return None
+
+          def count_command_entries():
+              count = 0
+              in_provides = False
+              in_commands = False
+              provides_indent = None
+              commands_indent = None
+              for line in lines:
+                  stripped = line.strip()
+                  indent = len(line) - len(line.lstrip(" "))
+                  if stripped == "provides:":
+                      in_provides = True
+                      in_commands = False
+                      provides_indent = indent
+                      commands_indent = None
+                      continue
+                  if in_provides and stripped and not stripped.startswith("#") and indent <= provides_indent:
+                      in_provides = False
+                      in_commands = False
+                      provides_indent = None
+                      commands_indent = None
+                  if in_provides and re.match(r"^\s*commands:\s*$", line):
+                      in_commands = True
+                      commands_indent = indent
+                      continue
+                  if in_commands:
+                      if stripped and not stripped.startswith("#") and indent <= commands_indent:
+                          in_commands = False
+                          commands_indent = None
+                      elif re.match(r"^\s*-\s+name:\s+", line):
+                          count += 1
+              return count
+
+          def count_hook_entries():
+              count = 0
+              in_hooks = False
+              hooks_indent = None
+              for line in lines:
+                  stripped = line.strip()
+                  indent = len(line) - len(line.lstrip(" "))
+                  if stripped == "hooks:":
+                      in_hooks = True
+                      hooks_indent = indent
+                      continue
+                  if in_hooks:
+                      if stripped and not stripped.startswith("#") and indent <= hooks_indent:
+                          break
+                      if indent == hooks_indent + 2 and re.match(r"^[a-zA-Z0-9_-]+:\s*$", stripped):
+                          count += 1
+              return count
+
+          # Update this repository's install-approved catalog when present.
+          if catalog_file.exists():
+              catalog_data = json.loads(catalog_file.read_text(encoding="utf-8"))
+              extensions = catalog_data.get("extensions")
+              if isinstance(extensions, dict):
+                  manifest_id = read_extension_field("id")
+                  if manifest_id and isinstance(extensions.get(manifest_id), dict):
+                      catalog_entry = extensions[manifest_id]
+                      catalog_entry["id"] = manifest_id
+                      catalog_entry["version"] = version
+                      catalog_entry["download_url"] = (
+                          f"{repo_base_url}/releases/download/{tag}/{extension_id}.zip"
+                      )
+                      catalog_entry.setdefault("provides", {})
+                      catalog_entry["provides"]["commands"] = count_command_entries()
+                      catalog_entry["provides"]["hooks"] = count_hook_entries()
+                      catalog_entry["updated_at"] = f"{today}T00:00:00Z"
+                      catalog_file.write_text(json.dumps(catalog_data, indent=2) + "\n", encoding="utf-8")
 
           # Update README release download links if present.
           if readme_file.exists():
@@ -225,6 +316,9 @@ jobs:
           if [[ -f "README.md" ]]; then
             release_files+=("README.md")
           fi
+          if [[ -f "catalog.json" ]]; then
+            release_files+=("catalog.json")
+          fi
 
           if git diff --quiet -- "${release_files[@]}"; then
             echo "Error: release preparation produced no changes" >&2
@@ -256,6 +350,9 @@ jobs:
           root_readme = Path("README.md")
           if root_readme.exists():
               release_files.append(root_readme)
+          catalog_file = Path("catalog.json")
+          if catalog_file.exists():
+              release_files.append(catalog_file)
 
           additions = []
           for path in release_files:

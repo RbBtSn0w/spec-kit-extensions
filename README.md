@@ -13,7 +13,29 @@ The current wedge is trustable AI-agent completion: when an agent says an implem
 
 ## Installation
 
-Install a single extension from a published release:
+Register this repository's catalog once so Spec Kit can install and update
+extensions from an install-approved source:
+
+```bash
+specify extension catalog add https://raw.githubusercontent.com/RbBtSn0w/spec-kit-extensions/main/catalog.json \
+  --name rbbtsn0w-spec-kit-extensions \
+  --priority 1 \
+  --install-allowed \
+  --description "RbBtSn0w Spec Kit Extensions"
+```
+
+Then install or update by the extension IDs declared in the catalog:
+
+```bash
+specify extension add superb
+specify extension update superb
+
+specify extension add memorylint
+specify extension update memorylint
+```
+
+For one-off installs without catalog-managed updates, install a single extension
+from a published release:
 
 ```bash
 specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.5.0/superpowers-bridge.zip

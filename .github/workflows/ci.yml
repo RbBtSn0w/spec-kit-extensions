@@ -22,6 +22,7 @@ jobs:
         run: |
           bash tests/test-review-regressions.sh
           bash tests/test-release-workflow.sh
+          bash tests/test-catalog.sh
           bash superpowers-bridge/tests/test-status-sync.sh
           bash superpowers-bridge/tests/test-archive-evidence.sh
           bash universal-bridge/tests/test-pre-commit.sh

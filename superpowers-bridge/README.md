@@ -246,9 +246,31 @@ The V2 redesign rationale is documented in
 
 ## Installation
 
-### Install from ZIP (Recommended)
+### Install from Catalog (Recommended)
 
-Install directly from the release asset:
+Register this repository's catalog once. The `--install-allowed` flag is
+required because Spec Kit's official community catalog is discovery-only and
+does not permit `extension update` for community entries.
+
+```bash
+specify extension catalog add https://raw.githubusercontent.com/RbBtSn0w/spec-kit-extensions/main/catalog.json \
+  --name rbbtsn0w-spec-kit-extensions \
+  --priority 1 \
+  --install-allowed \
+  --description "RbBtSn0w Spec Kit Extensions"
+```
+
+Install and update the bridge by its stable extension ID, `superb`:
+
+```bash
+specify extension add superb
+specify extension update superb
+```
+
+### Install from ZIP
+
+For one-off installs without catalog-managed updates, install directly from the
+published release asset:
 
 ```bash
 specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.5.0/superpowers-bridge.zip
