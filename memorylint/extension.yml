@@ -6,7 +6,7 @@ extension:
   version: 1.5.0
   description: "Evidence-driven instruction drift checker: audits agent memory files for boundary, reality, conflict, and redundancy drift."
 
-  author: "Spec-kit Community"
+  author: "rbbtsn0w"
 
 requires:
   speckit_version: ">=0.5.1"
