@@ -163,6 +163,33 @@ Also evaluate whether the task set is ready for a strict TDD gate:
 - Are tasks ordered so foundational setup does not force speculative production code before tests?
 - Are broad tasks split enough that one failing test can drive one meaningful increment?
 
+Apply these `writing-plans`-derived checks without generating or replacing a
+Spec Kit plan:
+
+### File Ownership Map
+
+Every implementation task should name the concrete file, module, contract, or
+test target it owns. Flag tasks that require an implementer to rediscover the
+intended file map from scratch.
+
+### Task Granularity
+
+Tasks should be bite-sized enough for one RED → GREEN → REFACTOR increment.
+Flag tasks that combine unrelated behaviors, setup, migration, and polish in a
+single checkbox.
+
+### RED/GREEN Target
+
+Every testable behavior should identify the failing test or observable check
+that proves RED before production code is written, and the command that proves
+GREEN after implementation.
+
+### Review Checkpoint Readiness
+
+The task set should make it clear where a reviewer can check spec compliance
+and code quality. Flag task groups that have no natural review checkpoint before
+large cross-cutting changes accumulate.
+
 ---
 
 ### Step 6 — Summary and Decision
@@ -189,7 +216,8 @@ If `C > 0` (gaps exist):
 
 Recommended action:
 1. Review each gap above
-2. Add missing tasks to tasks.md
+2. Recommend adding missing tasks to tasks.md through the Spec Kit task flow or
+   explicit user-approved task edits
 3. Re-run coverage review OR proceed with explicit acknowledgment of scope reduction
 ```
 

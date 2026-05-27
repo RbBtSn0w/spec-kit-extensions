@@ -100,6 +100,13 @@ happens:
 
 Either result breaks the contract of the Spec Kit flow.
 
+Later gap-closure work revised only the integration boundary, not the ownership
+rule: `brainstorming` can be used safely after `speckit.specify` when the
+active Spec Kit `spec.md` is treated as the user's explicit spec-location
+preference. In that shape, it refines the existing spec and does not create
+`docs/superpowers/specs/...`, replace `speckit.specify`, or invoke
+`writing-plans`.
+
 ### 2. Writing-plans conflicts with `plan` and `tasks`
 
 Superpowers `writing-plans` is not a small planning aid. It is a full plan
@@ -163,6 +170,11 @@ difference between:
 Its principles are useful, but its workflow role is too overlapping to be
 adopted directly.
 
+The bridge therefore represents `requesting-code-review` through
+`speckit.superb.critique` and `speckit.superb.respond`: `critique` can package
+spec, plan, task, diff, and verification context for an external or subagent
+review handoff, while `respond` handles the feedback reception discipline.
+
 ## What Can Be Borrowed Safely
 
 The bridge can safely adopt Superpowers skills when they operate as quality
@@ -170,6 +182,8 @@ discipline rather than as workflow ownership.
 
 These skills fit that rule:
 
+- `brainstorming`, only as optional post-specification refinement of the active
+  Spec Kit `spec.md`
 - `test-driven-development`
 - `verification-before-completion`
 - `systematic-debugging`
@@ -183,6 +197,9 @@ points.
 
 - `after_tasks`:
   bridge-native `review` checks coverage and TDD readiness
+- `after_specify`:
+  optional `brainstorm` refines the existing Spec Kit spec without creating a
+  second design document
 - `before_implement`:
   adapted `tdd` enforces test-first discipline
 - `after_implement`:
@@ -207,6 +224,9 @@ them.
 - map `spec.md` requirements to `tasks.md`
 - detect missing task coverage
 - assess whether the task set is ready for a strict TDD gate
+- borrow the useful `writing-plans` discipline around file ownership, task
+  granularity, RED/GREEN targets, and review checkpoints without generating a
+  second plan
 
 This is narrower than Spec Kit `analyze`, and more Spec-Kit-specific than any
 single Superpowers skill.
@@ -220,6 +240,15 @@ single Superpowers skill.
 - `tasks.md`
 
 It is not simply generic code review. It is a Spec Kit artifact alignment review.
+It also absorbs the useful handoff-packaging discipline from
+`requesting-code-review` without introducing a competing review command.
+
+### `debug`
+
+`debug` bridges systematic debugging directly and may use the
+`dispatching-parallel-agents` discipline only after evidence shows multiple
+independent failure domains. The bridge command remains the controller and must
+perform final verification after any parallel investigation results return.
 
 ### `check`
 
@@ -293,7 +322,8 @@ The result is a narrower but more coherent product.
 It is narrower because it does less:
 
 - it no longer pretends to bridge the whole Superpowers workflow
-- it no longer formalizes a pre-spec brainstorming stage
+- it no longer formalizes a pre-spec brainstorming stage; brainstorming is only
+  an optional post-spec refinement gate
 - it no longer implies a second planning or execution system
 
 It is more coherent because it does one thing well:

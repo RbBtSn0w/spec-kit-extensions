@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- Added optional `/speckit.superb.brainstorm` after-specify refinement hook for
+  applying installed Superpowers `brainstorming` discipline to the active Spec
+  Kit `spec.md`.
+
+### Changed
+
+- Clarified the Superpowers gap map: `requesting-code-review` is represented by
+  `critique`/`respond`, `dispatching-parallel-agents` informs `debug`, and
+  `writing-plans` informs task-quality checks in `review`.
+- Added a Superpowers-to-Superpowers Bridge mapping matrix documenting direct
+  bridges, borrowed disciplines, non-exposed workflow skills, and Spec Kit
+  stage integration.
+- Clarified the autonomous agent execution contract for required hooks,
+  optional hooks, manual commands, and borrowed disciplines.
+- Documented the Goal mode prompt pattern for opting into optional superb hooks
+  while preserving the baseline required/optional policy.
+- Expanded bridge diagnostics and configuration templates for optional
+  Superpowers discipline skills without changing hard requirements.
 
 ## [1.4.0] - 2026-05-24
 ### Added

@@ -56,12 +56,17 @@ not ready and the bridge is not fully operational.
 
 ### Optional Skills
 
+- `brainstorming`
 - `systematic-debugging`
 - `receiving-code-review`
 - `finishing-a-development-branch`
+- `dispatching-parallel-agents`
+- `requesting-code-review`
+- `writing-plans`
 
 Optional skills do not block the Spec Kit main flow, but their corresponding
-bridge commands should be reported as unavailable until installed.
+bridge commands or discipline enhancements should be reported as unavailable
+until installed.
 
 ---
 
@@ -82,15 +87,20 @@ Produce a compact diagnostic report:
 |-------|----------|--------|------|--------|
 | test-driven-development | Hard | workspace | ./.agents/skills/test-driven-development/SKILL.md | READY |
 | verification-before-completion | Hard | global | ~/.agents/skills/verification-before-completion/SKILL.md | READY |
+| brainstorming | Optional | workspace | ./.agents/skills/brainstorming/SKILL.md | READY |
 | systematic-debugging | Optional | — | — | MISSING |
+| dispatching-parallel-agents | Optional discipline | — | — | MISSING |
+| requesting-code-review | Optional discipline | global | ~/.agents/skills/requesting-code-review/SKILL.md | READY |
+| writing-plans | Optional discipline | global | ~/.agents/skills/writing-plans/SKILL.md | READY |
 
 ## Hook Readiness
 
-| Hook | Command | Status | Reason |
-|------|---------|--------|--------|
-| before_implement | /speckit.superb.tdd | READY | Hard dependency installed |
-| after_implement | /speckit.superb.verify | READY | Hard dependency installed |
-| after_tasks | /speckit.superb.review | READY | Bridge-native command |
+| Hook | Command | Requirement | Status | Reason |
+|------|---------|-------------|--------|--------|
+| after_specify | /speckit.superb.brainstorm | Optional | READY | Optional brainstorming skill installed |
+| after_tasks | /speckit.superb.review | Optional | READY | Bridge-native command |
+| before_implement | /speckit.superb.tdd | Required | READY | Hard dependency installed |
+| after_implement | /speckit.superb.verify | Required | READY | Hard dependency installed |
 
 ## Standalone Commands
 
@@ -100,6 +110,15 @@ Produce a compact diagnostic report:
 | /speckit.superb.respond | READY | receiving-code-review installed |
 | /speckit.superb.finish | UNAVAILABLE | finishing-a-development-branch missing |
 | /speckit.superb.critique | READY | Bridge-native command |
+| /speckit.superb.brainstorm | READY | brainstorming installed |
+
+## Discipline Enhancements
+
+| Discipline | Used By | Status | Reason |
+|------------|---------|--------|--------|
+| dispatching-parallel-agents | /speckit.superb.debug | UNAVAILABLE | optional skill missing |
+| requesting-code-review | /speckit.superb.critique | READY | context packaging discipline available |
+| writing-plans | /speckit.superb.review | READY | task quality discipline available |
 
 ## Verdict
 

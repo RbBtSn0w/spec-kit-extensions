@@ -26,6 +26,13 @@ provides:
         superpowers skills are installed in workspace or global skill roots and
         reports which hooks are ready to run.
 
+    - name: speckit.superb.brainstorm
+      file: commands/brainstorm.md
+      description: >
+        Optional after-specify refinement gate. Bridges an installed
+        superpowers brainstorming skill into the active Spec Kit spec.md without
+        creating a second design document or replacing speckit.specify.
+
     - name: speckit.superb.tdd
       file: commands/tdd.md
       description: >
@@ -87,6 +94,15 @@ provides:
       required: false
 
 hooks:
+  after_specify:
+    command: speckit.superb.brainstorm
+    optional: true
+    prompt: "Refine the new spec.md with Superpowers brainstorming before clarification or planning?"
+    description: >
+      Optional spec refinement gate. Uses an installed superpowers
+      brainstorming skill to strengthen the active Spec Kit spec.md while
+      preserving Spec Kit ownership of specification creation.
+
   before_implement:
     command: speckit.superb.tdd
     optional: false

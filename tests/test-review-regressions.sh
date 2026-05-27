@@ -20,6 +20,7 @@ PYTHON_BIN=$(find_python3)
 "$PYTHON_BIN" - "$ROOT_DIR" <<'PY'
 from pathlib import Path
 import sys
+import re
 
 root = Path(sys.argv[1])
 review_regressions = (root / "tests/test-review-regressions.sh").read_text(encoding="utf-8")
@@ -28,11 +29,49 @@ release = (root / ".github/workflows/release-trigger.yml").read_text(encoding="u
 critique = (root / "superpowers-bridge/commands/critique.md").read_text(encoding="utf-8")
 ps_test = (root / "superpowers-bridge/tests/test-status-sync.ps1").read_text(encoding="utf-8")
 verify = (root / "superpowers-bridge/commands/verify.md").read_text(encoding="utf-8")
+extension = (root / "superpowers-bridge/extension.yml").read_text(encoding="utf-8")
+readme = (root / "superpowers-bridge/README.md").read_text(encoding="utf-8")
+debug = (root / "superpowers-bridge/commands/debug.md").read_text(encoding="utf-8")
+review = (root / "superpowers-bridge/commands/review.md").read_text(encoding="utf-8")
+check = (root / "superpowers-bridge/commands/check.md").read_text(encoding="utf-8")
+config = (root / "superpowers-bridge/superb-config.template.yml").read_text(encoding="utf-8")
+respond = (root / "superpowers-bridge/commands/respond.md").read_text(encoding="utf-8")
+brainstorm_path = root / "superpowers-bridge/commands/brainstorm.md"
+brainstorm = brainstorm_path.read_text(encoding="utf-8") if brainstorm_path.exists() else ""
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise SystemExit(message)
+
+
+def require_hook_optional(hook: str, expected: str) -> None:
+    match = re.search(rf"^\s{{2}}{hook}:\n(?P<body>(?:^\s{{4}}.+\n)+)", extension, re.MULTILINE)
+    require(match is not None, f"extension.yml must declare hooks.{hook}")
+    require(
+        f"optional: {expected}" in match.group("body"),
+        f"hooks.{hook} must have optional: {expected}",
+    )
+
+
+def config_requirement_skills(kind: str):
+    requirements = re.search(
+        r"^requirements:\n(?P<body>(?:^\s{2}.+\n|^\s{4}.+\n)+)",
+        config,
+        re.MULTILINE,
+    )
+    require(requirements is not None, "superb-config.template.yml must declare requirements")
+    match = re.search(
+        rf"^\s{{2}}{kind}:\n(?P<body>(?:^\s{{4}}- .+\n)+)",
+        requirements.group("body"),
+        re.MULTILINE,
+    )
+    require(match is not None, f"superb-config.template.yml must declare requirements.{kind}")
+    return [line.strip()[2:] for line in match.group("body").splitlines()]
+
+
+hard_skills = config_requirement_skills("hard")
+optional_skills = config_requirement_skills("optional")
 
 
 require(
@@ -92,6 +131,150 @@ require(
 require(
     "#### 🟠 High" not in critique and "#### 🟡 Medium" not in critique,
     "critique.md must not emit High/Medium severity buckets",
+)
+require(
+    brainstorm_path.exists() and "$ARGUMENTS" in brainstorm,
+    "brainstorm.md must exist and include the $ARGUMENTS user context block",
+)
+require(
+    "name: speckit.superb.brainstorm" in extension
+    and "after_specify:" in extension
+    and "command: speckit.superb.brainstorm" in extension,
+    "extension.yml must declare speckit.superb.brainstorm and wire it to hooks.after_specify",
+)
+require_hook_optional("after_specify", "true")
+require_hook_optional("after_tasks", "true")
+require_hook_optional("before_implement", "false")
+require_hook_optional("after_implement", "false")
+require(
+    "## Hook Requirement Baseline" in readme
+    and "| `after_specify` | `/speckit.superb.brainstorm` | Optional |" in readme
+    and "| `after_tasks` | `/speckit.superb.review` | Optional |" in readme
+    and "| `before_implement` | `/speckit.superb.tdd` | Required |" in readme
+    and "| `after_implement` | `/speckit.superb.verify` | Required |" in readme,
+    "README must document the baseline required/optional hook policy",
+)
+require(
+    "## Goal Mode Usage" in readme
+    and "Treat optional superb hooks as accepted for this goal" in readme
+    and "run `/speckit.superb.brainstorm` after `/speckit.specify`" in readme
+    and "run `/speckit.superb.review` after `/speckit.tasks`" in readme,
+    "README must include a Goal mode usage prompt that opts into optional superb hooks",
+)
+require(
+    "hook_policy:" in config
+    and "required:" in config
+    and "before_implement" in config
+    and "after_implement" in config
+    and "optional:" in config
+    and "after_specify" in config
+    and "after_tasks" in config,
+    "superb-config.template.yml must document the baseline hook policy",
+)
+require(
+    "| after_specify | /speckit.superb.brainstorm | Optional |" in check
+    and "| after_tasks | /speckit.superb.review | Optional |" in check
+    and "| before_implement | /speckit.superb.tdd | Required |" in check
+    and "| after_implement | /speckit.superb.verify | Required |" in check,
+    "check.md must report baseline hook policy consistently",
+)
+require(
+    "brainstorming" in check
+    and "brainstorming" in extension
+    and "brainstorming" in optional_skills
+    and "brainstorming" not in hard_skills
+    and "test-driven-development" in hard_skills
+    and "verification-before-completion" in hard_skills,
+    "brainstorming must be treated as optional bridge capability, not a hard requirement",
+)
+require(
+    "not directly bridged" in readme
+    and "`requesting-code-review`" in readme
+    and "- `brainstorming`" not in readme,
+    "README must describe requesting-code-review as represented by critique/respond and must not list brainstorming as simply unbridged",
+)
+require(
+    "### Review Role Boundaries" in readme
+    and "`requesting-code-review` | Review request / handoff pattern" in readme
+    and "`/speckit.superb.critique` | Local spec-aligned reviewer" in readme
+    and "`/speckit.superb.respond` | Feedback receiver / implementer response" in readme,
+    "README must define requesting-code-review, critique, and respond as separate review roles",
+)
+require(
+    "## Superpowers Mapping Matrix" in readme
+    and "| `brainstorming` | `/speckit.superb.brainstorm` |" in readme
+    and "| `test-driven-development` | `/speckit.superb.tdd` |" in readme
+    and "| `verification-before-completion` | `/speckit.superb.verify` |" in readme
+    and "| `systematic-debugging` | `/speckit.superb.debug` |" in readme
+    and "| `dispatching-parallel-agents` | `/speckit.superb.debug` parallel mode |" in readme
+    and "| `requesting-code-review` | `/speckit.superb.critique` handoff section |" in readme
+    and "| `receiving-code-review` | `/speckit.superb.respond` |" in readme
+    and "| `finishing-a-development-branch` | `/speckit.superb.finish` |" in readme
+    and "| `writing-plans` | `/speckit.superb.review` task-quality checks |" in readme
+    and "| `subagent-driven-development` | Not exposed |" in readme
+    and "| `executing-plans` | Not exposed |" in readme
+    and "| `using-git-worktrees` | Not exposed |" in readme
+    and "Borrowed disciplines do not create new bridge commands" in readme,
+    "README must document the Superpowers-to-superb mapping matrix and bridge boundaries",
+)
+require(
+    "### Agent Execution Contract" in readme
+    and "treated as stage-specific middleware rather than a second workflow engine" in readme
+    and "Required bridge hooks are gates" in readme
+    and "Optional bridge hooks run only when the user, goal prompt, or local policy" in readme
+    and "Manual bridge commands are situational tools" in readme,
+    "README must explain how autonomous agents connect superb hooks into the Spec Kit workflow",
+)
+require(
+    "### Role Boundary" in critique
+    and "`critique` is the reviewer" in critique
+    and "`requesting-code-review` is a handoff pattern" in critique
+    and "`respond` is the feedback receiver" in critique,
+    "critique.md must define local reviewer vs review-request vs feedback-response roles",
+)
+require(
+    "## Role Boundary" in respond
+    and "`respond` is not a reviewer" in respond
+    and "`critique` or an external reviewer produces findings" in respond,
+    "respond.md must say it receives and triages findings rather than performing review",
+)
+require(
+    "Parallel Dispatch Mode" in debug
+    and "2+ independent failure domains" in debug
+    and "controller verification" in debug,
+    "debug.md must document the dispatching-parallel-agents escalation boundary and controller verification",
+)
+require(
+    "File Ownership Map" in review
+    and "Task Granularity" in review
+    and "RED/GREEN Target" in review
+    and "Review Checkpoint Readiness" in review,
+    "review.md must include writing-plans-derived file ownership, task granularity, RED/GREEN, and review checkpoint checks",
+)
+require(
+    ".specify/plan-fix.md" not in critique
+    and "append to the existing `plan.md`" not in critique
+    and "Automatically write a fix plan" not in critique
+    and "Fix Plan Draft" in critique
+    and "Reviewer Boundary" in critique,
+    "critique.md must not write planning artifacts and must present fix plans as drafts only",
+)
+require(
+    "## Artifact Ownership Model" in readme
+    and "Spec Kit owns creation, schema, lifecycle, and canonical meaning" in readme
+    and "Superpowers Bridge may only refine, check, report, or synchronize within declared hook boundaries" in readme,
+    "README must define artifact ownership separately from extension refinement/checking",
+)
+require(
+    "Spec Kit remains artifact owner" in brainstorm
+    and "Do not synchronize lifecycle status" in brainstorm
+    and "get user approval before writing changes" in brainstorm,
+    "brainstorm.md must require approval-before-write, no status sync, and artifact-owner reporting",
+)
+require(
+    "Recommend adding missing tasks" in review
+    and "Add missing tasks to tasks.md" not in review,
+    "review.md must recommend task edits without implying it edits tasks.md itself",
 )
 
 require(

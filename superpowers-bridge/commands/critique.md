@@ -114,6 +114,43 @@ git diff HEAD [files]
 
 ---
 
+### Optional Review Handoff Packaging
+
+This command covers the main intent of Superpowers `requesting-code-review`
+without adding a separate `/speckit.superb.request-review` command.
+
+### Role Boundary
+
+- `critique` is the reviewer: it evaluates implementation against Spec Kit
+  artifacts and reports findings.
+- `requesting-code-review` is a handoff pattern: it packages context for
+  another reviewer or subagent when such a reviewer is explicitly requested.
+- `respond` is the feedback receiver: it handles review findings after they
+  exist and decides whether to accept, reject, clarify, or implement them.
+
+If the user asks for external review, subagent review, or a reviewer handoff,
+package the loaded context into a concise reviewer prompt before or after your
+own findings:
+
+```markdown
+## External/Subagent Review Handoff
+
+**What was implemented:** [short summary]
+**Spec authority:** [spec.md path and relevant sections]
+**Plan/task authority:** [plan.md/tasks.md paths and relevant tasks]
+**Diff range:** [BASE_SHA]..[HEAD_SHA]
+**Verification evidence:** [test/build command and result]
+**Reviewer focus:** correctness regressions, missing tests, security issues,
+breaking API behavior, performance-sensitive paths
+**Expected output:** Critical / Important / Minor findings with file references
+```
+
+Do not dispatch another reviewer unless the current environment has an explicit
+subagent mechanism and the user or workflow requested it. `respond` remains the
+command for accepting, rejecting, or clarifying returned review feedback.
+
+---
+
 ### Phase 2 — Spec Compliance & Requirement Mapping Review
 
 Evaluate every code change in the git diff against the requirements and plan:
@@ -221,8 +258,24 @@ If Critical issues exist:
 🔴 BLOCKED: Fix all Critical issues above before continuing.
 Do not write new code or start new tasks until resolved.
 ```
-2. **Auto-Plan for Fixes**: Automatically write a fix plan to a new temporary file `.specify/plan-fix.md` (or append to the existing `plan.md` under a dedicated "Critique Fixes" section) detailing the exact tasks and files that must be modified to resolve the identified drifts.
-3. Present this generated fix plan to the user in your output.
+
+Then include a draft remediation plan in the response:
+
+```markdown
+## Fix Plan Draft
+
+- [Issue]: [required correction]
+- [Files likely involved]: [paths]
+- [Verification]: [test/build command that should prove the fix]
+```
+
+### Reviewer Boundary
+
+Do not write planning artifacts from this command. `critique` may report
+findings and draft remediation steps, but it must not modify `plan.md`,
+`tasks.md`, or create auxiliary planning files. If the fix requires changing
+planning artifacts, hand that work back to the Spec Kit planning/task flow or
+wait for explicit user authorization.
 
 If no Critical issues, but Important issues exist:
 ```

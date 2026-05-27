@@ -14,6 +14,17 @@ description: >
 
 ---
 
+## Role Boundary
+
+`respond` is not a reviewer. `critique` or an external reviewer produces findings;
+`respond` receives those findings, checks them against the codebase and
+`spec.md`, then accepts, rejects, clarifies, or implements them.
+
+Do not use this command to create the original review. Use
+`/speckit.superb.critique` when review findings do not already exist.
+
+---
+
 ## Step 1 — Resolve Installed Skill
 
 Look for `receiving-code-review/SKILL.md` in this exact order:

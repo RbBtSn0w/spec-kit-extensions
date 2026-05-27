@@ -73,6 +73,68 @@ Apply the resolved installed skill's four-phase protocol:
 
 ---
 
+## Step 4 — Parallel Dispatch Mode
+
+Use this mode only when debugging evidence shows **2+ independent failure domains**.
+It is adapted from the optional `dispatching-parallel-agents` skill, but this
+command remains the controller.
+
+### Independence Gate
+
+Before preparing parallel work, answer all of these from evidence:
+
+- Are there multiple failures, test files, subsystems, or bugs?
+- Can each domain be understood without shared context from the others?
+- Would fixing one domain be unlikely to change the others?
+- Can agents work without editing the same files or shared state?
+
+If any answer is "no" or "unknown", do not dispatch in parallel. Continue with
+single-root-cause systematic debugging.
+
+### Optional Skill Resolution
+
+If parallel dispatch is appropriate, look for
+`dispatching-parallel-agents/SKILL.md` in the same discovery order:
+
+1. `./.agents/skills/dispatching-parallel-agents/SKILL.md`
+2. `~/.agents/skills/dispatching-parallel-agents/SKILL.md`
+
+If unavailable, still produce the domain breakdown and focused task prompts,
+but report that automated parallel dispatch guidance is unavailable.
+
+### Task Package Format
+
+For each independent domain, produce one focused agent task:
+
+```markdown
+## Parallel Debug Task: [domain name]
+
+**Scope:** [one test file, subsystem, or bug cluster]
+**Known failures:** [test names, error messages, commands]
+**Relevant spec/task context:** [requirement or task references]
+**Goal:** Identify root cause and propose or implement the smallest fix.
+**Constraints:** Do not edit unrelated files. Do not broaden scope. Do not hide
+failures by changing expectations without evidence.
+**Return:** Root cause, files changed or recommended, verification command and
+output, remaining risks.
+```
+
+### Controller Integration
+
+Parallel agent outputs are not completion evidence. After all agents return:
+
+1. Review every summary and diff.
+2. Check for overlapping files or conflicting assumptions.
+3. Run the targeted failing tests.
+4. Run the full relevant test suite.
+5. Perform **controller verification** before declaring the debugging pass
+   resolved.
+
+If any fix changes another domain, stop parallel integration and return to
+single-threaded root-cause analysis.
+
+---
+
 ## Escalation Rule
 
 If **3 or more fix attempts** have failed:
