@@ -4,7 +4,7 @@ extension:
   id: superb
   name: Superpowers Bridge
   version: 1.4.0
-  description: "Adds evidence-first trust gates to Spec Kit so agent implementations require TDD, spec coverage, and verification evidence."
+  description: "Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates for agent workflows."
   author: rbbtsn0w
   repository: https://github.com/RbBtSn0w/spec-kit-extensions
   license: MIT

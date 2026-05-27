@@ -1,7 +1,8 @@
 # Superpowers Bridge
 
-Evidence-first trust gates for [Spec Kit](https://github.com/github/spec-kit)
-agent workflows.
+Bridges selected [obra/superpowers](https://github.com/obra/superpowers)
+disciplines into [Spec Kit](https://github.com/github/spec-kit) as
+evidence-first trust gates for agent workflows.
 
 Superpowers Bridge makes Spec Kit implementation claims verifiable: TDD before
 code, review against `spec.md` / `plan.md` / `tasks.md`, and fresh evidence
@@ -20,6 +21,22 @@ This extension combines:
 It does **not** replace the Spec Kit main flow. The main flow remains:
 
 `/speckit.specify -> /speckit.clarify -> /speckit.plan -> /speckit.tasks -> /speckit.analyze | /speckit.checklist -> /speckit.implement`
+
+## Naming And Brand
+
+Use these names consistently:
+
+| Name | Use For | Stability |
+|---|---|---|
+| Superpowers Bridge | Official extension and product name | Public, stable |
+| `superpowers-bridge` | Spec Kit extension package, folder, release asset, and tag prefix | Public, stable |
+| `superb` | Command namespace and local shorthand, as in `/speckit.superb.verify` | Public, stable |
+
+Do not use `SuperB` or `SuperBridge` as official public names for this
+extension. `SuperB` is easy to confuse with the lowercase command namespace,
+and `SuperBridge` hides the product's relationship to Superpowers. If a future
+broader bridge product needs either name, document it as a separate brand layer
+rather than renaming this extension in place.
 
 ## Who This Is For
 

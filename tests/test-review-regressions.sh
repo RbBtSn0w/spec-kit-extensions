@@ -80,23 +80,29 @@ require(
     "test-review-regressions.sh must resolve a Python 3 interpreter before running its Python checks",
 )
 require(
-    "Evidence-first trust gates for Spec Kit agent workflows" in root_readme
-    and "TDD, spec coverage, and verification evidence before completion" in root_readme,
-    "root README must position Superpowers Bridge as evidence-first trust gates for agent workflows",
+    "Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates for agent workflows" in root_readme,
+    "root README must position Superpowers Bridge as Superpowers-sourced trust gates for Spec Kit agent workflows",
 )
 require(
-    "Evidence-first trust gates for [Spec Kit](https://github.com/github/spec-kit)" in readme
+    "Bridges selected [obra/superpowers](https://github.com/obra/superpowers)" in readme
+    and "disciplines into [Spec Kit](https://github.com/github/spec-kit) as" in readme
+    and "evidence-first trust gates for agent workflows" in readme
     and "makes Spec Kit implementation claims verifiable" in readme
     and "no agent should mark a Spec Kit feature" in readme
+    and "## Naming And Brand" in readme
+    and "| Superpowers Bridge | Official extension and product name | Public, stable |" in readme
+    and "| `superpowers-bridge` | Spec Kit extension package, folder, release asset, and tag prefix | Public, stable |" in readme
+    and "| `superb` | Command namespace and local shorthand, as in `/speckit.superb.verify` | Public, stable |" in readme
+    and "Do not use `SuperB` or `SuperBridge` as official public names" in readme
     and "## Who This Is For" in readme
     and "## Open Source Adoption Path" in readme
     and "The extension is proving value when it blocks a false completion" in readme,
-    "Superpowers Bridge README must explain the open-source wedge, ICP, and first-success path",
+    "Superpowers Bridge README must preserve Superpowers identity, naming hierarchy, open-source wedge, ICP, and first-success path",
 )
 require(
-    "description: \"Adds evidence-first trust gates to Spec Kit" in extension
+    "description: \"Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates" in extension
     and len(re.search(r'^\s{2}description: "([^"]+)"$', extension, re.MULTILINE).group(1)) <= 200,
-    "extension.yml description must use the evidence-first trust-gate positioning and stay within catalog limits",
+    "extension.yml description must preserve Superpowers identity, trust-gate outcome, and catalog limits",
 )
 require(
     "windows-latest" in ci and "pwsh" in ci,
