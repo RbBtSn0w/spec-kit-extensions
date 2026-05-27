@@ -60,11 +60,22 @@ skill text.
 
 ## Step 2 — Resolve Active Spec Kit Spec
 
-Resolve the active feature spec path using the same Spec Kit prerequisite
-script pattern used by follow-up commands:
+Resolve the active feature spec path without requiring downstream planning
+artifacts. `brainstorm` runs in `after_specify`, so `plan.md` and `tasks.md`
+normally do not exist yet.
 
-- Prefer `FEATURE_SPEC` when present
-- Otherwise use `FEATURE_DIR/spec.md`
+Use this resolution order:
+
+1. Prefer hook-provided `FEATURE_SPEC` when present and readable.
+2. Otherwise use hook-provided `FEATURE_DIR/spec.md` when present and readable.
+3. Otherwise run the Spec Kit prerequisite script in paths-only mode
+   (`check-prerequisites.sh --json --paths-only`, or the PowerShell
+   equivalent) and read `FEATURE_SPEC` or `FEATURE_DIR/spec.md` from its JSON
+   output.
+
+Do not run the normal downstream prerequisite validation path here; it may
+require `plan.md` or `tasks.md` and would be incorrect immediately after
+`/speckit.specify`.
 
 If the active feature spec cannot be resolved or read, **STOP**:
 

@@ -56,19 +56,28 @@ def require_hook_optional(hook: str, expected: str) -> None:
 
 
 def config_requirement_skills(kind: str):
-    requirements = re.search(
-        r"^requirements:\n(?P<body>(?:^\s{2}.+\n|^\s{4}.+\n)+)",
-        config,
-        re.MULTILINE,
-    )
-    require(requirements is not None, "superb-config.template.yml must declare requirements")
-    match = re.search(
-        rf"^\s{{2}}{kind}:\n(?P<body>(?:^\s{{4}}- .+\n)+)",
-        requirements.group("body"),
-        re.MULTILINE,
-    )
-    require(match is not None, f"superb-config.template.yml must declare requirements.{kind}")
-    return [line.strip()[2:] for line in match.group("body").splitlines()]
+    in_requirements = False
+    in_requested_list = False
+    skills = []
+
+    for line in config.splitlines():
+        if line == "requirements:":
+            in_requirements = True
+            continue
+        if not in_requirements:
+            continue
+        if line and not line.startswith(" "):
+            break
+        if not line.strip():
+            continue
+        if line.startswith("  ") and not line.startswith("    "):
+            in_requested_list = line.strip() == f"{kind}:"
+            continue
+        if in_requested_list and line.startswith("    - "):
+            skills.append(line.strip()[2:])
+
+    require(skills, f"superb-config.template.yml must declare requirements.{kind}")
+    return skills
 
 
 hard_skills = config_requirement_skills("hard")
@@ -296,6 +305,12 @@ require(
     and "Do not synchronize lifecycle status" in brainstorm
     and "get user approval before writing changes" in brainstorm,
     "brainstorm.md must require approval-before-write, no status sync, and artifact-owner reporting",
+)
+require(
+    "check-prerequisites.sh --json --paths-only" in brainstorm
+    and "Do not run the normal downstream prerequisite validation path here" in brainstorm
+    and "plan.md` or `tasks.md`" in brainstorm,
+    "brainstorm.md must resolve specs with hook paths or paths-only prerequisites before plan/tasks exist",
 )
 require(
     "Recommend adding missing tasks" in review
