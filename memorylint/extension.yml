@@ -4,7 +4,7 @@ extension:
   id: "memorylint"
   name: "MemoryLint"
   version: 1.4.0
-  description: "Agent memory governance tool: Automatically audits and fixes boundary conflicts between AGENTS.md and the constitution."
+  description: "Evidence-driven instruction drift checker: audits agent memory files for boundary, reality, conflict, and redundancy drift."
 
   author: "Spec-kit Community"
 
@@ -13,22 +13,25 @@ requires:
 
 provides:
   commands:
-    - name: "speckit.memorylint.run"
-      file: "commands/check-boundaries.md"
-      description: "Audit and fix overlaps and out-of-bounds issues between AGENTS.md and project constitution"
+    - name: "speckit.memorylint.audit"
+      file: "commands/audit.md"
+      description: "Audit agent instruction files and generate an evidence-bound drift report"
+    - name: "speckit.memorylint.apply"
+      file: "commands/apply.md"
+      description: "Apply approved fixes from a previous MemoryLint audit report"
     - name: "speckit.memorylint.load-agents"
       file: "commands/load-agents.md"
       description: "Load AGENTS.md to ensure core rules do not drift during the planning phase"
 
 hooks:
   before_constitution:
-    command: "speckit.memorylint.run"
+    command: "speckit.memorylint.audit"
     optional: true
-    prompt: "Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infrastructure guidelines in AGENTS.md?"
+    prompt: "Run MemoryLint audit to generate a boundary report before constitution generation?"
   after_constitution:
-    command: "speckit.memorylint.run"
+    command: "speckit.memorylint.audit"
     optional: true
-    prompt: "Run MemoryLint to perform semantic auditing and redundancy pruning on the generated constitution?"
+    prompt: "Run MemoryLint audit to check for conflicts between constitution and AGENTS.md?"
   before_plan:
     command: "speckit.memorylint.load-agents"
     optional: false

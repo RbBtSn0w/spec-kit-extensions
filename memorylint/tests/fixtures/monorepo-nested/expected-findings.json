@@ -1,0 +1,8 @@
+[
+  {
+    "drift_type": "redundancy",
+    "severity": "warning",
+    "confidence": "medium",
+    "description": "Git workflow rules in packages/frontend/AGENTS.md duplicate the root AGENTS.md — nested rules risk diverging from root policy"
+  }
+]

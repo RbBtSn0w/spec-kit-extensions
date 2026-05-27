@@ -1,0 +1,19 @@
+schema_version: "1.0"
+
+extension:
+  id: "memorylint"
+  name: "MemoryLint"
+  version: 1.0.0
+  description: "Instruction drift checker for agent memory files."
+
+provides:
+  commands:
+    - name: "speckit.memorylint.audit"
+      file: "commands/audit.md"
+      description: "Audit agent instruction files"
+
+hooks:
+  before_plan:
+    command: "speckit.memorylint.run"
+    optional: false
+    description: "Run MemoryLint before planning"

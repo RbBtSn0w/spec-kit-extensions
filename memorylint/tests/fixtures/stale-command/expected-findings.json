@@ -1,0 +1,14 @@
+[
+  {
+    "drift_type": "reality",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "AGENTS.md references 'scripts/deploy.sh' but the file does not exist in the workspace"
+  },
+  {
+    "drift_type": "reality",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "AGENTS.md references 'npm run e2e' but no package.json with e2e script exists in the workspace"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "drift_type": "reality",
+    "severity": "critical",
+    "confidence": "high",
+    "description": "Hook before_plan references command 'speckit.memorylint.run' which is not declared in provides.commands — applying a rename without updating extension.yml would break hooks"
+  }
+]

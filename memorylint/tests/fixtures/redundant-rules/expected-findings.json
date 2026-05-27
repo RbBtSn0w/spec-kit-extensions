@@ -1,0 +1,8 @@
+[
+  {
+    "drift_type": "redundancy",
+    "severity": "info",
+    "confidence": "high",
+    "description": "Command naming convention rule appears in both AGENTS.md and constitution.md with near-identical wording"
+  }
+]

@@ -26,6 +26,8 @@ jobs:
           bash superpowers-bridge/tests/test-archive-evidence.sh
           bash universal-bridge/tests/test-pre-commit.sh
           bash tests/verify-feasibility.sh
+          bash memorylint/tests/test-memorylint-regressions.sh
+          bash memorylint/tests/test-fixture-validation.sh
 
   powershell-bridge-tests:
     name: powershell-bridge-tests

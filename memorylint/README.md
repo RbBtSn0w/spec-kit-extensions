@@ -1,93 +1,141 @@
 # MemoryLint
 
-MemoryLint is a Spec-kit extension designed for AI memory governance and boundary checking. 
+Evidence-driven instruction drift checker for Spec Kit.
 
-This extension serves as an "infrastructure guardian," ensuring that project-specific architecture rules stay in the constitution, while automatically supplementing missing general workflows in the global agent configuration. It is a secondary governance layer behind evidence-first completion gates.
+MemoryLint audits long-lived agent instruction files — `AGENTS.md`, `.specify/memory/constitution.md`, `CLAUDE.md`, `.cursor/rules/`, and other sources — to detect boundary violations, stale references, conflicts, and redundancies. Every finding is backed by concrete evidence so reviewers can trust the report before applying any changes.
 
 ## Problem Statement
-In Spec-Driven Development (SDD), AI Agents rely on two core long-term memory files:
-1. `AGENTS.md`: For general infrastructure, environment variables, and workflow standards.
-2. `.specify/memory/constitution.md`: For project core architecture decisions, code paradigms, and safety constraints.
 
-Over time, developers or AI assistants may mistakenly write "architectural constraints" into the global `AGENTS.md`. This causes blurred boundaries, context overload, and loss of a single source of truth.
+In Spec-Driven Development (SDD), AI agents rely on long-lived instruction files:
 
-## Solution: Bidirectional Governance
+1. `AGENTS.md`: Infrastructure rules, environment setup, and workflow standards.
+2. `.specify/memory/constitution.md`: Architecture decisions, code paradigms, and safety constraints.
+3. Additional sources: `CLAUDE.md`, `.cursor/rules/`, `README.md`, workflow configs.
 
-MemoryLint hooks into the `before_constitution` lifecycle to perform bidirectional governance:
-1. **Prune (Clean up)**: Automatically audits `AGENTS.md`, extracts out-of-bounds architectural specifications, and seamlessly hands them over to `constitution.md` via conversational context.
-2. **Enrich (Supplement)**: Analyzes the workspace (e.g., `package.json`, `Makefile`) to infer and supplement `AGENTS.md` with missing essential infrastructure guidelines (like standard test/build commands or Git commit conventions).
-3. **Semantic Audit**: Reports contradictions, redundancies, and obsolete rules across `AGENTS.md` and `.specify/memory/constitution.md`.
+Over time, these files drift:
 
-## Workflow Architecture
+- **Boundary drift**: Architecture rules leak into `AGENTS.md`, or workflow rules end up in the constitution.
+- **Reality drift**: Rules reference scripts, tools, or directories that no longer exist.
+- **Conflict drift**: Two files give contradictory instructions.
+- **Redundancy drift**: The same rule appears in multiple files, risking future divergence.
+
+## Solution: Evidence-Driven Drift Checking
+
+MemoryLint follows a strict pipeline that separates audit from apply:
 
 ```text
-  [ Developer / AI Agent ]                [ AI Agent Execution Engine ]             [ Local File System ]
-           │                                 │                                     │
-           │ 1. Trigger Pre-hook             │                                     │
-           │ > /speckit.memorylint...        │                                     │
-           ├───────────────────────────────> │ Read check-boundaries.md (Prompt)   │
-           │                                 │                                     │
-           │                                 │ ─── (Action 1) Tool: read_file ───> │ 📄 AGENTS.md (Bloated)
-           │                                 │ <── Return file content ────────────│
-           │                                 │                                     │
-           │                                 │ (Action 2) LLM: Identify & Extract  │
-           │                                 │            Architecture Rules       │
-           │                                 │                                     │
-           │                                 │ (Action 3) LLM: Infer & Enrich      │
-           │                                 │            Infrastructure Rules     │
-           │                                 │                                     │
-           │                                 │ ─── (Action 4) Tool: write_file ──> │ 📄 AGENTS.md (Governed)
-           │                                 │     (Remove rules, Add missing info)│
-           │                                 │                                     │
-           │ 2. Hook exits, context ready    │                                     │
-           │ <───────────────────────────────┤ (Output Protocol)                   │
-           │ [Prints Markdown list to UI/CTX]│ Forces extracted rules into chat    │
-           │ "### Extracted Rules..."        │ history (Short-term LLM memory)     │
-           │                                 │                                     │
-═══════════╪═════════════════════════════════╪═════════════════════════════════════╪═══════════════════
-           │                                 │                                     │
-           │ 3. Trigger Main Command         │                                     │
-           │ > /speckit constitution         │                                     │
-           ├───────────────────────────────> │ Read constitution prompt            │
-           │                                 │ + retrieve extracted rules from ctx │
-           │                                 │                                     │
-           │                                 │ LLM: Merge old constitution with    │
-           │                                 │      newly extracted rules          │
-           │                                 │                                     │
-           │                                 │ ─── Tool: write_file ─────────────> │ 📄 constitution.md
-           │                                 │                                     │
-═══════════╪═════════════════════════════════╪═════════════════════════════════════╪═══════════════════
-           │                                 │                                     │
-           │ 4. Trigger Plan Pre-hook        │                                     │
-           │ > /speckit.memorylint.load-agents │ (Mandatory load-agents gate)     │
-           ├───────────────────────────────> │ Read load-agents.md                │
-           │                                 │ ─── (Action) Tool: read_file ─────> │ 📄 AGENTS.md (Governed)
-           │                                 │ <── Return core rules context ──────│
-           │                                 │                                     │
-           │ 5. Trigger Planning Command     │                                     │
-           │ > /speckit plan                 │                                     │
-           ├───────────────────────────────> │ Read plan prompt                    │
-           │                                 │ + retrieve core rules from ctx      │
-           │                                 │                                     │
-           │                                 │ LLM: Generate plan & tasks          │
-           │                                 │      strictly following rules       │
-           │                                 │                                     │
-           │                                 │ ─── Tool: write_file ─────────────> │ 📄 plan.md / tasks.md
-           │                                 │                                     │
+┌─────────────────────┐
+│ Instruction Inventory│  Scan all long-lived instruction sources
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│ Rule Classification  │  Categorise each rule (8 categories)
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│ Evidence Binding     │  Attach file/command proof to every finding
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│ Drift Detection      │  Detect boundary, reality, conflict, redundancy
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│ Drift Report         │  Structured, reviewable report (read-only)
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│ Human Apply Gate     │  3-tier: report-only / safe-fixes / all-approved
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│ Post-Apply Validation│  Integrity checks + automatic rollback on failure
+└─────────────────────┘
 ```
 
-## Features
+## Commands
 
-- **Boundary Auditing**: Detects architecture leakage in `AGENTS.md`.
-- **Context Handoff**: Passes extracted rules cleanly without destructive overwrites of `constitution.md`.
-- **Infrastructure Enrichment**: Automatically detects missing test/build/git workflows and injects them into `AGENTS.md`.
-- **Semantic Audit Reporting**: Identifies conflicting, redundant, or obsolete long-lived instructions.
+| Command | Type | Purpose |
+|---|---|---|
+| `speckit.memorylint.audit` | Hookable | Scan instruction files and generate an evidence-bound Drift Report. Read-only — never modifies files. |
+| `speckit.memorylint.apply` | Manual | Apply approved fixes from a previous audit report. Supports three apply modes with post-apply validation and rollback. |
+| `speckit.memorylint.load-agents` | Hookable | Mandatory gate: load `AGENTS.md` into context before planning to prevent rule drift. |
+
+## Hook Integration
+
+This extension registers the following Spec Kit lifecycle hooks:
+
+| Hook | Command | Required? | Purpose |
+|------|---------|-----------|---------|
+| `before_constitution` | `audit` | Optional | Generate a boundary report before constitution generation |
+| `after_constitution` | `audit` | Optional | Check for conflicts between constitution and AGENTS.md |
+| `before_plan` | `load-agents` | **Mandatory** | Load AGENTS.md to enforce core rules before plan generation |
+
+Key design constraint: hooks only run **read-only** operations. The `apply` command is never wired to a hook — it is always an explicit user action.
+
+## Apply Modes
+
+| Mode | Behaviour |
+|------|-----------|
+| `report-only` | Default. Re-display the report summary without making changes. |
+| `apply-safe-fixes` | Apply only high-confidence, non-architectural fixes: dead reference removal, deduplication, formatting. |
+| `apply-all-approved` | Apply every fix the user has explicitly approved. Requires confirmation. |
+
+After applying, MemoryLint validates:
+
+1. `AGENTS.md` structural integrity (critical sections preserved).
+2. Constitution rule preservation (no accidental deletions).
+3. Hook reference consistency (all `extension.yml` hooks still valid).
+4. Repository validation commands pass.
+
+If any validation fails, **all changes are automatically reverted**.
+
+## Rule Classification
+
+Every rule is classified into one of eight categories:
+
+| Category | Meaning |
+|----------|---------|
+| `infrastructure` | CI, packaging, release mechanics, build/test commands |
+| `architecture` | Directory layout, module boundaries, design patterns |
+| `workflow` | Git hygiene, review process, commit conventions |
+| `domain` | Product behaviour, Spec Kit hook semantics |
+| `tooling` | CLI tools, language runtimes, editor config |
+| `personal_preference` | Style choices that do not affect correctness |
+| `obsolete` | References something that no longer exists |
+| `conflict` | Contradicts another rule |
+
+## Trust Metrics
+
+Every audit report includes a metrics section tracking:
+
+| Metric | Purpose |
+|--------|---------|
+| High-confidence finding acceptance rate | Measures report accuracy |
+| False positive rate | Must stay low to maintain trust |
+| Suggested diff apply rate | Tracks actionability |
+| Real stale/conflicting rules found | Measures value delivered |
+| Destructive surprise edits | Must be **zero** |
+
+## Regression Corpus
+
+MemoryLint includes a regression corpus of nine fixture repos under `tests/fixtures/`:
+
+| Fixture | Tests |
+|---------|-------|
+| `clean-repo` | Zero findings baseline |
+| `bloated-agents` | Boundary drift detection |
+| `stale-command` | Reality drift detection |
+| `conflicting-rules` | Conflict drift detection |
+| `redundant-rules` | Redundancy drift detection |
+| `missing-constitution` | Graceful handling of absent files |
+| `monorepo-nested` | Nested instruction file support |
+| `multi-source` | Multi-tool instruction scanning |
+| `post-apply-breakage` | Apply safety validation |
 
 ## Installation
 
 ### Install from ZIP (Recommended)
-
-Install directly from the release asset:
 
 ```bash
 specify extension add memorylint --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/memorylint-v1.4.0/memorylint.zip
@@ -95,45 +143,11 @@ specify extension add memorylint --from https://github.com/RbBtSn0w/spec-kit-ext
 
 ### Install from GitHub Repository (Development)
 
-Clone the collection repository and install the extension folder locally:
-
 ```bash
 git clone https://github.com/RbBtSn0w/spec-kit-extensions.git
 cd spec-kit-extensions
 specify extension add --dev ./memorylint
 ```
-
-## Commands
-
-| Command | Type | Purpose |
-|---|---|---|
-| `/speckit.memorylint.run` | Hookable | Prune out-of-bounds rules and enrich missing infrastructure guidelines in `AGENTS.md`. |
-| `/speckit.memorylint.load-agents` | Hookable | Mandatory gate: Load `AGENTS.md` to enforce core rules before planning. |
-
-*(Note: If the interactive hook is skipped in non-TTY environments, you can manually trigger `/speckit.memorylint.run` before running `/speckit constitution`.)*
-
-## Hook Integration
-
-This extension registers the following hooks:
-
-- `before_constitution` → `run` (optional)
-- `after_constitution` → `run` (optional)
-- `before_plan` → `load-agents` (mandatory)
-
-## Usage / Execution Flow
-
-When you run `/speckit constitution`, the system will intercept the process and prompt:
-
-```text
-Run MemoryLint to prune out-of-bounds architecture rules and enrich missing infrastructure guidelines in AGENTS.md? (y/n)
-```
-
-- **If you select `y`**: The audit will run, govern `AGENTS.md`, and the extracted rules will be incorporated into the new constitution seamlessly.
-- **If you select `n`**: The hook is bypassed and the standard constitution generation proceeds.
-
-When you run `/speckit plan`, the system will automatically execute the `load-agents` hook:
-
-- **Mandatory Gate**: The system will read your `AGENTS.md` file and acknowledge its core rules before starting the planning process. This ensures that the generated `plan.md` and `tasks.md` strictly adhere to your workspace's architectural constraints without needing manual confirmation.
 
 ## Requirements
 

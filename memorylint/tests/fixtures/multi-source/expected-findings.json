@@ -1,0 +1,14 @@
+[
+  {
+    "drift_type": "redundancy",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Build command rules in CLAUDE.md duplicate AGENTS.md — risks divergence if only one file is updated"
+  },
+  {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Architecture rules in .cursor/rules/project.md belong in constitution.md, not in editor-specific config"
+  }
+]

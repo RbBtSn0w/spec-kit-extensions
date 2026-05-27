@@ -1,0 +1,8 @@
+[
+  {
+    "drift_type": "reality",
+    "severity": "info",
+    "confidence": "medium",
+    "description": "constitution.md does not exist in the workspace — architecture rules have no canonical home"
+  }
+]

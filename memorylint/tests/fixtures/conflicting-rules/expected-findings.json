@@ -1,0 +1,8 @@
+[
+  {
+    "drift_type": "conflict",
+    "severity": "critical",
+    "confidence": "high",
+    "description": "AGENTS.md mandates Conventional Commits while constitution.md mandates a custom [JIRA-ID] format — these are mutually exclusive commit message policies"
+  }
+]

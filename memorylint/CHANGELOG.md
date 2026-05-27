@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- planned-bump: major -->
+<!-- next-release-version: 2.0.0 -->
+
+### Added
+
+- `speckit.memorylint.audit` command: read-only, evidence-driven instruction
+  drift audit. Produces a structured Drift Report with finding IDs, severity,
+  confidence, evidence bindings, and suggested actions.
+- Instruction Inventory: full-scan of all long-lived instruction sources
+  (AGENTS.md, constitution.md, CLAUDE.md, .cursor/rules/, README, workflows,
+  tests) with an output Instruction Map table.
+- Four-class drift detection: boundary, reality, conflict, redundancy.
+- Eight-category rule classification: infrastructure, architecture, workflow,
+  domain, tooling, personal_preference, obsolete, conflict.
+- `speckit.memorylint.apply` command with three-tier apply gate:
+  `report-only` (default), `apply-safe-fixes`, `apply-all-approved`.
+- Pre-apply staleness checks: refuses to apply if instruction files changed
+  since the audit report was generated.
+- Post-apply validation with automatic rollback on failure: checks AGENTS.md
+  integrity, constitution preservation, hook consistency, and repo validation
+  commands.
+- Trust metrics section in audit report output.
+- Regression test suite (`test-memorylint-regressions.sh`).
+- Fixture validation suite (`test-fixture-validation.sh`).
+- Nine regression corpus fixtures covering clean, bloated, stale, conflicting,
+  redundant, missing-constitution, monorepo, multi-source, and post-apply
+  breakage scenarios.
+- CI integration for MemoryLint tests.
+- Design document for the drift checker architecture.
+
+### Changed
+
+- Replaced `speckit.memorylint.run` with `speckit.memorylint.audit` (read-only)
+  and `speckit.memorylint.apply` (gated writes).
+- `before_constitution` and `after_constitution` hooks now target `audit`
+  instead of `run`.
+- Extension description updated to reflect evidence-driven drift checking.
+- Rule classification expanded from implicit 2-category (architecture vs
+  infrastructure) to explicit 8-category taxonomy.
+
+### Removed
+
+- Removed `speckit.memorylint.run` command and `check-boundaries.md`. Audit
+  and apply are now separate commands with distinct safety properties.
+
 ## [1.4.0] - 2026-05-24
 ### Changed
 
