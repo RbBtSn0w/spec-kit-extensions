@@ -320,9 +320,69 @@ jobs:
           EXTENSION_ID: ${{ github.event.inputs.extension_id }}
         run: |
           rm -f "${EXTENSION_ID}.zip"
-          cd "$EXTENSION_ID"
-          zip -r "../${EXTENSION_ID}.zip" . \
-            -x '.*' '__pycache__/*'
+
+          python3 -m pip install --quiet pathspec
+
+          STAGING_DIR="$(mktemp -d)"
+          export STAGING_DIR
+          trap 'rm -rf "$STAGING_DIR"' EXIT
+
+          python3 - <<'PY'
+          import os
+          import shutil
+          from pathlib import Path
+
+          import pathspec
+
+          extension_id = os.environ["EXTENSION_ID"]
+          source_root = Path(extension_id).resolve()
+          staging_root = (Path(os.environ["STAGING_DIR"]).resolve() / extension_id)
+
+          ignore_file = source_root / ".extensionignore"
+          patterns = []
+          if ignore_file.exists():
+            for raw_line in ignore_file.read_text(encoding="utf-8").splitlines():
+              line = raw_line.strip()
+              if line and not line.startswith("#"):
+                patterns.append(line.replace("\\", "/"))
+              else:
+                patterns.append(raw_line)
+
+          # Keep the packaged payload clean and preserve legacy cache excludes.
+          patterns.extend([".extensionignore", "__pycache__/"])
+
+          spec = pathspec.GitIgnoreSpec.from_lines(patterns)
+
+          def is_ignored(relative_path: Path, is_dir: bool) -> bool:
+            rel = relative_path.as_posix()
+            if is_dir:
+              rel = rel + "/"
+            return spec.match_file(rel)
+
+          for root, dirs, files in os.walk(source_root):
+            root_path = Path(root)
+            rel_root = root_path.relative_to(source_root)
+
+            kept_dirs = []
+            for directory in dirs:
+              rel_path = rel_root / directory
+              if is_ignored(rel_path, is_dir=True):
+                continue
+              kept_dirs.append(directory)
+              (staging_root / rel_path).mkdir(parents=True, exist_ok=True)
+            dirs[:] = kept_dirs
+
+            for filename in files:
+              rel_path = rel_root / filename
+              if is_ignored(rel_path, is_dir=False):
+                continue
+              destination = staging_root / rel_path
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(root_path / filename, destination)
+          PY
+
+          cd "$STAGING_DIR/$EXTENSION_ID"
+          zip -r "$GITHUB_WORKSPACE/${EXTENSION_ID}.zip" .
 
       - name: Generate release notes
         id: notes

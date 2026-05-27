@@ -18,6 +18,8 @@ trigger_text = trigger_path.read_text(encoding="utf-8")
 checks = [
     (r"^on:\n  workflow_dispatch:$", "Release Trigger must remain manually dispatched."),
     (r"^\s*- name: Create extension zip$", "Release Trigger must build the extension zip itself."),
+    (r"\.extensionignore", "Release Trigger must honor .extensionignore during zip assembly."),
+    (r"pathspec", "Release Trigger must use pathspec-compatible ignore matching during packaging."),
     (r"^\s*- name: Generate release notes$", "Release Trigger must generate release notes itself."),
     (r"gh release create", "Release Trigger must create the GitHub Release itself."),
     (r"createCommitOnBranch", "Release Trigger must create the release metadata commit via GitHub GraphQL."),
