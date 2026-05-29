@@ -303,6 +303,22 @@ def find_hook_command_line(text: str, hook_name: str) -> int | None:
     return None
 
 
+def rewrite_hook_command_line(line: str, replacement: str) -> str:
+    prefix_match = re.match(r"^(\s*command:\s*)(.+?)\s*$", line)
+    if not prefix_match:
+        return line
+
+    original_value = prefix_match.group(2).strip()
+    if original_value.startswith('"'):
+        comment_match = re.match(r'^"[^"]+"(\s+#.*)?$', original_value)
+    elif original_value.startswith("'"):
+        comment_match = re.match(r"^'[^']+'(\s+#.*)?$", original_value)
+    else:
+        comment_match = re.match(r"^[^#\n]+?(\s+#.*)?$", original_value)
+    comment = comment_match.group(1) if comment_match and comment_match.group(1) else ""
+    return f'{prefix_match.group(1)}"{replacement}"{comment}'
+
+
 def manifest_rules(path: Path, workspace_root: Path, next_rule_id: int) -> tuple[list[Rule], int]:
     text = read_text(path)
     rules: list[Rule] = []
@@ -691,7 +707,7 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
                         action="replace",
                         start_line=line_number,
                         end_line=line_number,
-                        replacement=[re.sub(r'command:\s*(?:"[^"]+"|\'[^\']+\'|[^#\n]+)', f'command: "{replacement}"', manifest_text.splitlines()[line_number - 1])],
+                        replacement=[rewrite_hook_command_line(manifest_text.splitlines()[line_number - 1], replacement)],
                         reason=f"Rewrite hook {hook_name} to the declared command {replacement}.",
                     )
                 ]

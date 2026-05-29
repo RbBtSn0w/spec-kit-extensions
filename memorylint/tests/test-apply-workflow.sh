@@ -421,4 +421,37 @@ grep -q "First rule" "$TMP_DIR/overlap-check/AGENTS.md" || {
   exit 1
 }
 
+mkdir -p "$TMP_DIR/hook-comment-rewrite"
+cat >"$TMP_DIR/hook-comment-rewrite/extension.yml" <<'EOF'
+schema_version: "1.0"
+extension:
+  id: memorylint
+  version: "0.1.0"
+  description: "Fixture for hook rewrite comments."
+hooks:
+  before_plan:
+    command: speckit.memorylint.run  # planning gate
+provides:
+  commands:
+    - name: speckit.memorylint.load-agents
+      description: "Load agents"
+EOF
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/hook-comment-rewrite" --json-out "$TMP_DIR/hook-comment-rewrite/report.json" >/dev/null
+"$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/hook-comment-rewrite/report.json" --mode apply-all-approved --approve ML-001 >/dev/null
+grep -q 'command: "speckit.memorylint.load-agents"  # planning gate' "$TMP_DIR/hook-comment-rewrite/extension.yml" || {
+  echo "FAIL: hook rewrite should preserve spacing before inline comments" >&2
+  exit 1
+}
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/hook-comment-rewrite" --json-out "$TMP_DIR/hook-comment-rewrite/recheck.json" >/dev/null
+"$PYTHON_BIN" - "$TMP_DIR/hook-comment-rewrite/recheck.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+hook_findings = [finding for finding in report["findings"] if "hook `" in finding.get("evidence", "")]
+if hook_findings:
+    raise SystemExit("FAIL: rewritten hook command with inline comment should remain parseable")
+PY
+
 echo "apply workflow checks passed"
