@@ -454,4 +454,51 @@ if hook_findings:
     raise SystemExit("FAIL: rewritten hook command with inline comment should remain parseable")
 PY
 
+mkdir -p "$TMP_DIR/top-level-heading"
+cat >"$TMP_DIR/top-level-heading/AGENTS.md" <<'EOF'
+# Workspace Rules
+
+- Keep this bullet.
+- Remove this bullet.
+EOF
+"$PYTHON_BIN" - "$TMP_DIR/top-level-heading/top-level-report.json" "$TMP_DIR/top-level-heading" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+workspace = Path(sys.argv[2]).resolve()
+agents_path = workspace / "AGENTS.md"
+report = {
+    "schema_version": "1.0",
+    "workspace_root": str(workspace),
+    "source_metadata": [{
+        "path": "AGENTS.md",
+        "sha256": hashlib.sha256(agents_path.read_bytes()).hexdigest(),
+    }],
+    "instruction_map": [],
+    "findings": [{
+        "id": "ML-top-level",
+        "drift_type": "reality",
+        "severity": "warning",
+        "confidence": "high",
+        "source": "AGENTS.md:4",
+        "evidence": "top-level heading",
+        "recommended_destination": "AGENTS.md",
+        "suggested_action": "delete",
+        "detail": "delete second bullet",
+        "edits": [{"path": "AGENTS.md", "action": "delete", "start_line": 4, "end_line": 4, "reason": "top-level"}],
+    }],
+    "metrics": {},
+    "summary": {},
+}
+report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+PY
+"$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/top-level-heading/top-level-report.json" --mode apply-all-approved --approve ML-top-level >/dev/null
+grep -q "Keep this bullet." "$TMP_DIR/top-level-heading/AGENTS.md" || {
+  echo "FAIL: bullets under a top-level heading should remain valid after apply" >&2
+  exit 1
+}
+
 echo "apply workflow checks passed"

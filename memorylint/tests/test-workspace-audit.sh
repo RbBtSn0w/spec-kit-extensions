@@ -103,8 +103,33 @@ provides:
       description: "Other command"
 EOF
 "$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/other-extension-hook" --json-out "$TMP_DIR/other-extension.json" >/dev/null
+mkdir -p "$TMP_DIR/commented-command"
+cat >"$TMP_DIR/commented-command/extension.yml" <<'EOF'
+schema_version: "1.0"
+extension:
+  id: demo-extension
+  version: "0.1.0"
+  description: "Fixture for commented command declarations."
+hooks:
+  before_plan:
+    command: speckit.demo.audit
+provides:
+  commands:
+    - name: speckit.demo.audit # primary command
+      description: "Audit"
+EOF
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/commented-command" --json-out "$TMP_DIR/commented-command.json" >/dev/null
+mkdir -p "$TMP_DIR/mixed-content"
+cat >"$TMP_DIR/mixed-content/AGENTS.md" <<'EOF'
+# Workspace Rules
 
-"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" "$TMP_DIR/escape.json" "$TMP_DIR/nested.json" "$TMP_DIR/invalid-package.json" "$TMP_DIR/single-quote.json" "$TMP_DIR/comment-hook.json" "$TMP_DIR/other-extension.json" <<'PY'
+## Commands
+
+- Run `make test`, then remove old helper `scripts/old.sh`.
+EOF
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/mixed-content" --json-out "$TMP_DIR/mixed-content.json" >/dev/null
+
+"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" "$TMP_DIR/escape.json" "$TMP_DIR/nested.json" "$TMP_DIR/invalid-package.json" "$TMP_DIR/single-quote.json" "$TMP_DIR/comment-hook.json" "$TMP_DIR/other-extension.json" "$TMP_DIR/commented-command.json" "$TMP_DIR/mixed-content.json" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -117,6 +142,8 @@ invalid_package = json.loads(Path(sys.argv[5]).read_text(encoding="utf-8"))
 single_quote = json.loads(Path(sys.argv[6]).read_text(encoding="utf-8"))
 comment_hook = json.loads(Path(sys.argv[7]).read_text(encoding="utf-8"))
 other_extension = json.loads(Path(sys.argv[8]).read_text(encoding="utf-8"))
+commented_command = json.loads(Path(sys.argv[9]).read_text(encoding="utf-8"))
+mixed_content = json.loads(Path(sys.argv[10]).read_text(encoding="utf-8"))
 
 if clean["metrics"]["total_findings"] != 0:
     raise SystemExit("FAIL: clean-repo workspace audit should produce zero findings")
@@ -160,6 +187,16 @@ if len(external_hook_findings) != 1:
     raise SystemExit(f"FAIL: external hook fixture should produce exactly 1 hook finding, got {len(external_hook_findings)}")
 if external_hook_findings[0].get("edits"):
     raise SystemExit("FAIL: non-memorylint hook findings without a known replacement should not emit no-op edits")
+
+commented_command_findings = [finding for finding in commented_command["findings"] if "hook `" in finding.get("evidence", "")]
+if commented_command_findings:
+    raise SystemExit("FAIL: inline comments in provides.commands should not break hook declaration matching")
+
+mixed_content_findings = [finding for finding in mixed_content["findings"] if "scripts/old.sh" in finding.get("evidence", "")]
+if len(mixed_content_findings) != 1:
+    raise SystemExit(f"FAIL: mixed-content fixture should produce exactly 1 stale-path finding, got {len(mixed_content_findings)}")
+if mixed_content_findings[0].get("edits"):
+    raise SystemExit("FAIL: mixed-content stale-path findings should not auto-delete the entire rule line")
 
 print("workspace audit checks passed")
 PY

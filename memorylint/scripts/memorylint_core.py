@@ -251,10 +251,24 @@ def parse_extension_commands(text: str) -> set[str]:
         if in_commands and re.match(r"^\s*[a-z_]+:\s*$", line):
             break
         if in_commands:
-            command_match = re.match(r'^\s*-\s+name:\s*["\']?([^"\']+)["\']?\s*$', line)
-            if command_match:
-                commands.add(command_match.group(1))
+            command_value = parse_declared_command_value(line)
+            if command_value:
+                commands.add(command_value)
     return commands
+
+
+def parse_declared_command_value(line: str) -> str | None:
+    match = re.match(r"^\s*-\s+name:\s*(.+?)\s*$", line)
+    if not match:
+        return None
+    value = match.group(1).strip()
+    if value.startswith('"'):
+        quoted = re.match(r'^"([^"]+)"(?:\s+#.*)?$', value)
+        return quoted.group(1) if quoted else None
+    if value.startswith("'"):
+        quoted = re.match(r"^'([^']+)'(?:\s+#.*)?$", value)
+        return quoted.group(1) if quoted else None
+    return re.sub(r"\s+#.*$", "", value).strip() or None
 
 
 def parse_extension_hooks(text: str) -> dict[str, str]:
@@ -529,6 +543,11 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
     findings: list[Finding] = []
     seen_sources: set[tuple[str, str]] = set()
 
+    def needs_manual_stale_path_rewrite(rule_text: str, reference: str) -> bool:
+        lowered = rule_text.lower()
+        stripped = lowered.replace(f"`{reference.lower()}`", "")
+        return any(token in stripped for token in (",", ";", " and ", " then ", " while "))
+
     for rule in rules:
         rule_path = workspace_root / rule.source
         rule_text_normalized = normalize_rule_text(rule.text)
@@ -571,6 +590,7 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
                 if key in seen_sources:
                     continue
                 seen_sources.add(key)
+                manual_rewrite = needs_manual_stale_path_rewrite(rule.text, reference)
                 findings.append(
                     Finding(
                         id="",
@@ -580,11 +600,15 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
                         source=f"{rule.source}:{rule.line_range}",
                         evidence=f"{rule.source} references `{reference}` but that path does not exist in the workspace.",
                         recommended_destination="N/A",
-                        suggested_action="delete",
-                        detail=f"Remove or replace the stale reference to `{reference}`.",
+                        suggested_action="rewrite" if manual_rewrite else "delete",
+                        detail=(
+                            f"Rewrite the mixed-content rule in {rule.source} to remove the stale reference `{reference}` without dropping the remaining guidance."
+                            if manual_rewrite
+                            else f"Remove or replace the stale reference to `{reference}`."
+                        ),
                         rule_ids=[rule.rule_id],
                         category=rule.category,
-                        edits=[
+                        edits=[] if manual_rewrite else [
                             Edit(
                                 path=rule.source,
                                 action="delete",
@@ -1155,7 +1179,7 @@ def validate_agents_integrity(before_text: str, after_text: str) -> list[str]:
                 issues.append(f"Missing AGENTS.md critical section family after apply: {family[0]}")
     has_heading_above = False
     for index, line in enumerate(after_text.splitlines(), start=1):
-        if re.match(r"^\s{0,3}##\s+", line):
+        if re.match(r"^\s{0,3}#{1,2}\s+", line):
             has_heading_above = True
             continue
         if re.match(r"^\s*[-*]\s+", line):
