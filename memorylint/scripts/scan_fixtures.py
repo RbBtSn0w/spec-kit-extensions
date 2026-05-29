@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 from memorylint_core import generate_report
@@ -19,7 +20,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def normalize_finding(finding: dict[str, object]) -> dict[str, object]:
-    source = __import__("re").sub(r":\d+(?:-\d+)?", "", str(finding["source"]))
+    source = re.sub(r":\d+(?:-\d+)?", "", str(finding["source"]))
     return {
         "drift_type": finding["drift_type"],
         "severity": finding["severity"],

@@ -31,8 +31,48 @@ cat >"$TMP_DIR/escape-ref/AGENTS.md" <<'EOF'
 EOF
 printf '#!/usr/bin/env bash\n' >"$TMP_DIR/outside.sh"
 "$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/escape-ref" --json-out "$TMP_DIR/escape.json" >/dev/null
+mkdir -p "$TMP_DIR/nested-ref/packages/frontend/scripts"
+cat >"$TMP_DIR/nested-ref/packages/frontend/AGENTS.md" <<'EOF'
+# Frontend Rules
 
-"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" "$TMP_DIR/escape.json" <<'PY'
+## Commands
+
+- Run `scripts/build.sh` before release.
+EOF
+printf '#!/usr/bin/env bash\n' >"$TMP_DIR/nested-ref/packages/frontend/scripts/build.sh"
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/nested-ref" --json-out "$TMP_DIR/nested.json" >/dev/null
+mkdir -p "$TMP_DIR/invalid-package"
+cat >"$TMP_DIR/invalid-package/AGENTS.md" <<'EOF'
+# Package Rules
+
+## Commands
+
+- Run `npm run build` before release.
+EOF
+cat >"$TMP_DIR/invalid-package/package.json" <<'EOF'
+{"scripts":
+EOF
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/invalid-package" --json-out "$TMP_DIR/invalid-package.json" >/dev/null
+mkdir -p "$TMP_DIR/single-quote-hooks"
+cat >"$TMP_DIR/single-quote-hooks/extension.yml" <<'EOF'
+schema_version: "1.0"
+extension:
+  id: memorylint
+  version: "0.1.0"
+  description: "Fixture for single quoted hooks."
+hooks:
+  before_plan:
+    command: 'speckit.memorylint.run'
+  after_constitution:
+    command: 'speckit.memorylint.run'
+provides:
+  commands:
+    - name: speckit.memorylint.audit
+      description: "Audit"
+EOF
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/single-quote-hooks" --json-out "$TMP_DIR/single-quote.json" >/dev/null
+
+"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" "$TMP_DIR/escape.json" "$TMP_DIR/nested.json" "$TMP_DIR/invalid-package.json" "$TMP_DIR/single-quote.json" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -40,6 +80,9 @@ from pathlib import Path
 clean = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 bloated = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 escaped = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
+nested = json.loads(Path(sys.argv[4]).read_text(encoding="utf-8"))
+invalid_package = json.loads(Path(sys.argv[5]).read_text(encoding="utf-8"))
+single_quote = json.loads(Path(sys.argv[6]).read_text(encoding="utf-8"))
 
 if clean["metrics"]["total_findings"] != 0:
     raise SystemExit("FAIL: clean-repo workspace audit should produce zero findings")
@@ -59,6 +102,20 @@ if not handoffs:
 escape_findings = [finding for finding in escaped["findings"] if "../outside.sh" in finding.get("evidence", "")]
 if not escape_findings:
     raise SystemExit("FAIL: workspace audit should flag out-of-workspace path references")
+
+nested_stale = [finding for finding in nested["findings"] if "scripts/build.sh" in finding.get("evidence", "")]
+if nested_stale:
+    raise SystemExit("FAIL: nested package-local script paths should resolve relative to their rule file")
+
+invalid_json = [finding for finding in invalid_package["findings"] if "not valid JSON" in finding.get("evidence", "")]
+if not invalid_json:
+    raise SystemExit("FAIL: malformed package.json should produce an explicit finding instead of crashing audit")
+
+hook_findings = [finding for finding in single_quote["findings"] if "hook `" in finding.get("evidence", "")]
+if len(hook_findings) != 2:
+    raise SystemExit(f"FAIL: single-quoted hook fixture should produce exactly 2 hook findings, got {len(hook_findings)}")
+if any(finding["source"].endswith(":1") for finding in hook_findings):
+    raise SystemExit("FAIL: single-quoted hook findings should point at the hook command line, not line 1")
 
 print("workspace audit checks passed")
 PY

@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 from collections import defaultdict
 from pathlib import Path
 
@@ -18,6 +20,7 @@ from memorylint_core import (
     validate_agents_integrity,
     validate_constitution_integrity,
     validate_hook_consistency,
+    validate_repository_diff,
     apply_edits_to_lines,
 )
 
@@ -64,7 +67,7 @@ def main() -> int:
     manual_handoffs = [finding for finding in report_copy.get("findings", []) if finding.get("manual_handoff")]
     if args.handoff_out:
         args.handoff_out.write_text(
-            __import__("json").dumps(manual_handoffs, indent=2, ensure_ascii=False) + "\n",
+            json.dumps(manual_handoffs, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
         )
 
@@ -85,7 +88,7 @@ def main() -> int:
         if not target_path.exists():
             print(format_apply_failure([f"Target file disappeared after audit: {relative}"], []), end="")
             return 1
-        current_hash = __import__("hashlib").sha256(target_path.read_bytes()).hexdigest()
+        current_hash = hashlib.sha256(target_path.read_bytes()).hexdigest()
         if source_hashes.get(relative) != current_hash:
             print(format_apply_failure([f"Staleness check failed for {relative}"], []), end="")
             return 1
@@ -106,6 +109,7 @@ def main() -> int:
             finding_map = {finding["id"]: finding for finding in approved}
             validation_issues.extend(validate_constitution_integrity(before_text, after_text, finding_map))
     validation_issues.extend(validate_hook_consistency(workspace_root))
+    validation_issues.extend(validate_repository_diff(workspace_root))
 
     if validation_issues:
         for relative, before_text in originals.items():

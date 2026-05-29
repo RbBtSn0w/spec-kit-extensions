@@ -105,4 +105,141 @@ grep -q '^outside$' "$TMP_DIR/escaped.txt" || {
   exit 1
 }
 
+mkdir -p "$TMP_DIR/apply-approved"
+cat >"$TMP_DIR/apply-approved/AGENTS.md" <<'EOF'
+# Workspace Rules
+
+## Commands
+
+- Remove stale script reference.
+- Remove stale npm script reference.
+EOF
+"$PYTHON_BIN" - "$TMP_DIR/apply-approved/approved-report.json" "$TMP_DIR/apply-approved" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+workspace = Path(sys.argv[2]).resolve()
+agents_path = workspace / "AGENTS.md"
+report = {
+    "schema_version": "1.0",
+    "workspace_root": str(workspace),
+    "source_metadata": [{
+        "path": "AGENTS.md",
+        "sha256": hashlib.sha256(agents_path.read_bytes()).hexdigest(),
+    }],
+    "instruction_map": [],
+    "findings": [
+        {
+            "id": "ML-safe",
+            "drift_type": "reality",
+            "severity": "warning",
+            "confidence": "high",
+            "source": "AGENTS.md:5",
+            "evidence": "safe finding",
+            "recommended_destination": "AGENTS.md",
+            "suggested_action": "delete",
+            "detail": "delete first line",
+            "edits": [{"path": "AGENTS.md", "action": "delete", "start_line": 5, "end_line": 5, "reason": "safe"}],
+        },
+        {
+            "id": "ML-approved",
+            "drift_type": "reality",
+            "severity": "critical",
+            "confidence": "high",
+            "source": "AGENTS.md:6",
+            "evidence": "approved finding",
+            "recommended_destination": "AGENTS.md",
+            "suggested_action": "delete",
+            "detail": "delete second line",
+            "edits": [{"path": "AGENTS.md", "action": "delete", "start_line": 6, "end_line": 6, "reason": "approved"}],
+        },
+    ],
+    "metrics": {},
+    "summary": {},
+}
+report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+PY
+"$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/apply-approved/approved-report.json" --mode apply-all-approved --approve ML-approved >/dev/null
+grep -q "Remove stale script reference" "$TMP_DIR/apply-approved/AGENTS.md" || {
+  echo "FAIL: apply-all-approved should not apply unapproved safe findings" >&2
+  exit 1
+}
+if grep -q "Remove stale npm script reference" "$TMP_DIR/apply-approved/AGENTS.md"; then
+  echo "FAIL: apply-all-approved should apply explicitly approved findings" >&2
+  exit 1
+fi
+
+mkdir -p "$TMP_DIR/git-diff-check"
+cat >"$TMP_DIR/git-diff-check/AGENTS.md" <<'EOF'
+# Workspace Rules
+
+## Commands
+
+- Clean command
+- Stable command
+EOF
+git -C "$TMP_DIR/git-diff-check" init -q
+git -C "$TMP_DIR/git-diff-check" config user.name "MemoryLint Test"
+git -C "$TMP_DIR/git-diff-check" config user.email "memorylint@example.com"
+git -C "$TMP_DIR/git-diff-check" add AGENTS.md
+git -C "$TMP_DIR/git-diff-check" commit -qm "init"
+"$PYTHON_BIN" - "$TMP_DIR/git-diff-check/git-report.json" "$TMP_DIR/git-diff-check" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+workspace = Path(sys.argv[2]).resolve()
+agents_path = workspace / "AGENTS.md"
+report = {
+    "schema_version": "1.0",
+    "workspace_root": str(workspace),
+    "source_metadata": [{
+        "path": "AGENTS.md",
+        "sha256": hashlib.sha256(agents_path.read_bytes()).hexdigest(),
+    }],
+    "instruction_map": [],
+    "findings": [
+        {
+            "id": "ML-diff",
+            "drift_type": "reality",
+            "severity": "warning",
+            "confidence": "high",
+            "source": "AGENTS.md:5",
+            "evidence": "git diff check",
+            "recommended_destination": "AGENTS.md",
+            "suggested_action": "rewrite",
+            "detail": "introduce trailing whitespace",
+            "edits": [{
+                "path": "AGENTS.md",
+                "action": "replace",
+                "start_line": 5,
+                "end_line": 5,
+                "replacement": ["- Dirty command  "],
+                "reason": "diff check",
+            }],
+        },
+    ],
+    "metrics": {},
+    "summary": {},
+}
+report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+PY
+if "$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/git-diff-check/git-report.json" --mode apply-all-approved --approve ML-diff >"$TMP_DIR/git-diff-check/output.txt" 2>&1; then
+  echo "FAIL: apply should rollback when git diff --check fails" >&2
+  exit 1
+fi
+grep -q "git diff --check failed" "$TMP_DIR/git-diff-check/output.txt" || {
+  echo "FAIL: git diff validation failure missing" >&2
+  exit 1
+}
+grep -q "Clean command" "$TMP_DIR/git-diff-check/AGENTS.md" || {
+  echo "FAIL: git diff validation rollback should restore original file" >&2
+  exit 1
+}
+
 echo "apply workflow checks passed"

@@ -30,6 +30,9 @@ jobs:
           bash memorylint/tests/test-memorylint-regressions.sh
           bash memorylint/tests/test-fixture-validation.sh
           bash memorylint/tests/test-fixture-scanner.sh
+          bash memorylint/tests/test-workspace-audit.sh
+          bash memorylint/tests/test-apply-workflow.sh
+          bash memorylint/tests/test-load-agents-proof.sh
 
   powershell-bridge-tests:
     name: powershell-bridge-tests

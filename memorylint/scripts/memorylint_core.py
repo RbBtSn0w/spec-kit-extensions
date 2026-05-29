@@ -7,6 +7,7 @@ import copy
 import hashlib
 import json
 import re
+import subprocess
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -126,8 +127,9 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def resolve_workspace_path(workspace_root: Path, relative: str) -> Path:
-    candidate = (workspace_root / relative).resolve()
+def resolve_workspace_path(workspace_root: Path, relative: str, *, base_path: Path | None = None) -> Path:
+    candidate_root = base_path if base_path is not None else workspace_root
+    candidate = (candidate_root / relative).resolve()
     try:
         candidate.relative_to(workspace_root)
     except ValueError as exc:
@@ -272,6 +274,20 @@ def parse_extension_hooks(text: str) -> dict[str, str]:
     return hooks
 
 
+def find_hook_command_line(text: str, hook_name: str) -> int | None:
+    current_hook: str | None = None
+    for index, line in enumerate(text.splitlines(), start=1):
+        hook_name_match = re.match(r"^\s{2}([a-z_]+):\s*$", line)
+        if hook_name_match:
+            current_hook = hook_name_match.group(1)
+            continue
+        if current_hook != hook_name:
+            continue
+        if re.match(r'^\s{4}command:\s*["\']?([^"\']+)["\']?\s*$', line):
+            return index
+    return None
+
+
 def manifest_rules(path: Path, workspace_root: Path, next_rule_id: int) -> tuple[list[Rule], int]:
     text = read_text(path)
     rules: list[Rule] = []
@@ -280,7 +296,7 @@ def manifest_rules(path: Path, workspace_root: Path, next_rule_id: int) -> tuple
     extension_id = extension_id_match.group(1) if extension_id_match else ""
 
     for hook_name, command_name in parse_extension_hooks(text).items():
-        line_number = find_line_number(text, f"command: \"{command_name}\"") or find_line_number(text, f"command: {command_name}") or 1
+        line_number = find_hook_command_line(text, hook_name) or 1
         rule_id = f"R-{next_rule_id:03d}"
         next_rule_id += 1
         summary = f"Hook {hook_name} uses command {command_name}"
@@ -476,7 +492,7 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
         for reference in detect_path_references(rule):
             key = (rule.source, reference)
             try:
-                candidate = resolve_workspace_path(workspace_root, reference)
+                candidate = resolve_workspace_path(workspace_root, reference, base_path=rule_path.parent)
             except ValueError:
                 if key in seen_sources:
                     continue
@@ -539,7 +555,34 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
         if npm_match:
             script_name = npm_match.group(1)
             package_json = nearest_package_json(rule_path, workspace_root)
-            package_data = json.loads(package_json.read_text(encoding="utf-8")) if package_json and package_json.exists() else {}
+            package_data: dict[str, object] = {}
+            if package_json and package_json.exists():
+                try:
+                    loaded = json.loads(package_json.read_text(encoding="utf-8"))
+                except json.JSONDecodeError:
+                    manifest_reference = relative_path(package_json, workspace_root)
+                    key = (rule.source, manifest_reference)
+                    if key in seen_sources:
+                        continue
+                    seen_sources.add(key)
+                    findings.append(
+                        Finding(
+                            id="",
+                            drift_type="reality",
+                            severity="warning",
+                            confidence="high",
+                            source=f"{rule.source}:{rule.line_range}",
+                            evidence=f"{rule.source} references `npm run {script_name}`, but `{manifest_reference}` is not valid JSON.",
+                            recommended_destination=manifest_reference,
+                            suggested_action="rewrite",
+                            detail=f"Fix `{manifest_reference}` so MemoryLint can verify the `{script_name}` script.",
+                            rule_ids=[rule.rule_id],
+                            category=rule.category,
+                        )
+                    )
+                    continue
+                if isinstance(loaded, dict):
+                    package_data = loaded
             scripts = package_data.get("scripts", {}) if isinstance(package_data, dict) else {}
             if script_name not in scripts:
                 findings.append(
@@ -595,7 +638,11 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
                 )
             )
 
+    scanned_manifests: set[str] = set()
     for manifest in [rule for rule in rules if path_kind(Path(rule.source)) == "manifest"]:
+        if manifest.source in scanned_manifests:
+            continue
+        scanned_manifests.add(manifest.source)
         manifest_path = workspace_root / manifest.source
         manifest_text = read_text(manifest_path)
         extension_id_match = re.search(r'^\s*id:\s*["\']?([^"\']+)["\']?\s*$', manifest_text, re.MULTILINE)
@@ -605,7 +652,7 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
             if command_name in declared:
                 continue
             replacement = MEMORYLINT_EXPECTED_HOOKS.get(hook_name, command_name) if extension_id == "memorylint" else command_name
-            line_number = find_line_number(manifest_text, f'command: "{command_name}"') or find_line_number(manifest_text, f"command: {command_name}") or 1
+            line_number = find_hook_command_line(manifest_text, hook_name) or 1
             findings.append(
                 Finding(
                     id="",
@@ -1023,7 +1070,7 @@ def approved_findings(report_payload: dict[str, object], mode: str, approved_ids
     if mode == "apply-safe-fixes":
         return [finding for finding in findings if safe_mode_eligible(finding)]
     approved_ids = approved_ids or set()
-    return [finding for finding in findings if finding["id"] in approved_ids or safe_mode_eligible(finding)]
+    return [finding for finding in findings if finding["id"] in approved_ids]
 
 
 def apply_edits_to_lines(lines: list[str], edits: list[dict[str, object]]) -> list[str]:
@@ -1055,12 +1102,12 @@ def validate_agents_integrity(before_text: str, after_text: str) -> list[str]:
         if any(keyword in heading for heading in before_normalized for keyword in family):
             if not any(keyword in heading for heading in after_normalized for keyword in family):
                 issues.append(f"Missing AGENTS.md critical section family after apply: {family[0]}")
+    has_heading_above = False
     for index, line in enumerate(after_text.splitlines(), start=1):
+        if re.match(r"^\s{0,3}##\s+", line):
+            has_heading_above = True
+            continue
         if re.match(r"^\s*[-*]\s+", line):
-            has_heading_above = any(
-                re.match(r"^\s{0,3}##\s+", earlier)
-                for earlier in after_text.splitlines()[: index - 1]
-            )
             if not has_heading_above:
                 issues.append(f"Found orphaned list item in AGENTS.md at line {index}")
                 break
@@ -1098,6 +1145,36 @@ def validate_hook_consistency(workspace_root: Path) -> list[str]:
                     f"{relative_path(manifest_path, workspace_root)} hook `{hook_name}` references undeclared command `{command_name}`"
                 )
     return issues
+
+
+def validate_repository_diff(workspace_root: Path) -> list[str]:
+    try:
+        repo_check = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=workspace_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return []
+    if repo_check.returncode != 0:
+        return []
+
+    diff_check = subprocess.run(
+        ["git", "diff", "--check", "--", "."],
+        cwd=workspace_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if diff_check.returncode == 0:
+        return []
+
+    output = (diff_check.stdout + diff_check.stderr).strip()
+    if not output:
+        return ["git diff --check failed after apply."]
+    return [f"git diff --check failed: {line}" for line in output.splitlines()]
 
 
 def format_apply_summary(applied: list[dict[str, object]], files_modified: list[str], validation_issues: list[str]) -> str:

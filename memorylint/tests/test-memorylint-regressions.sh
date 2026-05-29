@@ -38,6 +38,7 @@ load_agents_script = root / "memorylint/scripts/load_agents_state.py"
 workspace_audit_test_path = root / "memorylint/tests/test-workspace-audit.sh"
 apply_workflow_test_path = root / "memorylint/tests/test-apply-workflow.sh"
 load_agents_test_path = root / "memorylint/tests/test-load-agents-proof.sh"
+ci_workflow = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
 
 
 def require(condition: bool, message: str) -> None:
@@ -250,6 +251,18 @@ require(load_agents_script.exists(), "memorylint/scripts/load_agents_state.py mu
 require(workspace_audit_test_path.exists(), "memorylint/tests/test-workspace-audit.sh must exist")
 require(apply_workflow_test_path.exists(), "memorylint/tests/test-apply-workflow.sh must exist")
 require(load_agents_test_path.exists(), "memorylint/tests/test-load-agents-proof.sh must exist")
+require(
+    "bash memorylint/tests/test-workspace-audit.sh" in ci_workflow,
+    "CI must run memorylint/tests/test-workspace-audit.sh",
+)
+require(
+    "bash memorylint/tests/test-apply-workflow.sh" in ci_workflow,
+    "CI must run memorylint/tests/test-apply-workflow.sh",
+)
+require(
+    "bash memorylint/tests/test-load-agents-proof.sh" in ci_workflow,
+    "CI must run memorylint/tests/test-load-agents-proof.sh",
+)
 
 # ── design document ─────────────────────────────────────────────────────────
 
