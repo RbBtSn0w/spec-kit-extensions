@@ -126,6 +126,15 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def resolve_workspace_path(workspace_root: Path, relative: str) -> Path:
+    candidate = (workspace_root / relative).resolve()
+    try:
+        candidate.relative_to(workspace_root)
+    except ValueError as exc:
+        raise ValueError(f"Path escapes workspace: {relative}") from exc
+    return candidate
+
+
 def relative_path(path: Path, workspace_root: Path) -> str:
     return path.relative_to(workspace_root).as_posix()
 
@@ -465,9 +474,39 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
         line_number = int(rule.line_range.split("-")[0])
 
         for reference in detect_path_references(rule):
-            candidate = (workspace_root / reference).resolve()
+            key = (rule.source, reference)
+            try:
+                candidate = resolve_workspace_path(workspace_root, reference)
+            except ValueError:
+                if key in seen_sources:
+                    continue
+                seen_sources.add(key)
+                findings.append(
+                    Finding(
+                        id="",
+                        drift_type="reality",
+                        severity="warning",
+                        confidence="high",
+                        source=f"{rule.source}:{rule.line_range}",
+                        evidence=f"{rule.source} references `{reference}` but that path escapes the workspace boundary.",
+                        recommended_destination="N/A",
+                        suggested_action="delete",
+                        detail=f"Remove or replace the out-of-workspace reference `{reference}`.",
+                        rule_ids=[rule.rule_id],
+                        category=rule.category,
+                        edits=[
+                            Edit(
+                                path=rule.source,
+                                action="delete",
+                                start_line=line_number,
+                                end_line=line_number,
+                                reason=f"Delete out-of-workspace reference {reference}.",
+                            )
+                        ],
+                    )
+                )
+                continue
             if not candidate.exists():
-                key = (rule.source, reference)
                 if key in seen_sources:
                     continue
                 seen_sources.add(key)

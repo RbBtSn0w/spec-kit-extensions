@@ -23,14 +23,23 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 "$PYTHON_BIN" "$AUDIT_SCRIPT" "$FIXTURES_DIR/clean-repo" --json-out "$TMP_DIR/clean.json" >/dev/null
 "$PYTHON_BIN" "$AUDIT_SCRIPT" "$FIXTURES_DIR/bloated-agents" --json-out "$TMP_DIR/bloated.json" >/dev/null
+mkdir -p "$TMP_DIR/escape-ref"
+cat >"$TMP_DIR/escape-ref/AGENTS.md" <<'EOF'
+# Workspace Rules
 
-"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" <<'PY'
+- Run `../outside.sh` before deploy.
+EOF
+printf '#!/usr/bin/env bash\n' >"$TMP_DIR/outside.sh"
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/escape-ref" --json-out "$TMP_DIR/escape.json" >/dev/null
+
+"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" "$TMP_DIR/escape.json" <<'PY'
 import json
 import sys
 from pathlib import Path
 
 clean = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 bloated = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+escaped = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
 
 if clean["metrics"]["total_findings"] != 0:
     raise SystemExit("FAIL: clean-repo workspace audit should produce zero findings")
@@ -46,6 +55,10 @@ if not bloated["metrics"]["files_that_would_be_modified"]:
 handoffs = [finding for finding in bloated["findings"] if finding.get("manual_handoff")]
 if not handoffs:
     raise SystemExit("FAIL: bloated-agents should emit at least one constitution manual handoff")
+
+escape_findings = [finding for finding in escaped["findings"] if "../outside.sh" in finding.get("evidence", "")]
+if not escape_findings:
+    raise SystemExit("FAIL: workspace audit should flag out-of-workspace path references")
 
 print("workspace audit checks passed")
 PY

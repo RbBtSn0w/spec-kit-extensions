@@ -61,4 +61,48 @@ grep -q "speckit.memorylint.run" "$TMP_DIR/post-apply-breakage/extension.yml" ||
   exit 1
 }
 
+cp -R "$FIXTURES_DIR/stale-command" "$TMP_DIR/path-escape"
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/path-escape" --json-out "$TMP_DIR/path-escape-report.json" >/dev/null
+printf 'outside\n' > "$TMP_DIR/escaped.txt"
+"$PYTHON_BIN" - "$TMP_DIR/path-escape-report.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+report = json.loads(report_path.read_text(encoding="utf-8"))
+report["findings"] = [{
+    "id": "ML-escape",
+    "drift_type": "reality",
+    "severity": "warning",
+    "confidence": "high",
+    "source": "AGENTS.md:3-3",
+    "evidence": "malicious report",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "delete",
+    "detail": "attempt escape",
+    "edits": [{
+        "path": "../escaped.txt",
+        "action": "delete",
+        "start_line": 1,
+        "end_line": 1,
+        "reason": "escape test"
+    }]
+}]
+report["source_metadata"] = [{"path": "../escaped.txt", "sha256": "ignored"}]
+report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+PY
+if "$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/path-escape-report.json" --mode apply-all-approved --approve ML-escape >"$TMP_DIR/path-escape.txt" 2>&1; then
+  echo "FAIL: apply should reject report paths outside the workspace" >&2
+  exit 1
+fi
+grep -q "Path escapes workspace" "$TMP_DIR/path-escape.txt" || {
+  echo "FAIL: workspace escape failure output missing" >&2
+  exit 1
+}
+grep -q '^outside$' "$TMP_DIR/escaped.txt" || {
+  echo "FAIL: escaped target should remain unchanged" >&2
+  exit 1
+}
+
 echo "apply workflow checks passed"

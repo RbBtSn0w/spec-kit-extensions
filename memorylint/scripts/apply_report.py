@@ -14,6 +14,7 @@ from memorylint_core import (
     format_apply_failure,
     format_apply_summary,
     read_text,
+    resolve_workspace_path,
     validate_agents_integrity,
     validate_constitution_integrity,
     validate_hook_consistency,
@@ -73,8 +74,14 @@ def main() -> int:
 
     source_hashes = {item["path"]: item["sha256"] for item in report_copy.get("source_metadata", [])}
     target_paths = sorted({edit["path"] for finding in approved for edit in finding.get("edits", [])})
+    resolved_targets: dict[str, Path] = {}
     for relative in target_paths:
-        target_path = workspace_root / relative
+        try:
+            target_path = resolve_workspace_path(workspace_root, relative)
+        except ValueError as exc:
+            print(format_apply_failure([str(exc)], []), end="")
+            return 1
+        resolved_targets[relative] = target_path
         if not target_path.exists():
             print(format_apply_failure([f"Target file disappeared after audit: {relative}"], []), end="")
             return 1
@@ -83,16 +90,16 @@ def main() -> int:
             print(format_apply_failure([f"Staleness check failed for {relative}"], []), end="")
             return 1
 
-    originals = {relative: read_text(workspace_root / relative) for relative in target_paths}
+    originals = {relative: read_text(resolved_targets[relative]) for relative in target_paths}
     edits_by_file = grouped_edits(approved)
     for relative, edits in edits_by_file.items():
-        target_path = workspace_root / relative
+        target_path = resolved_targets[relative]
         updated = apply_edits_to_lines(read_text(target_path).splitlines(), edits)
         target_path.write_text("\n".join(updated).rstrip() + "\n", encoding="utf-8")
 
     validation_issues: list[str] = []
     for relative, before_text in originals.items():
-        after_text = read_text(workspace_root / relative)
+        after_text = read_text(resolved_targets[relative])
         if relative.endswith("AGENTS.md"):
             validation_issues.extend(validate_agents_integrity(before_text, after_text))
         if relative.endswith(".specify/memory/constitution.md"):
@@ -102,7 +109,7 @@ def main() -> int:
 
     if validation_issues:
         for relative, before_text in originals.items():
-            (workspace_root / relative).write_text(before_text, encoding="utf-8")
+            resolved_targets[relative].write_text(before_text, encoding="utf-8")
         print(format_apply_failure(validation_issues, sorted(originals)), end="")
         return 1
 
