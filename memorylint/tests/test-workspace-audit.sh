@@ -37,7 +37,7 @@ cat >"$TMP_DIR/nested-ref/packages/frontend/AGENTS.md" <<'EOF'
 
 ## Commands
 
-- Run `scripts/build.sh` before release.
+- Run `bash scripts/build.sh` before release.
 EOF
 printf '#!/usr/bin/env bash\n' >"$TMP_DIR/nested-ref/packages/frontend/scripts/build.sh"
 "$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/nested-ref" --json-out "$TMP_DIR/nested.json" >/dev/null
@@ -71,8 +71,40 @@ provides:
       description: "Audit"
 EOF
 "$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/single-quote-hooks" --json-out "$TMP_DIR/single-quote.json" >/dev/null
+mkdir -p "$TMP_DIR/comment-hook"
+cat >"$TMP_DIR/comment-hook/extension.yml" <<'EOF'
+schema_version: "1.0"
+extension:
+  id: memorylint
+  version: "0.1.0"
+  description: "Fixture for commented hook commands."
+hooks:
+  before_plan:
+    command: speckit.memorylint.load-agents # planning gate
+provides:
+  commands:
+    - name: speckit.memorylint.load-agents
+      description: "Load agents"
+EOF
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/comment-hook" --json-out "$TMP_DIR/comment-hook.json" >/dev/null
+mkdir -p "$TMP_DIR/other-extension-hook"
+cat >"$TMP_DIR/other-extension-hook/extension.yml" <<'EOF'
+schema_version: "1.0"
+extension:
+  id: demo-extension
+  version: "0.1.0"
+  description: "Fixture for external hook remediation."
+hooks:
+  before_plan:
+    command: speckit.demo.audit
+provides:
+  commands:
+    - name: speckit.demo.other
+      description: "Other command"
+EOF
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$TMP_DIR/other-extension-hook" --json-out "$TMP_DIR/other-extension.json" >/dev/null
 
-"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" "$TMP_DIR/escape.json" "$TMP_DIR/nested.json" "$TMP_DIR/invalid-package.json" "$TMP_DIR/single-quote.json" <<'PY'
+"$PYTHON_BIN" - "$TMP_DIR/clean.json" "$TMP_DIR/bloated.json" "$TMP_DIR/escape.json" "$TMP_DIR/nested.json" "$TMP_DIR/invalid-package.json" "$TMP_DIR/single-quote.json" "$TMP_DIR/comment-hook.json" "$TMP_DIR/other-extension.json" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -83,6 +115,8 @@ escaped = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
 nested = json.loads(Path(sys.argv[4]).read_text(encoding="utf-8"))
 invalid_package = json.loads(Path(sys.argv[5]).read_text(encoding="utf-8"))
 single_quote = json.loads(Path(sys.argv[6]).read_text(encoding="utf-8"))
+comment_hook = json.loads(Path(sys.argv[7]).read_text(encoding="utf-8"))
+other_extension = json.loads(Path(sys.argv[8]).read_text(encoding="utf-8"))
 
 if clean["metrics"]["total_findings"] != 0:
     raise SystemExit("FAIL: clean-repo workspace audit should produce zero findings")
@@ -116,6 +150,16 @@ if len(hook_findings) != 2:
     raise SystemExit(f"FAIL: single-quoted hook fixture should produce exactly 2 hook findings, got {len(hook_findings)}")
 if any(finding["source"].endswith(":1") for finding in hook_findings):
     raise SystemExit("FAIL: single-quoted hook findings should point at the hook command line, not line 1")
+
+comment_hook_findings = [finding for finding in comment_hook["findings"] if "hook `" in finding.get("evidence", "")]
+if comment_hook_findings:
+    raise SystemExit("FAIL: inline YAML comments should not become part of hook command names")
+
+external_hook_findings = [finding for finding in other_extension["findings"] if "hook `" in finding.get("evidence", "")]
+if len(external_hook_findings) != 1:
+    raise SystemExit(f"FAIL: external hook fixture should produce exactly 1 hook finding, got {len(external_hook_findings)}")
+if external_hook_findings[0].get("edits"):
+    raise SystemExit("FAIL: non-memorylint hook findings without a known replacement should not emit no-op edits")
 
 print("workspace audit checks passed")
 PY

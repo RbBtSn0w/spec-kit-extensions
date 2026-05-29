@@ -172,6 +172,115 @@ if grep -q "Remove stale npm script reference" "$TMP_DIR/apply-approved/AGENTS.m
   exit 1
 fi
 
+mkdir -p "$TMP_DIR/workspace-override"
+cat >"$TMP_DIR/workspace-override/AGENTS.md" <<'EOF'
+# Workspace Rules
+
+## Commands
+
+- Override target
+EOF
+"$PYTHON_BIN" - "$TMP_DIR/workspace-override/override-report.json" "$TMP_DIR/workspace-override" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+workspace = Path(sys.argv[2]).resolve()
+agents_path = workspace / "AGENTS.md"
+report = {
+    "schema_version": "1.0",
+    "workspace_root": "/tmp/elsewhere",
+    "source_metadata": [{
+        "path": "AGENTS.md",
+        "sha256": hashlib.sha256(agents_path.read_bytes()).hexdigest(),
+    }],
+    "instruction_map": [],
+    "findings": [{
+        "id": "ML-override",
+        "drift_type": "reality",
+        "severity": "warning",
+        "confidence": "high",
+        "source": "AGENTS.md:5",
+        "evidence": "workspace override",
+        "recommended_destination": "AGENTS.md",
+        "suggested_action": "delete",
+        "detail": "delete target",
+        "edits": [{"path": "AGENTS.md", "action": "delete", "start_line": 5, "end_line": 5, "reason": "override"}],
+    }],
+    "metrics": {},
+    "summary": {},
+}
+report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+PY
+"$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/workspace-override/override-report.json" --workspace "$TMP_DIR/workspace-override" --mode apply-all-approved --approve ML-override >/dev/null
+if grep -q "Override target" "$TMP_DIR/workspace-override/AGENTS.md"; then
+  echo "FAIL: --workspace override should apply against the overridden workspace root" >&2
+  exit 1
+fi
+
+mkdir -p "$TMP_DIR/constitution-edit/.specify/memory"
+cat >"$TMP_DIR/constitution-edit/.specify/memory/constitution.md" <<'EOF'
+# Constitution
+
+## Rules
+
+- Immutable rule
+EOF
+"$PYTHON_BIN" - "$TMP_DIR/constitution-edit/constitution-report.json" "$TMP_DIR/constitution-edit" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+workspace = Path(sys.argv[2]).resolve()
+constitution_path = workspace / ".specify/memory/constitution.md"
+report = {
+    "schema_version": "1.0",
+    "workspace_root": str(workspace),
+    "source_metadata": [{
+        "path": ".specify/memory/constitution.md",
+        "sha256": hashlib.sha256(constitution_path.read_bytes()).hexdigest(),
+    }],
+    "instruction_map": [],
+    "findings": [{
+        "id": "ML-constitution",
+        "drift_type": "reality",
+        "severity": "warning",
+        "confidence": "high",
+        "source": ".specify/memory/constitution.md:5",
+        "evidence": "constitution edit",
+        "recommended_destination": ".specify/memory/constitution.md",
+        "suggested_action": "delete",
+        "detail": "should remain manual",
+        "edits": [{
+            "path": ".specify/memory/constitution.md",
+            "action": "delete",
+            "start_line": 5,
+            "end_line": 5,
+            "reason": "constitution",
+        }],
+    }],
+    "metrics": {},
+    "summary": {},
+}
+report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+PY
+if "$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/constitution-edit/constitution-report.json" --mode apply-all-approved --approve ML-constitution >"$TMP_DIR/constitution-edit/output.txt" 2>&1; then
+  echo "FAIL: apply should reject constitution edit targets" >&2
+  exit 1
+fi
+grep -q "Constitution edits must stay manual handoffs" "$TMP_DIR/constitution-edit/output.txt" || {
+  echo "FAIL: constitution protection failure output missing" >&2
+  exit 1
+}
+grep -q "Immutable rule" "$TMP_DIR/constitution-edit/.specify/memory/constitution.md" || {
+  echo "FAIL: constitution file should remain unchanged" >&2
+  exit 1
+}
+
 mkdir -p "$TMP_DIR/git-diff-check"
 cat >"$TMP_DIR/git-diff-check/AGENTS.md" <<'EOF'
 # Workspace Rules
@@ -239,6 +348,76 @@ grep -q "git diff --check failed" "$TMP_DIR/git-diff-check/output.txt" || {
 }
 grep -q "Clean command" "$TMP_DIR/git-diff-check/AGENTS.md" || {
   echo "FAIL: git diff validation rollback should restore original file" >&2
+  exit 1
+}
+
+mkdir -p "$TMP_DIR/overlap-check"
+cat >"$TMP_DIR/overlap-check/AGENTS.md" <<'EOF'
+# Workspace Rules
+
+## Commands
+
+- First rule
+- Second rule
+EOF
+"$PYTHON_BIN" - "$TMP_DIR/overlap-check/overlap-report.json" "$TMP_DIR/overlap-check" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+report_path = Path(sys.argv[1])
+workspace = Path(sys.argv[2]).resolve()
+agents_path = workspace / "AGENTS.md"
+report = {
+    "schema_version": "1.0",
+    "workspace_root": str(workspace),
+    "source_metadata": [{
+        "path": "AGENTS.md",
+        "sha256": hashlib.sha256(agents_path.read_bytes()).hexdigest(),
+    }],
+    "instruction_map": [],
+    "findings": [
+        {
+            "id": "ML-overlap-a",
+            "drift_type": "reality",
+            "severity": "warning",
+            "confidence": "high",
+            "source": "AGENTS.md:5",
+            "evidence": "overlap a",
+            "recommended_destination": "AGENTS.md",
+            "suggested_action": "delete",
+            "detail": "first overlap",
+            "edits": [{"path": "AGENTS.md", "action": "delete", "start_line": 5, "end_line": 5, "reason": "overlap a"}],
+        },
+        {
+            "id": "ML-overlap-b",
+            "drift_type": "reality",
+            "severity": "warning",
+            "confidence": "high",
+            "source": "AGENTS.md:5",
+            "evidence": "overlap b",
+            "recommended_destination": "AGENTS.md",
+            "suggested_action": "delete",
+            "detail": "second overlap",
+            "edits": [{"path": "AGENTS.md", "action": "delete", "start_line": 5, "end_line": 5, "reason": "overlap b"}],
+        },
+    ],
+    "metrics": {},
+    "summary": {},
+}
+report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+PY
+if "$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/overlap-check/overlap-report.json" --mode apply-all-approved --approve ML-overlap-a --approve ML-overlap-b >"$TMP_DIR/overlap-check/output.txt" 2>&1; then
+  echo "FAIL: apply should reject overlapping edits" >&2
+  exit 1
+fi
+grep -q "Overlapping edits detected" "$TMP_DIR/overlap-check/output.txt" || {
+  echo "FAIL: overlapping edit failure output missing" >&2
+  exit 1
+}
+grep -q "First rule" "$TMP_DIR/overlap-check/AGENTS.md" || {
+  echo "FAIL: overlapping edit rejection should leave source unchanged" >&2
   exit 1
 }
 

@@ -45,6 +45,11 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="Optional path to write manual handoff findings as JSON.",
     )
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        help="Optional workspace root override. Defaults to the path stored in the report.",
+    )
     return parser.parse_args()
 
 
@@ -56,12 +61,39 @@ def grouped_edits(findings: list[dict[str, object]]) -> dict[str, list[dict[str,
     return grouped
 
 
+def protected_edit_issues(findings: list[dict[str, object]]) -> list[str]:
+    issues: list[str] = []
+    for finding in findings:
+        for edit in finding.get("edits", []):
+            if str(edit["path"]).endswith(".specify/memory/constitution.md"):
+                issues.append(
+                    f"Finding {finding['id']} targets .specify/memory/constitution.md. Constitution edits must stay manual handoffs."
+                )
+    return issues
+
+
+def overlapping_edit_issues(edits_by_file: dict[str, list[dict[str, object]]]) -> list[str]:
+    issues: list[str] = []
+    for relative, edits in edits_by_file.items():
+        previous: tuple[int, int] | None = None
+        for edit in sorted(edits, key=lambda item: (int(item["start_line"]), int(item["end_line"]))):
+            start = int(edit["start_line"])
+            end = int(edit["end_line"])
+            if previous and start <= previous[1]:
+                issues.append(
+                    f"Overlapping edits detected in {relative}: {previous[0]}-{previous[1]} conflicts with {start}-{end}."
+                )
+                break
+            previous = (start, end)
+    return issues
+
+
 def main() -> int:
     args = parse_args()
     report_path = args.report.resolve()
     report_payload = extract_report_payload(report_path.read_text(encoding="utf-8"))
     report_copy = deep_copy_report(report_payload)
-    workspace_root = Path(report_copy["workspace_root"]).resolve()
+    workspace_root = args.workspace.resolve() if args.workspace else Path(report_copy["workspace_root"]).resolve()
 
     approved = approved_findings(report_copy, args.mode, set(args.approve))
     manual_handoffs = [finding for finding in report_copy.get("findings", []) if finding.get("manual_handoff")]
@@ -74,6 +106,11 @@ def main() -> int:
     if args.mode == "report-only":
         print(format_apply_summary([], [], []), end="")
         return 0
+
+    policy_issues = protected_edit_issues(approved)
+    if policy_issues:
+        print(format_apply_failure(policy_issues, []), end="")
+        return 1
 
     source_hashes = {item["path"]: item["sha256"] for item in report_copy.get("source_metadata", [])}
     target_paths = sorted({edit["path"] for finding in approved for edit in finding.get("edits", [])})
@@ -95,6 +132,10 @@ def main() -> int:
 
     originals = {relative: read_text(resolved_targets[relative]) for relative in target_paths}
     edits_by_file = grouped_edits(approved)
+    overlap_issues = overlapping_edit_issues(edits_by_file)
+    if overlap_issues:
+        print(format_apply_failure(overlap_issues, sorted(originals)), end="")
+        return 1
     for relative, edits in edits_by_file.items():
         target_path = resolved_targets[relative]
         updated = apply_edits_to_lines(read_text(target_path).splitlines(), edits)

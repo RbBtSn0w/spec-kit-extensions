@@ -7,6 +7,7 @@ import copy
 import hashlib
 import json
 import re
+import shlex
 import subprocess
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
@@ -268,10 +269,24 @@ def parse_extension_hooks(text: str) -> dict[str, str]:
         if hook_name_match:
             current_hook = hook_name_match.group(1)
             continue
-        command_match = re.match(r'^\s{4}command:\s*["\']?([^"\']+)["\']?\s*$', line)
-        if current_hook and command_match:
-            hooks[current_hook] = command_match.group(1)
+        command_value = parse_hook_command_value(line)
+        if current_hook and command_value:
+            hooks[current_hook] = command_value
     return hooks
+
+
+def parse_hook_command_value(line: str) -> str | None:
+    match = re.match(r"^\s{4}command:\s*(.+?)\s*$", line)
+    if not match:
+        return None
+    value = match.group(1).strip()
+    if value.startswith('"'):
+        quoted = re.match(r'^"([^"]+)"(?:\s+#.*)?$', value)
+        return quoted.group(1) if quoted else None
+    if value.startswith("'"):
+        quoted = re.match(r"^'([^']+)'(?:\s+#.*)?$", value)
+        return quoted.group(1) if quoted else None
+    return re.sub(r"\s+#.*$", "", value).strip() or None
 
 
 def find_hook_command_line(text: str, hook_name: str) -> int | None:
@@ -283,7 +298,7 @@ def find_hook_command_line(text: str, hook_name: str) -> int | None:
             continue
         if current_hook != hook_name:
             continue
-        if re.match(r'^\s{4}command:\s*["\']?([^"\']+)["\']?\s*$', line):
+        if parse_hook_command_value(line):
             return index
     return None
 
@@ -473,11 +488,25 @@ def find_line_number(text: str, snippet: str) -> int | None:
 
 
 def detect_path_references(rule: Rule) -> Iterable[str]:
+    def looks_like_path_reference(value: str) -> bool:
+        return value.startswith(("scripts/", "bin/", "tools/", "./", "../")) or value.endswith((".sh", ".py", ".rb", ".js", ".ts"))
+
     for match in re.findall(r"`([^`]+)`", rule.text):
         if "://" in match or "{" in match:
             continue
-        if match.startswith(("scripts/", "bin/", "tools/")) or match.endswith((".sh", ".py", ".rb", ".js", ".ts")):
-            yield match
+        normalized = match.strip().rstrip(".,;:")
+        if " " not in normalized and looks_like_path_reference(normalized):
+            yield normalized
+            continue
+        try:
+            tokens = shlex.split(match)
+        except ValueError:
+            tokens = match.split()
+        for token in tokens[1:] if len(tokens) > 1 else tokens:
+            normalized_token = token.strip().rstrip(".,;:")
+            if looks_like_path_reference(normalized_token):
+                yield normalized_token
+                break
 
 
 def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Finding]:
@@ -653,6 +682,21 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
                 continue
             replacement = MEMORYLINT_EXPECTED_HOOKS.get(hook_name, command_name) if extension_id == "memorylint" else command_name
             line_number = find_hook_command_line(manifest_text, hook_name) or 1
+            edits: list[Edit] = []
+            detail = f"Rewrite hook `{hook_name}` to use a declared command."
+            if replacement != command_name:
+                edits = [
+                    Edit(
+                        path=manifest.source,
+                        action="replace",
+                        start_line=line_number,
+                        end_line=line_number,
+                        replacement=[re.sub(r'command:\s*(?:"[^"]+"|\'[^\']+\'|[^#\n]+)', f'command: "{replacement}"', manifest_text.splitlines()[line_number - 1])],
+                        reason=f"Rewrite hook {hook_name} to the declared command {replacement}.",
+                    )
+                ]
+            else:
+                detail = f"Declare `{command_name}` under provides.commands or replace hook `{hook_name}` with a declared command."
             findings.append(
                 Finding(
                     id="",
@@ -663,19 +707,10 @@ def detect_reality_findings(workspace_root: Path, rules: list[Rule]) -> list[Fin
                     evidence=f"{manifest.source} hook `{hook_name}` references `{command_name}`, but provides.commands declares {sorted(declared)}.",
                     recommended_destination=manifest.source,
                     suggested_action="rewrite",
-                    detail=f"Rewrite hook `{hook_name}` to use a declared command.",
+                    detail=detail,
                     rule_ids=[manifest.rule_id],
                     category="domain",
-                    edits=[
-                        Edit(
-                            path=manifest.source,
-                            action="replace",
-                            start_line=line_number,
-                            end_line=line_number,
-                            replacement=[re.sub(r'command:\s*["\']?[^"\']+["\']?', f'command: "{replacement}"', manifest_text.splitlines()[line_number - 1])],
-                            reason=f"Rewrite hook {hook_name} to the declared command {replacement}.",
-                        )
-                    ],
+                    edits=edits,
                 )
             )
 
