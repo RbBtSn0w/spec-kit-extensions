@@ -32,6 +32,12 @@ design = design_path.read_text(encoding="utf-8") if design_path.exists() else ""
 check_boundaries_path = root / "memorylint/commands/check-boundaries.md"
 fixture_scanner_path = root / "memorylint/scripts/scan_fixtures.py"
 fixture_scanner_test_path = root / "memorylint/tests/test-fixture-scanner.sh"
+workspace_audit_script = root / "memorylint/scripts/audit_workspace.py"
+apply_report_script = root / "memorylint/scripts/apply_report.py"
+load_agents_script = root / "memorylint/scripts/load_agents_state.py"
+workspace_audit_test_path = root / "memorylint/tests/test-workspace-audit.sh"
+apply_workflow_test_path = root / "memorylint/tests/test-apply-workflow.sh"
+load_agents_test_path = root / "memorylint/tests/test-load-agents-proof.sh"
 
 
 def require(condition: bool, message: str) -> None:
@@ -117,11 +123,15 @@ require(
 # ── audit.md ─────────────────────────────────────────────────────────────────
 
 require("$ARGUMENTS" in audit, "audit.md must include the $ARGUMENTS context block")
+require("scripts:" in audit, "audit.md must declare scripts frontmatter")
 
 require("Instruction Inventory" in audit, "audit.md must include Instruction Inventory")
 require("Rule Classification" in audit, "audit.md must include Rule Classification")
 require("Evidence Binding" in audit, "audit.md must include Evidence Binding")
 require("Drift Detection" in audit, "audit.md must include Drift Detection")
+require("Canonical Ownership / Precedence Matrix" in audit, "audit.md must include canonical ownership / precedence matrix")
+require("manual_handoff" in audit, "audit.md must define constitution handoff output")
+require("edits" in audit, "audit.md must describe executable edits")
 
 # All 8 categories
 for cat in [
@@ -166,6 +176,7 @@ require(
 # ── apply.md ─────────────────────────────────────────────────────────────────
 
 require("$ARGUMENTS" in apply_cmd, "apply.md must include the $ARGUMENTS context block")
+require("scripts:" in apply_cmd, "apply.md must declare scripts frontmatter")
 
 # Three modes
 require("report-only" in apply_cmd, "apply.md must include report-only mode")
@@ -178,6 +189,7 @@ require("Post-Apply Validation" in apply_cmd, "apply.md must include Post-Apply 
 
 # Rollback
 require("Rollback" in apply_cmd, "apply.md must mention Rollback")
+require("manual_handoff" in apply_cmd or "handoff artifact" in apply_cmd, "apply.md must mention constitution handoff artifact")
 
 # AGENTS.md integrity check
 require("AGENTS.md" in apply_cmd and "Integrity" in apply_cmd, "apply.md must include AGENTS.md integrity check")
@@ -198,6 +210,7 @@ require(
     "$ARGUMENTS" in load_agents,
     "load-agents.md must include the $ARGUMENTS context block",
 )
+require("scripts:" in load_agents, "load-agents.md must declare scripts frontmatter")
 
 # Mandatory failure / fail-fast
 require(
@@ -212,6 +225,7 @@ require(
     "Read-Only" in load_agents or "read-only" in load_agents.lower(),
     "load-agents.md must mention Read-Only constraint",
 )
+require("agents_sha256" in load_agents and "rule_summaries" in load_agents, "load-agents.md must define structured proof output")
 
 # ── check-boundaries.md must NOT exist (old command removed) ─────────────────
 
@@ -230,6 +244,12 @@ require(
     fixture_scanner_test_path.exists(),
     "memorylint/tests/test-fixture-scanner.sh must exist",
 )
+require(workspace_audit_script.exists(), "memorylint/scripts/audit_workspace.py must exist")
+require(apply_report_script.exists(), "memorylint/scripts/apply_report.py must exist")
+require(load_agents_script.exists(), "memorylint/scripts/load_agents_state.py must exist")
+require(workspace_audit_test_path.exists(), "memorylint/tests/test-workspace-audit.sh must exist")
+require(apply_workflow_test_path.exists(), "memorylint/tests/test-apply-workflow.sh must exist")
+require(load_agents_test_path.exists(), "memorylint/tests/test-load-agents-proof.sh must exist")
 
 # ── design document ─────────────────────────────────────────────────────────
 
@@ -238,7 +258,9 @@ for phrase in [
     "Product Boundary",
     "Trust Model",
     "Audit Pipeline",
+    "Source Ownership Matrix",
     "Apply Gate",
+    "Planning Gate",
     "Machine-Readable Report",
     "Regression Corpus",
 ]:

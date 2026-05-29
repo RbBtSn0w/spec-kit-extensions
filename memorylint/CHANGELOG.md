@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Real workspace-level audit/apply/load-agents helper scripts:
+  `scripts/audit_workspace.py`, `scripts/apply_report.py`,
+  `scripts/load_agents_state.py`.
+- Canonical ownership / precedence matrix for architecture, domain,
+  infrastructure, workflow, tooling, and personal preference rules.
+- Constitution manual handoff artifact contract for boundary findings that
+  target `.specify/memory/constitution.md`.
+- Executable `edits` support in the machine-readable audit report so safe/apply
+  runs can use deterministic file changes.
+
+### Changed
+
+- Refactored fixture scanning onto a shared audit core so the regression corpus
+  executes the same detection logic as workspace audit.
+- Strengthened the `before_plan` gate to require structured `AGENTS.md` load
+  proof instead of a verbal acknowledgement only.
+- Aligned README / DESIGN / command docs around the executable report schema and
+  operational audit metrics.
+- Updated regression fixtures to match the canonical ownership matrix and real
+  audit behaviour.
+
 ## [1.5.0] - 2026-05-27
 <!-- planned-bump: major -->
 <!-- next-release-version: 2.0.0 -->

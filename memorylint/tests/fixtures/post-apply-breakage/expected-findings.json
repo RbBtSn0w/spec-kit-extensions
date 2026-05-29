@@ -1,11 +1,31 @@
 [
   {
     "drift_type": "reality",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rewrite the stale command reference to `speckit.memorylint.load-agents`.",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md still references removed command `speckit.memorylint.run`.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "rewrite"
+  },
+  {
+    "drift_type": "reality",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rewrite the stale command reference to `speckit.memorylint.audit`.",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md still references removed command `speckit.memorylint.run`.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "rewrite"
+  },
+  {
+    "drift_type": "reality",
     "severity": "critical",
     "confidence": "high",
-    "description": "Hook before_plan references command 'speckit.memorylint.run' which is not declared in provides.commands — applying a rename without updating extension.yml would break hooks",
+    "description": "Rewrite hook `before_plan` to use a declared command.",
     "source": "extension.yml",
-    "evidence": "extension.yml hook references speckit.memorylint.run, but provides.commands declares ['MemoryLint', 'speckit.memorylint.audit'].",
+    "evidence": "extension.yml hook `before_plan` references `speckit.memorylint.run`, but provides.commands declares ['speckit.memorylint.audit'].",
     "recommended_destination": "extension.yml",
     "suggested_action": "rewrite"
   }

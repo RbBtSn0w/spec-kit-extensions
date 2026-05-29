@@ -1,11 +1,31 @@
 [
   {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rule 'Commit messages should follow the project's custom format: [JIRA-ID] description.' belongs in AGENTS.md, not in .specify/memory/constitution.md.",
+    "source": ".specify/memory/constitution.md",
+    "evidence": ".specify/memory/constitution.md contains a infrastructure rule under heading 'Commit Message Policy'.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "move"
+  },
+  {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rule 'Never use type prefixes like `feat:` or `fix:` in commit messages.' belongs in AGENTS.md, not in .specify/memory/constitution.md.",
+    "source": ".specify/memory/constitution.md",
+    "evidence": ".specify/memory/constitution.md contains a infrastructure rule under heading 'Commit Message Policy'.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "move"
+  },
+  {
     "drift_type": "conflict",
     "severity": "critical",
     "confidence": "high",
-    "description": "AGENTS.md mandates Conventional Commits while constitution.md mandates a custom [JIRA-ID] format — these are mutually exclusive commit message policies",
+    "description": "The commit message policies are mutually exclusive and must be reconciled in one canonical source.",
     "source": "AGENTS.md + .specify/memory/constitution.md",
-    "evidence": "AGENTS.md requires Conventional Commits while constitution.md forbids feat:/fix: prefixes.",
+    "evidence": "AGENTS.md requires Conventional Commits while .specify/memory/constitution.md forbids type prefixes and requires a JIRA format.",
     "recommended_destination": "AGENTS.md",
     "suggested_action": "rewrite"
   }

@@ -3,9 +3,9 @@
     "drift_type": "reality",
     "severity": "warning",
     "confidence": "high",
-    "description": "AGENTS.md references 'scripts/deploy.sh' but the file does not exist in the workspace",
+    "description": "Remove or replace the stale reference to `scripts/deploy.sh`.",
     "source": "AGENTS.md",
-    "evidence": "AGENTS.md names scripts/deploy.sh and the fixture has no scripts/deploy.sh file.",
+    "evidence": "AGENTS.md references `scripts/deploy.sh` but that path does not exist in the workspace.",
     "recommended_destination": "N/A",
     "suggested_action": "delete"
   },
@@ -13,9 +13,9 @@
     "drift_type": "reality",
     "severity": "warning",
     "confidence": "high",
-    "description": "AGENTS.md references 'npm run e2e' but no package.json with e2e script exists in the workspace",
+    "description": "Remove or update the stale npm script reference `e2e`.",
     "source": "AGENTS.md",
-    "evidence": "AGENTS.md names npm run e2e and no package.json e2e script exists in the fixture.",
+    "evidence": "AGENTS.md references `npm run e2e` but the workspace has no package.json script named `e2e`.",
     "recommended_destination": "N/A",
     "suggested_action": "delete"
   }

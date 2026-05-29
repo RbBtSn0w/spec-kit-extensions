@@ -1,22 +1,52 @@
 [
   {
-    "drift_type": "redundancy",
+    "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Build command rules in CLAUDE.md duplicate AGENTS.md — risks divergence if only one file is updated",
-    "source": "AGENTS.md + CLAUDE.md",
-    "evidence": "AGENTS.md and CLAUDE.md both list make build and make test.",
-    "recommended_destination": "AGENTS.md",
-    "suggested_action": "merge"
+    "description": "Rule 'Use repository pattern for all data access.' belongs in .specify/memory/constitution.md, not in .cursor/rules/project.md.",
+    "source": ".cursor/rules/project.md",
+    "evidence": ".cursor/rules/project.md contains a architecture rule under heading 'Architecture'.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
   },
   {
     "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Architecture rules in .cursor/rules/project.md belong in constitution.md, not in editor-specific config",
+    "description": "Rule 'Services must not depend on concrete implementations.' belongs in .specify/memory/constitution.md, not in .cursor/rules/project.md.",
     "source": ".cursor/rules/project.md",
-    "evidence": ".cursor/rules/project.md contains an Architecture section with architecture-boundary rules.",
+    "evidence": ".cursor/rules/project.md contains a architecture rule under heading 'Architecture'.",
     "recommended_destination": ".specify/memory/constitution.md",
     "suggested_action": "move"
+  },
+  {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rule 'All modules follow hexagonal architecture boundaries.' belongs in .specify/memory/constitution.md, not in .cursor/rules/project.md.",
+    "source": ".cursor/rules/project.md",
+    "evidence": ".cursor/rules/project.md contains a architecture rule under heading 'Architecture'.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
+  },
+  {
+    "drift_type": "reality",
+    "severity": "info",
+    "confidence": "medium",
+    "description": "The canonical constitution file is missing. Create or restore it before consolidating architecture/domain rules.",
+    "source": ".specify/memory/constitution.md",
+    "evidence": "The workspace does not contain .specify/memory/constitution.md, so architecture/domain rules do not have their canonical home.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "keep"
+  },
+  {
+    "drift_type": "redundancy",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Build command rules are duplicated across AGENTS.md and CLAUDE.md, risking divergence.",
+    "source": "AGENTS.md + CLAUDE.md",
+    "evidence": "AGENTS.md and CLAUDE.md both list make build and make test.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "merge"
   }
 ]

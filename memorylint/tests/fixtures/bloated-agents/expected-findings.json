@@ -3,9 +3,9 @@
     "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Architecture rule 'Use MVC pattern' in AGENTS.md belongs in constitution.md",
+    "description": "Rule 'Use MVC pattern for all user-facing modules.' belongs in .specify/memory/constitution.md, not in AGENTS.md.",
     "source": "AGENTS.md",
-    "evidence": "AGENTS.md contains an architecture pattern rule outside the constitution.",
+    "evidence": "AGENTS.md contains a architecture rule under heading 'Architecture (MISPLACED — should be in constitution)'.",
     "recommended_destination": ".specify/memory/constitution.md",
     "suggested_action": "move"
   },
@@ -13,9 +13,9 @@
     "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Architecture rule 'State management via Redux' in AGENTS.md belongs in constitution.md",
+    "description": "Rule 'State management must be handled via Redux and only Redux.' belongs in .specify/memory/constitution.md, not in AGENTS.md.",
     "source": "AGENTS.md",
-    "evidence": "AGENTS.md contains a state-management architecture rule outside the constitution.",
+    "evidence": "AGENTS.md contains a architecture rule under heading 'Architecture (MISPLACED — should be in constitution)'.",
     "recommended_destination": ".specify/memory/constitution.md",
     "suggested_action": "move"
   },
@@ -23,9 +23,29 @@
     "drift_type": "boundary",
     "severity": "warning",
     "confidence": "high",
-    "description": "Architecture rule 'API design must follow REST principles' in AGENTS.md belongs in constitution.md",
+    "description": "Rule 'API design must follow REST principles with JSON:API response format.' belongs in .specify/memory/constitution.md, not in AGENTS.md.",
     "source": "AGENTS.md",
-    "evidence": "AGENTS.md contains an API design rule outside the constitution.",
+    "evidence": "AGENTS.md contains a architecture rule under heading 'Architecture (MISPLACED — should be in constitution)'.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
+  },
+  {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rule 'Prefer composition over inheritance in all service layers.' belongs in .specify/memory/constitution.md, not in AGENTS.md.",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md contains a architecture rule under heading 'Code Conventions (MISPLACED — should be in constitution)'.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
+  },
+  {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rule 'All public interfaces must include JSDoc annotations.' belongs in .specify/memory/constitution.md, not in AGENTS.md.",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md contains a architecture rule under heading 'Code Conventions (MISPLACED — should be in constitution)'.",
     "recommended_destination": ".specify/memory/constitution.md",
     "suggested_action": "move"
   }

@@ -4,6 +4,12 @@ Evidence-driven instruction drift checker for Spec Kit.
 
 MemoryLint audits long-lived agent instruction files — `AGENTS.md`, `.specify/memory/constitution.md`, `CLAUDE.md`, `.cursor/rules/`, and other sources — to detect boundary violations, stale references, conflicts, and redundancies. Every finding is backed by concrete evidence so reviewers can trust the report before applying any changes.
 
+The current implementation includes executable helpers for all three surfaces:
+
+- `scripts/audit_workspace.py`
+- `scripts/apply_report.py`
+- `scripts/load_agents_state.py`
+
 ## Problem Statement
 
 In Spec-Driven Development (SDD), AI agents rely on long-lived instruction files:
@@ -74,6 +80,22 @@ This extension registers the following Spec Kit lifecycle hooks:
 
 Key design constraint: hooks only run **read-only** operations. The `apply` command is never wired to a hook — it is always an explicit user action.
 
+## Canonical Ownership Matrix
+
+MemoryLint now applies one canonical ownership matrix during audit:
+
+| Category | Canonical Owner | Notes |
+|----------|-----------------|-------|
+| `architecture` | `.specify/memory/constitution.md` | editor rules may restate, but do not own |
+| `domain` | `.specify/memory/constitution.md` | manifests and docs may reflect, but do not own |
+| `infrastructure` | root `AGENTS.md` | nested/editor sources may scope or mirror |
+| `workflow` | root `AGENTS.md` | nested/editor sources may scope or mirror |
+| `tooling` | root `AGENTS.md` | tool-specific files may add local detail |
+| `personal_preference` | root `AGENTS.md` | editor-specific restatements are secondary |
+
+This matrix is what drives `recommended_destination`, redundancy cleanup, and
+constitution handoff generation.
+
 ## Apply Modes
 
 | Mode | Behaviour |
@@ -103,6 +125,11 @@ It includes `schema_version`, `source_metadata`, `instruction_map`, `findings`,
 and `metrics`. `source_metadata` records SHA-256 hashes for scanned files so the
 apply gate can reject stale reports before changing anything.
 
+Executable findings may also include:
+
+- `edits`: line-scoped file operations used by the apply gate
+- `manual_handoff`: constitution-targeted handoff material that must be reviewed by a human
+
 ## Rule Classification
 
 Every rule is classified into one of eight categories:
@@ -118,17 +145,22 @@ Every rule is classified into one of eight categories:
 | `obsolete` | References something that no longer exists |
 | `conflict` | Contradicts another rule |
 
-## Trust Metrics
+## Audit Metrics
 
-Every audit report includes a metrics section tracking:
+Every audit report now emits run-time metrics that match the executable output:
 
 | Metric | Purpose |
 |--------|---------|
-| High-confidence finding acceptance rate | Measures report accuracy |
-| False positive rate | Must stay low to maintain trust |
-| Suggested diff apply rate | Tracks actionability |
-| Real stale/conflicting rules found | Measures value delivered |
-| Destructive surprise edits | Must be **zero** |
+| Total instruction sources scanned | Shows workspace coverage |
+| Total rules catalogued | Shows extracted rule inventory size |
+| Total findings | Shows total actionable/non-actionable drift |
+| High-confidence findings | Indicates directly evidenced findings |
+| Medium-confidence findings | Indicates heuristic findings that need review |
+| Low-confidence findings | Indicates weak-evidence findings |
+| Files that would be modified by suggested actions | Powers safe preview and apply gating |
+
+Longitudinal trust KPIs such as false-positive rate or destructive surprise
+edits remain release-evaluation signals, not per-run report fields.
 
 ## Regression Corpus
 
@@ -147,8 +179,8 @@ MemoryLint includes a regression corpus of nine fixture repos under `tests/fixtu
 | `post-apply-breakage` | Apply safety validation |
 
 The fixture corpus is executable. `memorylint/scripts/scan_fixtures.py --check`
-generates deterministic findings for every fixture and compares them with each
-fixture's `expected-findings.json`.
+re-runs the real audit core against every fixture and compares the normalized
+findings with each fixture's `expected-findings.json`.
 
 ## Design
 

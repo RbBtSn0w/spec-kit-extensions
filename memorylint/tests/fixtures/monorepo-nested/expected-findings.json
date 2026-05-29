@@ -1,11 +1,21 @@
 [
   {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rule 'Prefer functional components over class components.' belongs in AGENTS.md, not in .specify/memory/constitution.md.",
+    "source": ".specify/memory/constitution.md",
+    "evidence": ".specify/memory/constitution.md contains a personal_preference rule under heading 'Code Conventions'.",
+    "recommended_destination": "AGENTS.md",
+    "suggested_action": "move"
+  },
+  {
     "drift_type": "redundancy",
     "severity": "warning",
     "confidence": "medium",
-    "description": "Git workflow rules in packages/frontend/AGENTS.md duplicate the root AGENTS.md — nested rules risk diverging from root policy",
+    "description": "Nested workflow rules duplicate the root policy and risk divergence.",
     "source": "AGENTS.md + packages/frontend/AGENTS.md",
-    "evidence": "Root and nested AGENTS.md repeat the focused commits / Conventional Commit policy.",
+    "evidence": "Root and nested AGENTS.md repeat the focused commits policy.",
     "recommended_destination": "AGENTS.md",
     "suggested_action": "merge"
   }

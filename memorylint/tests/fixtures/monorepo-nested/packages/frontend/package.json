@@ -1,0 +1,8 @@
+{
+  "name": "frontend",
+  "private": true,
+  "scripts": {
+    "build": "echo build",
+    "test": "echo test"
+  }
+}

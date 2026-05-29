@@ -1,12 +1,22 @@
 [
   {
+    "drift_type": "boundary",
+    "severity": "warning",
+    "confidence": "high",
+    "description": "Rule 'Command names must follow `speckit.{extension-id}.{command-name}` pattern.' belongs in .specify/memory/constitution.md, not in AGENTS.md.",
+    "source": "AGENTS.md",
+    "evidence": "AGENTS.md contains a domain rule under heading 'Command Naming'.",
+    "recommended_destination": ".specify/memory/constitution.md",
+    "suggested_action": "move"
+  },
+  {
     "drift_type": "redundancy",
     "severity": "info",
     "confidence": "high",
-    "description": "Command naming convention rule appears in both AGENTS.md and constitution.md with near-identical wording",
+    "description": "Keep one canonical copy of the command naming rule to avoid future divergence.",
     "source": "AGENTS.md + .specify/memory/constitution.md",
-    "evidence": "Both files contain the same speckit command naming pattern.",
-    "recommended_destination": "AGENTS.md",
+    "evidence": "Both sources contain the same speckit command naming pattern.",
+    "recommended_destination": ".specify/memory/constitution.md",
     "suggested_action": "merge"
   }
 ]

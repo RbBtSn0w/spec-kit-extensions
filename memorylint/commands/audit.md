@@ -1,147 +1,193 @@
+---
+scripts:
+  - scripts/audit_workspace.py
+  - scripts/memorylint_core.py
+---
 $ARGUMENTS
 
 # Role
 
-You are a rigorous Instruction Drift Auditor. Your task is to scan every
-long-lived instruction source in the workspace, classify each rule, bind
-findings to concrete evidence, and produce a structured **MemoryLint Drift
-Report** that a human reviewer can act on.
+You are a rigorous Instruction Drift Auditor. Scan the current workspace,
+catalogue long-lived instruction rules, bind every finding to evidence, and
+produce a deterministic **MemoryLint Drift Report**.
 
 **You MUST NOT modify any file during this audit.** This command is strictly
-read-only. All recommendations go into the report; actual changes are applied
-only through the separate `speckit.memorylint.apply` command.
+read-only. All mutations happen only through `speckit.memorylint.apply`.
 
 # Objective
 
-1. **Instruction Inventory** — discover every long-lived instruction source and
-   catalogue the rules each one contains.
-2. **Rule Classification** — assign each rule to one of eight categories.
-3. **Evidence Binding** — attach file-path or command-output proof to every
-   finding. Mark anything without evidence as `confidence: low`.
-4. **Drift Detection** — detect boundary, reality, conflict, and redundancy
-   drift across all sources.
-5. **Report Generation** — produce a structured Drift Report with an
-   Instruction Map, itemised Findings, Summary, Metrics, and Source Metadata
-   section, plus a machine-readable `memorylint-report.json` block.
+1. **Instruction Inventory** — discover long-lived instruction sources and
+   catalogue every rule they contain.
+2. **Rule Classification** — classify each rule into one primary category.
+3. **Evidence Binding** — back every finding with file or command evidence.
+4. **Drift Detection** — detect `boundary`, `reality`, `conflict`, and
+   `redundancy` drift.
+5. **Report Generation** — emit a Markdown Drift Report plus a machine-readable
+   `memorylint-report.json` artifact.
 
 ---
 
 # Step 1 — Instruction Inventory
 
-Scan the workspace for all instruction sources that exist. Include at least:
+Scan the workspace root only. Include at least these source families when they
+exist:
 
 | Source | Path Pattern |
 |--------|-------------|
-| Agent rules | `AGENTS.md` |
-| Constitution | `.specify/memory/constitution.md` |
-| Claude rules | `CLAUDE.md` |
-| Cursor rules | `.cursor/rules/*` |
+| Agent rules | `AGENTS.md`, `**/AGENTS.md` |
+| Constitution | `.specify/memory/constitution.md`, `**/.specify/memory/constitution.md` |
+| Claude rules | `CLAUDE.md`, `**/CLAUDE.md` |
+| Cursor rules | `.cursor/rules/*`, `**/.cursor/rules/*` |
 | Root README | `README.md` |
-| Per-extension README | `*/README.md` |
-| Workflow files | `.github/workflows/*.yml` |
-| Test scripts | `tests/*`, `*/tests/*` |
-| Extension manifests | `*/extension.yml` |
+| Per-extension README | `**/README.md` |
+| Workflow files | `.github/workflows/*.yml`, `**/.github/workflows/*.yml` |
+| Test scripts | `tests/*`, `**/tests/*` |
+| Extension manifests | `extension.yml`, `**/extension.yml` |
 
-For every source that exists, extract individual rules and record:
+For every source that exists, extract rules and record:
 
-- **rule_id**: sequential `R-001`, `R-002`, etc.
-- **source**: file path and line range
-- **summary**: one-line plain-English description of the rule
-- **category**: see Step 2
+- `rule_id`: sequential `R-001`, `R-002`, ...
+- `source`: relative file path
+- `line_range`: source line or line range
+- `summary`: plain-English rule summary
+- `category`: see Step 2
 
-If a source file does not exist, note its absence as a finding (it may be
-expected or may indicate reality drift).
+Missing optional files do not fail the audit. Record absence as evidence only
+when it creates real drift.
 
 ---
 
 # Step 2 — Rule Classification
 
-Classify every rule into exactly one category:
+Classify every rule into exactly one primary category:
 
 | Category | Meaning |
 |----------|---------|
-| `infrastructure` | CI, packaging, release mechanics, build/test commands |
-| `architecture` | Directory layout, module boundaries, code conventions, design patterns |
+| `infrastructure` | CI, release mechanics, build/test commands, packaging |
+| `architecture` | Module boundaries, design patterns, structural code rules |
 | `workflow` | Git hygiene, review process, PR conventions, commit style |
 | `domain` | Product behaviour, Spec Kit hook semantics, extension contracts |
-| `tooling` | CLI tools, language runtimes, editor config, env vars |
+| `tooling` | CLI tools, runtimes, editor-specific tooling |
 | `personal_preference` | Style choices that do not affect correctness |
 | `obsolete` | References something that no longer exists in the repo |
-| `conflict` | Contradicts another rule in the same or a different file |
+| `conflict` | Contradicts another rule |
 
-A rule may look like it belongs in two categories. Pick the primary category
-and note the secondary concern in the finding.
+If a rule could fit multiple categories, pick the primary owner and describe the
+secondary concern in the finding detail.
+
+## Canonical Ownership / Precedence Matrix
+
+Use this matrix to decide canonical ownership and `recommended_destination`:
+
+| Category | Canonical Owner | Secondary / Contextual Sources |
+|----------|-----------------|--------------------------------|
+| `architecture` | `.specify/memory/constitution.md` | editor rules may restate, but do not own |
+| `domain` | `.specify/memory/constitution.md` | manifests and docs may reflect, but do not own |
+| `infrastructure` | root `AGENTS.md` | nested `AGENTS.md`, `CLAUDE.md`, workflows may scope or mirror |
+| `workflow` | root `AGENTS.md` | nested `AGENTS.md`, `CLAUDE.md` may restate |
+| `tooling` | root `AGENTS.md` | tool-specific editor files may add local context |
+| `personal_preference` | root `AGENTS.md` | editor files may restate for agent ergonomics |
+
+Additional precedence rules:
+
+1. Constitution outranks editor-specific files for shared architecture/domain guidance.
+2. Root `AGENTS.md` outranks nested/editor files for shared workflow/tooling/infrastructure guidance.
+3. `README.md`, workflows, tests, and manifests are evidence-bearing sources, not canonical owners of shared guidance.
 
 ---
 
 # Step 3 — Evidence Binding
 
-For every observation, supply **evidence**:
+Every finding must cite direct evidence:
 
-- A file path (with line range if applicable) that proves or disproves the rule.
-  Example: "`package.json` exists and defines `scripts.test` → rule is supported."
-- A directory listing when a rule claims a directory structure.
-  Example: "`ls tests/` shows no memorylint-specific tests → rule is unsupported."
-- A command reference when a rule names a tool.
-  Example: "`which yq` → tool is / is not available."
+- file path and line range
+- missing-path check
+- manifest / hook consistency proof
+- command or script existence proof
 
-**If you cannot find evidence**, mark the finding `confidence: low` and explain
-what evidence you looked for but did not find. Never mark a finding
-`confidence: high` without concrete proof.
-
-### Confidence Levels
+Confidence levels:
 
 | Level | Criteria |
 |-------|----------|
 | `high` | Direct file or command evidence confirms the finding |
-| `medium` | Indirect evidence (e.g., pattern inference, partial match) |
-| `low` | No concrete evidence found; based on heuristic judgement only |
+| `medium` | Partial match or heuristic inference |
+| `low` | No direct evidence; heuristic only |
+
+If evidence is missing, explicitly mark `confidence: low`. The report must
+include the phrase `confidence: low` when a low-confidence finding appears.
 
 ---
 
 # Step 4 — Drift Detection
 
-Detect and classify every drift instance:
+Detect every drift instance and classify it:
 
-| Drift Type | Description | Example |
-|------------|-------------|---------|
-| `boundary` | Rule lives in the wrong file | Architecture rule in AGENTS.md; workflow rule in constitution |
-| `reality` | Rule references something that does not exist | Script, directory, command, or tool mentioned but absent |
-| `conflict` | Two rules contradict each other | "Always use X" in AGENTS.md vs "Never use X" in constitution |
-| `redundancy` | Same rule appears in multiple files | Identical or near-identical wording risks future divergence |
+| Drift Type | Description |
+|------------|-------------|
+| `boundary` | Rule lives in the wrong canonical file |
+| `reality` | Rule references a missing or stale file, script, command, or hook |
+| `conflict` | Two rules are mutually exclusive |
+| `redundancy` | Same rule appears in multiple places and risks divergence |
 
-For each drift instance, determine:
+For each finding determine:
 
-- **severity**: `critical` (blocks correctness or safety), `warning` (degrades
-  maintainability), or `info` (cosmetic or minor)
-- **confidence**: `high`, `medium`, or `low` (see Step 3)
-- **suggested_action**: one of `keep`, `move`, `delete`, `merge`, or `rewrite`
-- **recommended_destination**: the file where the rule should live (for
-  boundary drift), or `N/A`
+- `severity`: `critical`, `warning`, or `info`
+- `confidence`: `high`, `medium`, or `low`
+- `suggested_action`: `keep`, `move`, `delete`, `merge`, or `rewrite`
+- `recommended_destination`: canonical owner path or `N/A`
+
+## Constitution Manual Handoff Rule
+
+When a boundary finding says a rule belongs in the constitution:
+
+- DO NOT auto-rewrite `.specify/memory/constitution.md`
+- emit a `manual_handoff` object that identifies:
+  - `target_path`
+  - `target_section`
+  - `rule_text`
+  - `merge_rationale`
+  - `requires_human_review`
+
+## Executable Output Contract
+
+When a finding can be safely rewritten or deleted, include an `edits` array with
+precise file-level operations. Each edit includes:
+
+- `path`
+- `action`
+- `start_line`
+- `end_line`
+- optional `replacement`
+- `reason`
 
 ---
 
 # Step 5 — Report Generation
 
-Produce the Drift Report as Markdown with exactly these sections: `Instruction Map`, `Findings`, `Summary`, `Metrics`, `Source Metadata`, and `Machine-Readable Report`.
+Produce the Drift Report as Markdown with exactly these sections:
+
+- `Instruction Map`
+- `Findings`
+- `Summary`
+- `Metrics`
+- `Source Metadata`
+- `Machine-Readable Report`
 
 ## MemoryLint Drift Report
 
 ### Instruction Map
 
-A table with columns:
-
 | rule_id | source | line_range | summary | category | status |
 |---------|--------|------------|---------|----------|--------|
 
-`status` is one of: `ok`, `boundary_drift`, `reality_drift`, `conflict`,
-`redundant`, `obsolete`.
+`status` is one of `ok`, `boundary_drift`, `reality_drift`, `conflict`,
+`redundant`, or `obsolete`.
 
 ### Findings
 
-For each finding, use this structure:
+For each finding:
 
-```
+```text
 #### ML-001
 - **drift_type**: boundary | reality | conflict | redundancy
 - **severity**: critical | warning | info
@@ -151,13 +197,10 @@ For each finding, use this structure:
 - **recommended_destination**: target file (or N/A)
 - **suggested_action**: keep | move | delete | merge | rewrite
 - **detail**: brief explanation of the problem and recommendation
+- **manual_handoff**: {...}               # only when constitution handoff is required
 ```
 
-Number findings sequentially: `ML-001`, `ML-002`, etc.
-
 ### Summary
-
-Provide totals:
 
 | Drift Type | Critical | Warning | Info | Total |
 |------------|----------|---------|------|-------|
@@ -167,11 +210,9 @@ Provide totals:
 | redundancy |          |         |      |       |
 | **Total**  |          |         |      |       |
 
-Highlight any critical findings with a brief call-to-action.
-
 ### Metrics
 
-Report these trust metrics for the audit run:
+Report these operational metrics:
 
 | Metric | Value |
 |--------|-------|
@@ -185,21 +226,19 @@ Report these trust metrics for the audit run:
 
 ### Source Metadata
 
-A table listing the content hashes of the scanned source files to enable staleness checks during apply:
-
 | File Path | Content Hash (SHA-256) |
 |-----------|------------------------|
 
 ### Machine-Readable Report
 
-Also include the same audit result as a fenced JSON artifact named
-`memorylint-report.json`. This block is the authoritative input for
-`speckit.memorylint.apply`; the Markdown report is for human review.
+Also include the same result as a fenced JSON artifact named
+`memorylint-report.json`. This artifact is the authoritative input for
+`speckit.memorylint.apply`.
 
 ```memorylint-report.json
 {
   "schema_version": "1.0",
-  "workspace_root": "<workspace path>",
+  "workspace_root": "/path/to/workspace",
   "source_metadata": [
     {
       "path": "AGENTS.md",
@@ -210,7 +249,7 @@ Also include the same audit result as a fenced JSON artifact named
     {
       "rule_id": "R-001",
       "source": "AGENTS.md",
-      "line_range": "10-12",
+      "line_range": "10",
       "summary": "<rule summary>",
       "category": "infrastructure",
       "status": "ok"
@@ -222,11 +261,18 @@ Also include the same audit result as a fenced JSON artifact named
       "drift_type": "boundary",
       "severity": "warning",
       "confidence": "high",
-      "source": "AGENTS.md:15-19",
-      "evidence": "<direct file or command evidence>",
+      "source": "AGENTS.md:15",
+      "evidence": "<direct evidence>",
       "recommended_destination": ".specify/memory/constitution.md",
       "suggested_action": "move",
-      "detail": "<finding detail>"
+      "detail": "<finding detail>",
+      "manual_handoff": {
+        "target_path": ".specify/memory/constitution.md",
+        "target_section": "Imported rules",
+        "rule_text": "<rule text>",
+        "merge_rationale": "<why this belongs there>",
+        "requires_human_review": true
+      }
     }
   ],
   "metrics": {
@@ -237,7 +283,8 @@ Also include the same audit result as a fenced JSON artifact named
     "medium_confidence_findings": 0,
     "low_confidence_findings": 0,
     "files_that_would_be_modified": []
-  }
+  },
+  "summary": {}
 }
 ```
 
@@ -246,10 +293,8 @@ Also include the same audit result as a fenced JSON artifact named
 # Constraints
 
 - **Read-only**: do not create, modify, or delete any file.
-- **Evidence-first**: every finding must cite evidence. No evidence → low
-  confidence.
-- **Deterministic output**: follow the exact report structure above so the
-  `speckit.memorylint.apply` command can parse it.
-- **Handle missing files gracefully**: if `.specify/memory/constitution.md` or
-  other optional sources do not exist, note this as a finding — do not error.
-- **Scope to workspace root**: do not scan outside the current workspace.
+- **Evidence-first**: every finding needs evidence; no evidence means
+  `confidence: low`.
+- **Deterministic output**: preserve the report structure so
+  `speckit.memorylint.apply` can parse it.
+- **Workspace-only scope**: do not scan outside the current workspace.

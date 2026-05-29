@@ -1,12 +1,1 @@
-[
-  {
-    "drift_type": "reality",
-    "severity": "info",
-    "confidence": "medium",
-    "description": "constitution.md does not exist in the workspace — architecture rules have no canonical home",
-    "source": ".specify/memory/constitution.md",
-    "evidence": "The fixture does not contain .specify/memory/constitution.md.",
-    "recommended_destination": ".specify/memory/constitution.md",
-    "suggested_action": "keep"
-  }
-]
+[]

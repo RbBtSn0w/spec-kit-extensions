@@ -37,7 +37,7 @@ silent authority over long-lived project memory.
 
 ## Audit Pipeline
 
-The audit command follows a deterministic conceptual pipeline:
+The audit command now follows a deterministic executable pipeline:
 
 1. **Instruction Inventory**: scan instruction sources such as `AGENTS.md`,
    `.specify/memory/constitution.md`, `CLAUDE.md`, `.cursor/rules/*`, README
@@ -49,8 +49,27 @@ The audit command follows a deterministic conceptual pipeline:
    evidence to each finding.
 4. **Drift Detection**: detect `boundary`, `reality`, `conflict`, and
    `redundancy` drift.
-5. **Report Generation**: emit both a human-readable Markdown report and a
-   machine-readable `memorylint-report.json` artifact.
+5. **Executable Report Generation**: emit both a human-readable Markdown report
+   and a machine-readable `memorylint-report.json` artifact.
+
+## Source Ownership Matrix
+
+MemoryLint applies a canonical ownership / precedence model:
+
+| Category | Canonical Owner | Secondary Sources |
+|----------|-----------------|------------------|
+| `architecture` | `.specify/memory/constitution.md` | `.cursor/rules/*`, `CLAUDE.md` |
+| `domain` | `.specify/memory/constitution.md` | manifests, docs |
+| `infrastructure` | root `AGENTS.md` | nested `AGENTS.md`, `CLAUDE.md`, workflows |
+| `workflow` | root `AGENTS.md` | nested `AGENTS.md`, `CLAUDE.md` |
+| `tooling` | root `AGENTS.md` | tool-specific editor rules |
+| `personal_preference` | root `AGENTS.md` | editor-specific restatements |
+
+Precedence rules:
+
+1. Constitution wins for shared architecture and domain rules.
+2. Root `AGENTS.md` wins for shared workflow, infrastructure, tooling, and preference rules.
+3. README, workflows, tests, and manifests are evidence-bearing sources, not canonical owners.
 
 ## Machine-Readable Report
 
@@ -75,6 +94,11 @@ gate compares these hashes against current file content before modifying any
 file. This prevents applying stale findings after instruction files have
 changed.
 
+Findings may additionally carry:
+
+- `edits`: deterministic line-scoped mutations for executable safe/apply runs
+- `manual_handoff`: constitution-targeted handoff material that cannot be auto-applied
+
 ## Apply Gate
 
 Apply has three modes:
@@ -86,6 +110,24 @@ Apply has three modes:
 
 Safe mode must not move architecture or domain rules, rewrite semantics, delete
 constitution-owned rules, or apply medium/low-confidence findings.
+
+Boundary fixes targeting the constitution always become **manual handoff
+artifacts**. Apply may remove the misplaced secondary copy only when the
+handoff has been explicitly approved; it still must not auto-merge into the
+constitution.
+
+## Planning Gate
+
+`load-agents` is now a verifiable gate rather than a verbal acknowledgement.
+Its success output records:
+
+- the root `AGENTS.md` path
+- the SHA-256 hash of the loaded file
+- the extracted section list
+- the rule summaries inherited into planning
+
+This creates a machine-checkable `before_plan` proof instead of a best-effort
+statement.
 
 Post-apply validation checks:
 
@@ -112,6 +154,12 @@ contract. It covers:
 each fixture's `expected-findings.json`. This turns the design from a prompt-only
 contract into a deterministic regression gate.
 
+The same core powers:
+
+- `scripts/audit_workspace.py` for real workspace audit
+- `scripts/apply_report.py` for staleness-checked apply and rollback
+- `scripts/load_agents_state.py` for structured planning-gate proof
+
 ## Release Criteria
 
 MemoryLint changes are ready to ship only when:
@@ -120,4 +168,5 @@ MemoryLint changes are ready to ship only when:
 - audit/apply/load-agents prompts preserve their safety contracts;
 - fixture schemas are valid;
 - deterministic fixture scanning matches expected findings;
+- real workspace audit/apply/load-agents scripts stay aligned with the prompt contracts;
 - repository workflow tests and whitespace checks pass.
