@@ -317,6 +317,23 @@ require(
     and "Add missing tasks to tasks.md" not in review,
     "review.md must recommend task edits without implying it edits tasks.md itself",
 )
+require(
+    "## Workflow Decision" in review
+    and "**Feature status:** Tasked" in review
+    and "**Gate:** after_tasks.review" in review
+    and "**Outcome:** PASS | BLOCKED | INCONCLUSIVE" in review
+    and "**Next command:**" in review
+    and "/speckit.implement" in review
+    and "/speckit.clarify" in review
+    and "/speckit.plan" in review
+    and "/speckit.tasks" in review
+    and "coverage_gap" in review
+    and "task_quality_issue" in review
+    and "spec_ambiguity" in review
+    and "plan_task_mismatch" in review
+    and "missing_artifact" in review,
+    "review.md must emit a stable workflow decision with outcome, reason, and next-command routing",
+)
 
 require(
     "-notmatch '^\\*\\*Status\\*\\*: Tasked$'" not in ps_test,
