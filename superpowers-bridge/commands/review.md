@@ -52,7 +52,14 @@ Read the following files (all from the current feature directory):
 4. `data-model.md` (if exists) — entity and relationship constraints
 5. `contracts/` (if exists) — interface contracts
 
-If `spec.md` is missing, **STOP** and report:
+If `spec.md` is missing, emit the `Workflow Decision` block indicating:
+- Feature status: Tasked | Abandoned
+- Outcome: INCONCLUSIVE
+- Reason: missing_artifact
+- Next command: none
+- Requires user approval: true
+
+Then **STOP** and report:
 ```
 ERROR: spec.md not found. Cannot perform coverage review without the spec.
 Run speckit.specify first.
@@ -190,6 +197,13 @@ The task set should make it clear where a reviewer can check spec compliance
 and code quality. Flag task groups that have no natural review checkpoint before
 large cross-cutting changes accumulate.
 
+### Artifact Consistency Checks
+
+Evaluate whether the artifacts contain any obvious blocking discrepancies (note: this command does not replace full consistency checks performed by `/speckit.analyze`, but visible issues must block execution):
+
+- **Spec Ambiguity**: Are requirements in `spec.md` blatantly ambiguous, contradictory, or missing critical details that tasks had to guess?
+- **Plan/Task Discrepancies**: Do `plan.md` and `tasks.md` disagree on architecture, files, interface contracts, or implementation sequencing?
+
 ---
 
 ### Step 6 — Summary and Decision
@@ -238,14 +252,14 @@ Recommended action: Fix flagged tasks before running speckit.implement.
 ```
 
 Then always emit a workflow routing decision. This decision does not create a
-new lifecycle state. It explains whether the current `Tasked` artifact set is
+new lifecycle state. It explains whether the current feature status (`Tasked` or `Abandoned`) is
 ready to enter implementation, or which Spec Kit owner should handle the
 remediation loop.
 
 ```markdown
 ## Workflow Decision
 
-**Feature status:** Tasked
+**Feature status:** Tasked | Abandoned
 **Gate:** after_tasks.review
 **Outcome:** PASS | BLOCKED | INCONCLUSIVE
 **Reason:** none | coverage_gap | task_quality_issue | spec_ambiguity | plan_task_mismatch | missing_artifact
@@ -259,17 +273,15 @@ Use this routing table:
 
 | Condition | Outcome | Reason | Next command | Requires user approval | Why |
 |---|---|---|---|---|---|
-| No gaps and no task quality issues | PASS | none | `/speckit.implement` | false | `tasks.md` is coverage-complete and ready for the TDD gate. |
+| No gaps, no task quality issues, and TDD readiness is READY | PASS | none | `/speckit.implement` | false | `tasks.md` is coverage-complete and ready for the TDD gate. |
 | `spec.md` requirement is ambiguous or contradictory | BLOCKED | spec_ambiguity | `/speckit.clarify` | true | The spec owns requirement meaning; tasks should not guess. |
 | `plan.md` and `tasks.md` disagree about architecture, files, contracts, or sequencing | BLOCKED | plan_task_mismatch | `/speckit.plan` | true | The technical plan owns the implementation approach before tasks are regenerated. |
-| One or more requirements have `✗ Gap` or `~ Partial` task coverage | BLOCKED | coverage_gap | `/speckit.tasks` | false | Task generation or explicit task refinement owns missing requirement coverage. |
-| Coverage is complete but tasks are too broad, vague, missing file ownership, missing RED/GREEN targets, or missing test/commit steps | BLOCKED | task_quality_issue | `/speckit.tasks` | false | The task artifact must be shaped before strict TDD can execute it. |
+| One or more requirements have `✗ Gap` or `~ Partial` task coverage (Normal Mode) | BLOCKED | coverage_gap | `/speckit.tasks` | false | Task generation or explicit task refinement owns missing requirement coverage. |
+| One or more requirements have `✗ Gap` or `~ Partial` task coverage (Non-blocking Mode with explicit gap acknowledgment) | PASS | none | `/speckit.implement` | false | The user explicitly acknowledged gaps to bypass task regeneration. |
+| Coverage is complete but tasks are too broad, vague, missing file ownership, missing RED/GREEN targets, missing test/commit steps, or TDD readiness is PARTIAL/NOT READY | BLOCKED | task_quality_issue | `/speckit.tasks` | false | The task artifact must be shaped before strict TDD can execute it. |
 | Required artifacts are missing or cannot be resolved | INCONCLUSIVE | missing_artifact | none | true | The gate lacks enough evidence to route safely. |
 
-When multiple conditions apply, choose the earliest owning stage in the Spec Kit
-flow: `clarify` before `plan`, `plan` before `tasks`, and `tasks` before
-`implement`. Include the lower-level issues in the report, but route to the
-earliest stage that can correct the source of truth.
+When multiple conditions apply, prioritize `missing_artifact` (which makes the review `INCONCLUSIVE`) first. Otherwise, choose the earliest owning stage in the Spec Kit flow: `clarify` before `plan`, `plan` before `tasks`, and `tasks` before `implement`. Include the lower-level issues in the report, but route to the earliest stage that can correct the source of truth.
 
 ---
 
