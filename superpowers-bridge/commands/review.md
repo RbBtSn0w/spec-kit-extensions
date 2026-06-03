@@ -52,17 +52,24 @@ Read the following files (all from the current feature directory):
 4. `data-model.md` (if exists) — entity and relationship constraints
 5. `contracts/` (if exists) — interface contracts
 
-If `spec.md` is missing, emit the `Workflow Decision` block indicating:
-- Feature status: Tasked | Abandoned
-- Outcome: INCONCLUSIVE
-- Reason: missing_artifact
-- Next command: none
-- Requires user approval: true
+If `spec.md`, `plan.md`, or `tasks.md` is missing or cannot be resolved, emit the full `Workflow Decision` block:
+
+```markdown
+## Workflow Decision
+
+**Feature status:** Tasked | Abandoned
+**Gate:** after_tasks.review
+**Outcome:** INCONCLUSIVE
+**Reason:** missing_artifact
+**Next command:** none
+**Requires user approval:** true
+
+**Why:** Required planning artifacts are missing or unresolved. Cannot perform coverage review.
+```
 
 Then **STOP** and report:
 ```
-ERROR: spec.md not found. Cannot perform coverage review without the spec.
-Run speckit.specify first.
+ERROR: Required artifacts (spec.md, plan.md, tasks.md) are missing. Run the appropriate Spec Kit pipeline stage.
 ```
 
 Use the resolved current feature directory as the authoritative path for any
@@ -262,7 +269,7 @@ remediation loop.
 **Feature status:** Tasked | Abandoned
 **Gate:** after_tasks.review
 **Outcome:** PASS | BLOCKED | INCONCLUSIVE
-**Reason:** none | coverage_gap | task_quality_issue | spec_ambiguity | plan_task_mismatch | missing_artifact
+**Reason:** none | coverage_gap | task_quality_issue | spec_ambiguity | plan_task_mismatch | missing_artifact | abandoned_feature
 **Next command:** `/speckit.implement` | `/speckit.clarify` | `/speckit.plan` | `/speckit.tasks` | none
 **Requires user approval:** true | false
 
@@ -273,7 +280,8 @@ Use this routing table:
 
 | Condition | Outcome | Reason | Next command | Requires user approval | Why |
 |---|---|---|---|---|---|
-| No gaps, no task quality issues, and TDD readiness is READY | PASS | none | `/speckit.implement` | false | `tasks.md` is coverage-complete and ready for the TDD gate. |
+| No gaps, no task quality issues, TDD readiness is READY, and feature status is not Abandoned | PASS | none | `/speckit.implement` | false | `tasks.md` is coverage-complete and ready for the TDD gate. |
+| Feature status is Abandoned | BLOCKED | abandoned_feature | none | true | Abandoned features cannot route to implementation. |
 | `spec.md` requirement is ambiguous or contradictory | BLOCKED | spec_ambiguity | `/speckit.clarify` | true | The spec owns requirement meaning; tasks should not guess. |
 | `plan.md` and `tasks.md` disagree about architecture, files, contracts, or sequencing | BLOCKED | plan_task_mismatch | `/speckit.plan` | true | The technical plan owns the implementation approach before tasks are regenerated. |
 | One or more requirements have `✗ Gap` or `~ Partial` task coverage (Normal Mode) | BLOCKED | coverage_gap | `/speckit.tasks` | false | Task generation or explicit task refinement owns missing requirement coverage. |
