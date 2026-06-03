@@ -69,7 +69,7 @@ If `spec.md`, `plan.md`, or `tasks.md` is missing or cannot be resolved, emit th
 
 Then **STOP** and report:
 ```
-ERROR: Required artifacts (spec.md, plan.md, tasks.md) are missing. Run the appropriate Spec Kit pipeline stage.
+ERROR: One or more required planning artifacts (spec.md, plan.md, tasks.md) are missing or unresolved. Run the appropriate Spec Kit pipeline stage.
 ```
 
 Use the resolved current feature directory as the authoritative path for any
@@ -266,7 +266,7 @@ remediation loop.
 ```markdown
 ## Workflow Decision
 
-**Feature status:** Tasked | Abandoned
+**Feature status:** Tasked | Abandoned | unknown
 **Gate:** after_tasks.review
 **Outcome:** PASS | BLOCKED | INCONCLUSIVE
 **Reason:** none | coverage_gap | task_quality_issue | spec_ambiguity | plan_task_mismatch | missing_artifact | abandoned_feature
@@ -289,7 +289,7 @@ Use this routing table:
 | Coverage is complete but tasks are too broad, vague, missing file ownership, missing RED/GREEN targets, missing test/commit steps, or TDD readiness is PARTIAL/NOT READY | BLOCKED | task_quality_issue | `/speckit.tasks` | false | The task artifact must be shaped before strict TDD can execute it. |
 | Required artifacts are missing or cannot be resolved | INCONCLUSIVE | missing_artifact | none | true | The gate lacks enough evidence to route safely. |
 
-When multiple conditions apply, prioritize `missing_artifact` (which makes the review `INCONCLUSIVE`) and `abandoned_feature` (which blocks the review) first. Otherwise, choose the earliest owning stage in the Spec Kit flow: `clarify` before `plan`, `plan` before `tasks`, and `tasks` before `implement`. Include the lower-level issues in the report, but route to the earliest stage that can correct the source of truth.
+When multiple conditions apply, prioritize `abandoned_feature` (which blocks the review) first, and then `missing_artifact` (which makes the review `INCONCLUSIVE`). Otherwise, choose the earliest owning stage in the Spec Kit flow: `clarify` before `plan`, `plan` before `tasks`, and `tasks` before `implement`. Include the lower-level issues in the report, but route to the earliest stage that can correct the source of truth.
 
 ---
 

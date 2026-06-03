@@ -319,7 +319,7 @@ require(
 )
 require(
     "## Workflow Decision" in review
-    and "**Feature status:** Tasked | Abandoned" in review
+    and "**Feature status:** Tasked | Abandoned | unknown" in review
     and "**Gate:** after_tasks.review" in review
     and "**Outcome:** PASS | BLOCKED | INCONCLUSIVE" in review
     and "**Reason:** none | coverage_gap | task_quality_issue | spec_ambiguity | plan_task_mismatch | missing_artifact | abandoned_feature" in review
