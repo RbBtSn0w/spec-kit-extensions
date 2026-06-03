@@ -52,12 +52,12 @@ Read the following files (all from the current feature directory):
 4. `data-model.md` (if exists) — entity and relationship constraints
 5. `contracts/` (if exists) — interface contracts
 
-If `spec.md`, `plan.md`, or `tasks.md` is missing or cannot be resolved, emit the full `Workflow Decision` block:
+If `spec.md`, `plan.md`, or `tasks.md` is missing or cannot be resolved, emit the full `Workflow Decision` block (use the actual spec status from `spec.md` if available, otherwise use `unknown`):
 
 ```markdown
 ## Workflow Decision
 
-**Feature status:** Tasked | Abandoned
+**Feature status:** [actual status or unknown]
 **Gate:** after_tasks.review
 **Outcome:** INCONCLUSIVE
 **Reason:** missing_artifact
@@ -289,7 +289,7 @@ Use this routing table:
 | Coverage is complete but tasks are too broad, vague, missing file ownership, missing RED/GREEN targets, missing test/commit steps, or TDD readiness is PARTIAL/NOT READY | BLOCKED | task_quality_issue | `/speckit.tasks` | false | The task artifact must be shaped before strict TDD can execute it. |
 | Required artifacts are missing or cannot be resolved | INCONCLUSIVE | missing_artifact | none | true | The gate lacks enough evidence to route safely. |
 
-When multiple conditions apply, prioritize `missing_artifact` (which makes the review `INCONCLUSIVE`) first. Otherwise, choose the earliest owning stage in the Spec Kit flow: `clarify` before `plan`, `plan` before `tasks`, and `tasks` before `implement`. Include the lower-level issues in the report, but route to the earliest stage that can correct the source of truth.
+When multiple conditions apply, prioritize `missing_artifact` (which makes the review `INCONCLUSIVE`) and `abandoned_feature` (which blocks the review) first. Otherwise, choose the earliest owning stage in the Spec Kit flow: `clarify` before `plan`, `plan` before `tasks`, and `tasks` before `implement`. Include the lower-level issues in the report, but route to the earliest stage that can correct the source of truth.
 
 ---
 
