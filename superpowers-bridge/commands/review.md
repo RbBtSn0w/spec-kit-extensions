@@ -52,7 +52,31 @@ Read the following files (all from the current feature directory):
 4. `data-model.md` (if exists) — entity and relationship constraints
 5. `contracts/` (if exists) — interface contracts
 
-If `spec.md`, `plan.md`, or `tasks.md` is missing or cannot be resolved, emit the full `Workflow Decision` block (use the actual spec status from `spec.md` if available, otherwise use `unknown`):
+If `spec.md` exists and its actual status is `Abandoned`, emit the full
+`Workflow Decision` block before any missing-artifact fallback, even when
+`plan.md` or `tasks.md` is missing or unresolved:
+
+```markdown
+## Workflow Decision
+
+**Feature status:** Abandoned
+**Gate:** after_tasks.review
+**Outcome:** BLOCKED
+**Reason:** abandoned_feature
+**Next command:** none
+**Requires user approval:** true
+
+**Why:** Abandoned features cannot route to implementation or artifact repair until the user reactivates the feature.
+```
+
+Then **STOP** and report:
+```
+ERROR: Feature status is Abandoned. Reactivate the feature before running coverage review.
+```
+
+If `spec.md`, `plan.md`, or `tasks.md` is missing or cannot be resolved after
+the abandoned-status check, emit the full `Workflow Decision` block (use the
+actual spec status from `spec.md` if available, otherwise use `unknown`):
 
 ```markdown
 ## Workflow Decision
