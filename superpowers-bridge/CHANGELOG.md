@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Changed `/speckit.superb.verify` evidence capture to write run-local files in
+  the system temporary directory instead of creating project files under
+  `.specify/evidence/`.
+- Updated the Universal Bridge pre-commit hook so `Verified` specs require
+  completed tasks but no longer require repository-stored evidence files.
+
 ## [1.5.1] - 2026-06-04
+
 ### Fixed
 
 - Updated `/speckit.superb.review` to emit a stable workflow decision block that

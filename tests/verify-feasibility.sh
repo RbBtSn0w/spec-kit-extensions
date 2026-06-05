@@ -1,16 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
-EVIDENCE_DIR=".specify/evidence"
-mkdir -p "$EVIDENCE_DIR"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 FEATURE_NAME="feasibility-test"
-FILE_PATH="$EVIDENCE_DIR/${TIMESTAMP}-${FEATURE_NAME}-verify.md"
+TEMP_ROOT="${TMPDIR:-/tmp}"
+TEMP_ROOT="${TEMP_ROOT%/}"
+FILE_PATH="$TEMP_ROOT/speckit-superb-evidence-${FEATURE_NAME}-${TIMESTAMP}.md"
 
 cleanup() {
   rm -f "$FILE_PATH"
-  rmdir "$EVIDENCE_DIR" 2>/dev/null || true
-  rmdir ".specify" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -23,7 +21,7 @@ cat <<EOF > "$FILE_PATH"
 EOF
 
 if [ -f "$FILE_PATH" ]; then
-  echo "Feasibility Test Passed: Evidence archived at $FILE_PATH"
+  echo "Feasibility Test Passed: Evidence captured at $FILE_PATH"
   cat "$FILE_PATH"
 else
   echo "Feasibility Test Failed"

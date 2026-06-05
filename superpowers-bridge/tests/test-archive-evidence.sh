@@ -1,17 +1,17 @@
 #!/bin/bash
 set -euo pipefail
 
-EVIDENCE_DIR=".specify/evidence"
 SCRIPT_PATH="./superpowers-bridge/scripts/bash/archive-evidence.sh"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
+TEMP_ROOT="${TMPDIR:-/tmp}"
+TEMP_ROOT="${TEMP_ROOT%/}"
 
 # Clean up before testing
-rm -rf "$EVIDENCE_DIR"
-mkdir -p "$EVIDENCE_DIR"
+rm -rf ".specify/evidence"
 
-# Test 1: Successful archiving
-echo "Test 1: Successful Archiving"
-cat << 'EOF' | bash "$SCRIPT_PATH" --feature-name "test-feature" --build-status "PASS" --commit-hash "12345abc"
+# Test 1: Successful evidence capture
+echo "Test 1: Successful Evidence Capture"
+OUTPUT=$(cat << 'EOF' | bash "$SCRIPT_PATH" --feature-name "test-feature" --build-status "PASS" --commit-hash "12345abc"
 - [x] R01
 - [x] R02
 
@@ -19,11 +19,29 @@ cat << 'EOF' | bash "$SCRIPT_PATH" --feature-name "test-feature" --build-status 
 Tests passing: 5
 Tests failing: 0
 EOF
+)
 
-ARCHIVED_FILE=$(ls "$EVIDENCE_DIR"/*.md | head -n 1)
+ARCHIVED_FILE=$(printf '%s\n' "$OUTPUT" | sed -n 's/^Evidence captured at //p')
 
 if [ -f "$ARCHIVED_FILE" ]; then
     echo "  -> Passed: File created: $ARCHIVED_FILE"
+
+    case "$ARCHIVED_FILE" in
+        "$TEMP_ROOT"/speckit-superb-evidence-test-feature-*.md)
+            echo "  -> Passed: File created in system temp directory."
+            ;;
+        *)
+            echo "  -> Failed: File was not created in system temp directory."
+            exit 1
+            ;;
+    esac
+
+    if [ -d ".specify/evidence" ]; then
+        echo "  -> Failed: Repo evidence directory should not be created."
+        exit 1
+    else
+        echo "  -> Passed: Repo evidence directory not created."
+    fi
     
     if grep -q "12345abc" "$ARCHIVED_FILE"; then
         echo "  -> Passed: Commit hash found."
@@ -89,4 +107,4 @@ else
 fi
 
 echo "All tests passed successfully."
-rm -rf "$EVIDENCE_DIR"
+rm -f "$ARCHIVED_FILE"

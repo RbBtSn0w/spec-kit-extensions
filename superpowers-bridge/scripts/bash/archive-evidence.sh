@@ -7,6 +7,7 @@ usage() {
 Usage: archive-evidence.sh --feature-name <name> --build-status <PASS|FAIL|N/A> [--commit-hash <hash>]
 
 Reads the checklist and test output from standard input, separated by the line "---OUTPUT---".
+Writes the evidence file to the system temporary directory for the current run.
 
 Options:
   --feature-name   The name of the feature being verified
@@ -100,13 +101,14 @@ if [[ -z "${TEST_OUTPUT//[[:space:]]/}" ]]; then
   exit 1
 fi
 
-EVIDENCE_DIR=".specify/evidence"
-mkdir -p "$EVIDENCE_DIR"
-
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 # Clean feature name for file path
 SAFE_FEATURE_NAME=$(echo "$FEATURE_NAME" | sed 's/[^a-zA-Z0-9_-]/_/g')
-FILE_PATH="$EVIDENCE_DIR/${TIMESTAMP}-${SAFE_FEATURE_NAME}-verify.md"
+TEMP_ROOT="${TMPDIR:-/tmp}"
+TEMP_ROOT="${TEMP_ROOT%/}"
+TEMP_FILE=$(mktemp "$TEMP_ROOT/speckit-superb-evidence-${SAFE_FEATURE_NAME}-${TIMESTAMP}.XXXXXX")
+FILE_PATH="${TEMP_FILE}.md"
+mv "$TEMP_FILE" "$FILE_PATH"
 
 cat <<EOF > "$FILE_PATH"
 # Verification Evidence: $FEATURE_NAME
@@ -126,4 +128,4 @@ $TEST_OUTPUT
 \`\`\`
 EOF
 
-echo "Evidence successfully archived to $FILE_PATH"
+echo "Evidence captured at $FILE_PATH"

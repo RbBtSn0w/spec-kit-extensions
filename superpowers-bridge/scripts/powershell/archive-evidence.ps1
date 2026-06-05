@@ -93,14 +93,11 @@ end {
         }
     }
 
-    $EvidenceDir = ".specify/evidence"
-    if (!(Test-Path -Path $EvidenceDir)) {
-        New-Item -ItemType Directory -Path $EvidenceDir | Out-Null
-    }
-
     $Timestamp = (Get-Date).ToString("yyyyMMddHHmmss")
     $SafeFeatureName = $FeatureName -replace '[^a-zA-Z0-9_-]', '_'
-    $FileName = "${Timestamp}-${SafeFeatureName}-verify.md"
+    $UniqueSuffix = [System.Guid]::NewGuid().ToString("N")
+    $FileName = "speckit-superb-evidence-${SafeFeatureName}-${Timestamp}-${UniqueSuffix}.md"
+    $EvidenceDir = [System.IO.Path]::GetTempPath()
     $FilePath = Join-Path -Path $EvidenceDir -ChildPath $FileName
 
     $UtcTimestamp = [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
@@ -125,5 +122,5 @@ $TestOutput
 
     $Content | Out-File -FilePath $FilePath -Encoding utf8 -NoNewline
 
-    Write-Output "Evidence successfully archived to $FilePath"
+    Write-Output "Evidence captured at $FilePath"
 }

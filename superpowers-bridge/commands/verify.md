@@ -2,7 +2,7 @@
 description: >
   Mandatory completion gate. Bridges an installed obra/superpowers
   verification-before-completion skill and extends it with spec-kit's
-  spec-coverage checklist. No task may be marked done without fresh evidence.
+  spec-coverage checklist. No task may be marked done without fresh run evidence.
 scripts:
   sh: scripts/bash/sync-spec-status.sh
   ps: scripts/powershell/sync-spec-status.ps1
@@ -101,9 +101,9 @@ Unmet requirements: [list them]
 
 ---
 
-## Step 5 — Archiving Evidence
+## Step 5 — Capture Temporary Evidence
 
-Archive the verification results to `.specify/evidence/` by executing the archiving script. The test output and checklist must both be present and should be passed via stdin to avoid command-line argument size limits.
+Capture the verification results in the system temporary directory by executing the evidence script. This file is a run-local artifact for the current gate, not a repository artifact. The test output and checklist must both be present and should be passed via stdin to avoid command-line argument size limits.
 
 On Unix-like systems (sh):
 ```bash
@@ -138,7 +138,7 @@ Replace the arguments with:
 
 ## Step 6 — Status Synchronization
 
-Only after all verification checks pass AND evidence is successfully archived, synchronize the feature spec status to:
+Only after all verification checks pass AND temporary evidence is successfully captured, synchronize the feature spec status to:
 
 ```bash
 {SCRIPT} --status "Verified"
@@ -148,7 +148,7 @@ Status sync rules:
 
 - Use the script output as the source of truth for resolved spec path and
   resulting status
-- If verification fails or archiving fails, leave the previous status unchanged
+- If verification fails or evidence capture fails, leave the previous status unchanged
 - Do not overwrite `Abandoned`
 - Do not introduce `Completed` here
 

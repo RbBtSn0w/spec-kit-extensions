@@ -99,21 +99,9 @@ echo "- [ ] Task 1" > tasks.md
 git add spec.md tasks.md
 assert_fails_with "uncompleted tasks" "$HOOK_SCRIPT"
 
-# Test 5: Spec Verified, tasks completed, but no evidence (should exit 1)
-echo "Test 5: Spec Verified, no evidence"
+# Test 5: Spec Verified, tasks completed, no repo evidence required (should exit 0)
+echo "Test 5: Spec Verified, tasks completed"
 echo "- [x] Task 1" > tasks.md
-assert_fails_with "no verification evidence found" "$HOOK_SCRIPT"
-
-# Test 6: Spec Verified, tasks completed, unrelated evidence exists (should exit 1)
-echo "Test 6: Spec Verified, unrelated evidence exists"
-mkdir -p .specify/evidence
-touch .specify/evidence/20260523000000-other-feature-verify.md
-assert_fails_with "no verification evidence found" "$HOOK_SCRIPT"
-
-# Test 7: Spec Verified, tasks completed, matching evidence exists (should exit 0)
-echo "Test 7: Spec Verified, matching evidence exists"
-SAFE_TEMP_NAME=$(basename "$TEMP_DIR" | sed 's/[^a-zA-Z0-9_-]/_/g')
-touch ".specify/evidence/20260523000000-${SAFE_TEMP_NAME}-verify.md"
 if "$HOOK_SCRIPT" >/dev/null; then
     echo "  -> Passed"
 else

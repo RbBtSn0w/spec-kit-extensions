@@ -1,18 +1,17 @@
 param()
 
 $ErrorActionPreference = "Stop"
-$EvidenceDir = ".specify/evidence"
 $ScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "..\scripts\powershell\archive-evidence.ps1"
 $PowerShellExe = (Get-Process -Id $PID).Path
+$TempDir = [System.IO.Path]::GetTempPath().TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
 
 # Clean up before testing
-if (Test-Path -Path $EvidenceDir) {
-    Remove-Item -Path $EvidenceDir -Recurse -Force
+if (Test-Path -Path ".specify/evidence") {
+    Remove-Item -Path ".specify/evidence" -Recurse -Force
 }
-New-Item -ItemType Directory -Path $EvidenceDir | Out-Null
 
-# Test 1: Successful archiving
-Write-Host "Test 1: Successful Archiving"
+# Test 1: Successful evidence capture
+Write-Host "Test 1: Successful Evidence Capture"
 $InputData = @"
 - [x] R01
 - [x] R02
@@ -31,23 +30,41 @@ function Invoke-ArchiveEvidence {
     $InputFile = New-TemporaryFile
     try {
         Set-Content -LiteralPath $InputFile.FullName -Value $InputData -NoNewline
-        & $PowerShellExe -NoProfile -NonInteractive -File "$ScriptPath" @Arguments -InputFile "$($InputFile.FullName)" *> $null
-        return $LASTEXITCODE
+        $Output = & $PowerShellExe -NoProfile -NonInteractive -File "$ScriptPath" @Arguments -InputFile "$($InputFile.FullName)" 2>&1
+        return @{
+            ExitCode = $LASTEXITCODE
+            Output = $Output
+        }
     } finally {
         Remove-Item -LiteralPath $InputFile.FullName -Force -ErrorAction SilentlyContinue
     }
 }
 
-$ExitCode = Invoke-ArchiveEvidence $InputData @("-FeatureName", "test-feature", "-BuildStatus", "PASS", "-CommitHash", "12345abc")
-if ($ExitCode -ne 0) {
-    Write-Error "Failed: Script exited with status $ExitCode."
+$Result = Invoke-ArchiveEvidence $InputData @("-FeatureName", "test-feature", "-BuildStatus", "PASS", "-CommitHash", "12345abc")
+if ($Result.ExitCode -ne 0) {
+    Write-Error "Failed: Script exited with status $($Result.ExitCode)."
     exit 1
 }
 
-$ArchivedFiles = Get-ChildItem -Path $EvidenceDir -Filter "*.md"
-if ($ArchivedFiles.Count -gt 0) {
-    $ArchivedFile = $ArchivedFiles[0].FullName
+$OutputText = ($Result.Output | Out-String).Trim()
+$ArchivedFile = $OutputText -replace '^Evidence captured at ', ''
+if (Test-Path -LiteralPath $ArchivedFile -PathType Leaf) {
     Write-Host "  -> Passed: File created: $ArchivedFile"
+
+    $ArchivedDir = [System.IO.Path]::GetDirectoryName($ArchivedFile).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    if ($ArchivedDir -eq $TempDir -and ([System.IO.Path]::GetFileName($ArchivedFile) -like "speckit-superb-evidence-test-feature-*.md")) {
+        Write-Host "  -> Passed: File created in system temp directory."
+    } else {
+        Write-Error "Failed: File was not created in system temp directory."
+        exit 1
+    }
+
+    if (Test-Path -Path ".specify/evidence") {
+        Write-Error "Failed: Repo evidence directory should not be created."
+        exit 1
+    } else {
+        Write-Host "  -> Passed: Repo evidence directory not created."
+    }
     
     $Content = Get-Content -Path $ArchivedFile -Raw
     
@@ -77,8 +94,8 @@ function Assert-Fails {
     )
 
     Write-Host $Name
-    $ExitCode = Invoke-ArchiveEvidence $InputData $Arguments
-    if ($ExitCode -eq 0) {
+    $Result = Invoke-ArchiveEvidence $InputData $Arguments
+    if ($Result.ExitCode -eq 0) {
         Write-Error "Failed: Script should have failed."
         exit 1
     }
@@ -101,4 +118,4 @@ Assert-Fails "Test 5: Missing Test Output" "- [x] R01`n---OUTPUT---" @("-Feature
 Assert-Fails "Test 6: Invalid Build Status" "- [x] R01`n---OUTPUT---`nTests passing: 5" @("-FeatureName", "test-feature", "-BuildStatus", "BROKEN")
 
 Write-Host "All tests passed successfully."
-Remove-Item -Path $EvidenceDir -Recurse -Force
+Remove-Item -LiteralPath $ArchivedFile -Force -ErrorAction SilentlyContinue

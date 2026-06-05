@@ -9,8 +9,7 @@ code, review against `spec.md` / `plan.md` / `tasks.md`, and fresh evidence
 before a feature can be treated as `Verified`.
 
 The current product promise is narrow: no agent should mark a Spec Kit feature
-complete without fresh verification evidence, mapped spec coverage, and a
-durable evidence archive.
+complete without fresh verification evidence and mapped spec coverage.
 
 This extension combines:
 
@@ -64,12 +63,11 @@ demo:
    `implement`.
 4. Let `/speckit.superb.tdd` run before implementation and
    `/speckit.superb.verify` run after implementation.
-5. Treat the first success as real only when `.specify/evidence/` contains a
-   fresh archive with test output and a spec-coverage checklist.
+5. Treat the first success as real only when `/speckit.superb.verify` captures
+   fresh run-local evidence with test output and a spec-coverage checklist.
 
-The extension is proving value when it blocks a false completion, exposes a
-missing requirement-to-task link, or leaves durable evidence that another
-reviewer can inspect later.
+The extension is proving value when it blocks a false completion or exposes a
+missing requirement-to-task link before `Verified` is synchronized.
 
 ## Bridge Model
 
@@ -122,9 +120,9 @@ reviewer can inspect later.
 
 ## Evidence-First Completion
 
-`/speckit.superb.verify` archives completion evidence to `.specify/evidence/` before it synchronizes the active `spec.md` status to `Verified`.
+`/speckit.superb.verify` captures completion evidence in the system temporary directory before it synchronizes the active `spec.md` status to `Verified`. The evidence file is a run-local artifact for the current gate, not a source-controlled project artifact.
 
-Each evidence archive records:
+Each temporary evidence file records:
 
 - UTC timestamp
 - git commit hash
@@ -132,7 +130,7 @@ Each evidence archive records:
 - spec-coverage checklist
 - full test output
 
-If the checklist, test output, or archive step is missing, the previous status is preserved.
+If the checklist, test output, or evidence capture step is missing, the previous status is preserved.
 
 ## What This Bridge Does Not Do
 

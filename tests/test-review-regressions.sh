@@ -123,11 +123,11 @@ require(
 )
 require(
     "test-archive-evidence.sh" in ci and "test-pre-commit.sh" in ci,
-    "ci.yml must include evidence archiving and universal pre-commit regression coverage",
+    "ci.yml must include evidence capture and universal pre-commit regression coverage",
 )
 require(
     "test-archive-evidence.ps1" in ci,
-    "ci.yml must include PowerShell evidence archiving regression coverage",
+    "ci.yml must include PowerShell evidence capture regression coverage",
 )
 require(
     'git checkout -B "$DEFAULT_BRANCH" "origin/$DEFAULT_BRANCH"' in release,
@@ -157,7 +157,7 @@ require(
 require(
     "archive_sh: scripts/bash/archive-evidence.sh" in verify
     and "archive_ps: scripts/powershell/archive-evidence.ps1" in verify,
-    "verify.md must declare evidence archiving scripts in frontmatter",
+    "verify.md must declare evidence capture scripts in frontmatter",
 )
 require(
     "#### 🟠 Important" in critique and "#### 🔵 Minor" in critique,
