@@ -5,6 +5,14 @@ SCRIPT_PATH="./superpowers-bridge/scripts/bash/archive-evidence.sh"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 TEMP_ROOT="${TMPDIR:-/tmp}"
 TEMP_ROOT="${TEMP_ROOT%/}"
+ARCHIVED_FILE=""
+
+cleanup() {
+    if [ -n "$ARCHIVED_FILE" ] && [ -f "$ARCHIVED_FILE" ]; then
+        rm -f "$ARCHIVED_FILE"
+    fi
+}
+trap cleanup EXIT
 
 # Clean up before testing
 rm -rf ".specify/evidence"
@@ -22,6 +30,7 @@ EOF
 )
 
 ARCHIVED_FILE=$(printf '%s\n' "$OUTPUT" | sed -n 's/^Evidence captured at //p')
+ARCHIVED_FILE="${ARCHIVED_FILE%$'\r'}"
 
 if [ -f "$ARCHIVED_FILE" ]; then
     echo "  -> Passed: File created: $ARCHIVED_FILE"
@@ -107,4 +116,3 @@ else
 fi
 
 echo "All tests passed successfully."
-rm -f "$ARCHIVED_FILE"

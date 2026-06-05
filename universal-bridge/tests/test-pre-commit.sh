@@ -99,9 +99,28 @@ echo "- [ ] Task 1" > tasks.md
 git add spec.md tasks.md
 assert_fails_with "uncompleted tasks" "$HOOK_SCRIPT"
 
-# Test 5: Spec Verified, tasks completed, no repo evidence required (should exit 0)
-echo "Test 5: Spec Verified, tasks completed"
+# Test 5: Spec Verified in index, but tasks.md missing (should exit 1)
+echo "Test 5: Spec Verified, missing tasks"
+git rm --cached -f tasks.md > /dev/null 2>&1 || true
+rm -f tasks.md
+echo "**Status**: Verified" > spec.md
+git add spec.md
+echo "**Status**: Tasked" > spec.md
+assert_fails_with "tasks.md is staged" "$HOOK_SCRIPT"
+
+# Test 6: Spec Verified, staged tasks incomplete, working tree complete (should exit 1)
+echo "Test 6: Spec Verified, staged tasks incomplete"
+echo "**Status**: Verified" > spec.md
+echo "- [ ] Task 1" > tasks.md
+git add spec.md tasks.md
 echo "- [x] Task 1" > tasks.md
+assert_fails_with "uncompleted tasks" "$HOOK_SCRIPT"
+
+# Test 7: Spec Verified, tasks completed, no repo evidence required (should exit 0)
+echo "Test 7: Spec Verified, tasks completed"
+echo "**Status**: Verified" > spec.md
+echo "- [x] Task 1" > tasks.md
+git add spec.md tasks.md
 if "$HOOK_SCRIPT" >/dev/null; then
     echo "  -> Passed"
 else

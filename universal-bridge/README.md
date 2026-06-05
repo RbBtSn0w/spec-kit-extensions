@@ -21,8 +21,7 @@ The `hooks/` directory provides standalone, platform-agnostic scripts that can b
 This pre-commit hook acts as an automated quality gate. It verifies the following rules before allowing a commit:
 1. **Spec Identification**: Locates the active `spec.md` in the workspace.
 2. **Status Constraints**:
-   - If the specification's status is `Verified`, it ensures that `tasks.md` does not contain any uncompleted tasks (`- [ ]`).
-   - If the status is `Verified`, it checks that all tasks are complete. Verification evidence is treated as run-local temporary state, not a repository file requirement.
+   - If the specification's status is `Verified`, it ensures that a related `tasks.md` exists and contains no uncompleted tasks (`- [ ]`). Verification evidence is treated as run-local temporary state, not a repository file requirement.
 3. **Safety warnings**: Issues warnings if commits are attempted on an `Abandoned` specification.
 
 ### Installation

@@ -8,17 +8,65 @@ set -euo pipefail
 
 echo ">>> Running SDD Pre-Commit Hook..."
 
+INSIDE_GIT_WORK_TREE=false
+REPO_ROOT=""
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    INSIDE_GIT_WORK_TREE=true
+    REPO_ROOT=$(git rev-parse --show-toplevel)
+fi
+
+to_repo_path() {
+    local path="$1"
+
+    if [ "$INSIDE_GIT_WORK_TREE" = true ]; then
+        case "$path" in
+            "$REPO_ROOT"/*)
+                path="${path#$REPO_ROOT/}"
+                ;;
+            ./*)
+                path="${path#./}"
+                ;;
+        esac
+    fi
+
+    printf '%s\n' "$path"
+}
+
+committed_file_exists() {
+    local path="$1"
+
+    if [ "$INSIDE_GIT_WORK_TREE" = true ]; then
+        local repo_path
+        repo_path=$(to_repo_path "$path")
+        git ls-files --stage -- "$repo_path" | grep -q .
+    else
+        [ -f "$path" ]
+    fi
+}
+
+read_committed_file() {
+    local path="$1"
+
+    if [ "$INSIDE_GIT_WORK_TREE" = true ]; then
+        local repo_path
+        repo_path=$(to_repo_path "$path")
+        git show ":$repo_path"
+    else
+        cat "$path"
+    fi
+}
+
 # Find spec.md or active feature spec
 SPEC_FILE=""
-if [ -n "${FEATURE_SPEC:-}" ] && [ -f "$FEATURE_SPEC" ]; then
+if [ -n "${FEATURE_SPEC:-}" ] && committed_file_exists "$FEATURE_SPEC"; then
     SPEC_FILE="$FEATURE_SPEC"
-elif [ -f "spec.md" ]; then
+elif committed_file_exists "spec.md"; then
     SPEC_FILE="spec.md"
 else
     # Try to find a spec.md related to the staged files first
     while IFS= read -r -d '' STAGED_PATH; do
         DIR=$(dirname "$STAGED_PATH")
-        if [ -f "$DIR/spec.md" ]; then
+        if committed_file_exists "$DIR/spec.md"; then
             SPEC_FILE="$DIR/spec.md"
             break
         fi
@@ -27,7 +75,7 @@ else
         PARENT="$DIR"
         while [ "$PARENT" != "." ] && [ "$PARENT" != "/" ]; do
             PARENT=$(dirname "$PARENT")
-            if [ -f "$PARENT/spec.md" ]; then
+            if committed_file_exists "$PARENT/spec.md"; then
                 SPEC_FILE="$PARENT/spec.md"
                 break
             fi
@@ -37,7 +85,12 @@ else
     
     # Fallback: search the workspace, silencing errors
     if [ -z "$SPEC_FILE" ]; then
-        SPEC_FILE=$(find . -name "spec.md" 2>/dev/null | head -n 1 || true)
+        while IFS= read -r -d '' CANDIDATE_SPEC; do
+            if committed_file_exists "$CANDIDATE_SPEC"; then
+                SPEC_FILE="$CANDIDATE_SPEC"
+                break
+            fi
+        done < <(find . -name "spec.md" -print0 2>/dev/null)
     fi
 fi
 
@@ -61,24 +114,9 @@ fi
 # Extract status
 STATUS=""
 if [ -n "$PYTHON_BIN" ]; then
-    STATUS=$($PYTHON_BIN - "$SPEC_FILE" <<'PY'
-import sys
-import re
-from pathlib import Path
-try:
-    content = Path(sys.argv[1]).read_text(encoding='utf-8')
-    match = re.search(r'\*\*Status\*\*:\s*([^\r\n]+)', content)
-    if match:
-        print(match.group(1).strip())
-    else:
-        print("")
-except Exception as e:
-    print(f"ERROR: {e}", file=sys.stderr)
-    sys.exit(1)
-PY
-)
+    STATUS=$(read_committed_file "$SPEC_FILE" | "$PYTHON_BIN" -c 'import re, sys; match = re.search(r"\*\*Status\*\*:\s*([^\r\n]+)", sys.stdin.read()); print(match.group(1).strip() if match else "")')
 else
-    STATUS=$(grep -i "\*\*Status\*\*:" "$SPEC_FILE" | head -n 1 | cut -d: -f2 | xargs || true)
+    STATUS=$(read_committed_file "$SPEC_FILE" | grep -i "\*\*Status\*\*:" | head -n 1 | cut -d: -f2- | xargs || true)
 fi
 
 echo "Current Spec Status: $STATUS"
@@ -90,22 +128,28 @@ fi
 
 # Check tasks.md if it exists
 TASKS_FILE=""
-if [ -f "tasks.md" ]; then
+if committed_file_exists "tasks.md"; then
     TASKS_FILE="tasks.md"
 else
     # Search in the same directory as the spec
     SPEC_DIR=$(dirname "$SPEC_FILE")
-    if [ -f "$SPEC_DIR/tasks.md" ]; then
+    if committed_file_exists "$SPEC_DIR/tasks.md"; then
         TASKS_FILE="$SPEC_DIR/tasks.md"
     fi
 fi
 
-if [ -f "$TASKS_FILE" ]; then
+if [ "$STATUS" = "Verified" ] && [ -z "$TASKS_FILE" ]; then
+    echo "ERROR: Spec status is 'Verified' but no related tasks.md is staged for commit." >&2
+    echo "Please add a completed tasks.md or revert status before committing." >&2
+    exit 1
+fi
+
+if [ -n "$TASKS_FILE" ]; then
     echo "Found tasks checklist: $TASKS_FILE"
     
     # If status is Verified, ensure there are no uncompleted tasks [ ] in tasks.md
     if [ "$STATUS" = "Verified" ]; then
-        UNCOMPLETED=$(grep -E '^\s*[-*]\s*\[\s*\]' "$TASKS_FILE" | wc -l | xargs || true)
+        UNCOMPLETED=$(read_committed_file "$TASKS_FILE" | grep -E '^\s*[-*]\s*\[\s*\]' | wc -l | xargs || true)
         if [ "$UNCOMPLETED" -ne 0 ]; then
             echo "ERROR: Spec status is 'Verified' but tasks.md contains $UNCOMPLETED uncompleted tasks [ ]." >&2
             echo "Please complete all tasks or revert status before committing." >&2

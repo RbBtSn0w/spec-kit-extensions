@@ -5,12 +5,18 @@ TIMESTAMP=$(date +%Y%m%d%H%M%S)
 FEATURE_NAME="feasibility-test"
 TEMP_ROOT="${TMPDIR:-/tmp}"
 TEMP_ROOT="${TEMP_ROOT%/}"
-FILE_PATH="$TEMP_ROOT/speckit-superb-evidence-${FEATURE_NAME}-${TIMESTAMP}.md"
+FILE_PATH=""
 
 cleanup() {
-  rm -f "$FILE_PATH"
+  if [ -n "$FILE_PATH" ]; then
+    rm -f "$FILE_PATH"
+  fi
 }
 trap cleanup EXIT
+
+TEMP_FILE=$(mktemp "$TEMP_ROOT/speckit-superb-evidence-${FEATURE_NAME}-${TIMESTAMP}.XXXXXX")
+FILE_PATH="${TEMP_FILE}.md"
+mv "$TEMP_FILE" "$FILE_PATH"
 
 cat <<EOF > "$FILE_PATH"
 # Verification Evidence
