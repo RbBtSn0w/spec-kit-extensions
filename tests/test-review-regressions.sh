@@ -178,12 +178,14 @@ require(
     "extension.yml must declare speckit.superb.brainstorm and wire it to hooks.after_specify",
 )
 require_hook_optional("after_specify", "true")
+require_hook_optional("after_plan", "false")
 require_hook_optional("after_tasks", "true")
 require_hook_optional("before_implement", "false")
 require_hook_optional("after_implement", "false")
 require(
     "## Hook Requirement Baseline" in readme
     and "| `after_specify` | `/speckit.superb.brainstorm` | Optional |" in readme
+    and "| `after_plan` | `/speckit.superb.plan-gate` | Required |" in readme
     and "| `after_tasks` | `/speckit.superb.review` | Optional |" in readme
     and "| `before_implement` | `/speckit.superb.controller` | Required |" in readme
     and "| `after_implement` | `/speckit.superb.verify` | Required |" in readme,
@@ -199,6 +201,7 @@ require(
 require(
     "hook_policy:" in config
     and "required:" in config
+    and "after_plan" in config
     and "before_implement" in config
     and "after_implement" in config
     and "optional:" in config
@@ -208,6 +211,7 @@ require(
 )
 require(
     "| after_specify | /speckit.superb.brainstorm | Optional |" in check
+    and "| after_plan | /speckit.superb.plan-gate | Required |" in check
     and "| after_tasks | /speckit.superb.review | Optional |" in check
     and "| before_implement | /speckit.superb.controller | Required |" in check
     and "| after_implement | /speckit.superb.verify | Required |" in check,

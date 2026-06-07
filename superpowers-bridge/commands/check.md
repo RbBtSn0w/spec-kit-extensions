@@ -107,6 +107,7 @@ Produce a compact diagnostic report:
 | Hook | Command | Requirement | Status | Reason |
 |------|---------|-------------|--------|--------|
 | after_specify | /speckit.superb.brainstorm | Optional | READY | Optional brainstorming skill installed |
+| after_plan | /speckit.superb.plan-gate | Required | READY | Bridge-native command |
 | after_tasks | /speckit.superb.review | Optional | READY | Bridge-native command |
 | before_implement | /speckit.superb.controller | Required | READY | Hard dependency installed |
 | after_implement | /speckit.superb.verify | Required | READY | Hard dependency installed |

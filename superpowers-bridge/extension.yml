@@ -128,8 +128,8 @@ hooks:
     command: speckit.superb.plan-gate
     optional: false
     description: >
-      Mandatory Plan gate. Verifies task list completeness and injects SDD
-      directives for agentic workers.
+      Mandatory Plan gate. Verifies plan completeness and injects SDD
+      directives into plan.md for agentic workers.
 
   after_implement:
     command: speckit.superb.verify

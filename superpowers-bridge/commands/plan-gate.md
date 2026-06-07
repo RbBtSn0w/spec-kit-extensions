@@ -7,7 +7,7 @@ description: >
 # Plan Quality Gate
 
 > **Type:** Bridge-native after_plan gate
-> **Invocation:** Executed automatically after `/speckit-plan` or when saving `plan.md`.
+> **Invocation:** Mandatory post-hook for `speckit.plan` (after_plan). Executed automatically after `/speckit.plan`.
 
 ---
 
@@ -27,11 +27,11 @@ If the workspace and global copies both exist, use the workspace copy.
 Scan the generated `plan.md` and associated design files in the feature directory.
 
 ### Layer 1: Native writing-plans Reviewer (Preferred)
-If the `writing-plans` skill was successfully resolved in Step 0, the Controller MUST spawn a dedicated **Plan Reviewer** subagent using `define_subagent` and `invoke_subagent`:
+If the `writing-plans` skill was successfully resolved in Step 0 and the `define_subagent` tool is available in the assistant's tool declarations, the Controller MUST spawn a dedicated **Plan Reviewer** subagent using `define_subagent` and `invoke_subagent`:
 1. **Subagent Configuration**:
    - **TypeName**: `research` or `self`
    - **Role**: `Plan Document Reviewer`
-   - **Prompt**: Load and format the template from the resolved `writing-plans/plan-document-reviewer-prompt.md` file, filling in `[PLAN_FILE_PATH]` with the absolute path of `plan.md` and `[SPEC_FILE_PATH]` with `spec.md`.
+   - **Prompt**: Load and format the template from the resolved `writing-plans/plan-document-reviewer-prompt.md` file, filling in `[PLAN_FILE_PATH]` with the absolute path of `plan.md` and `[SPEC_FILE_PATH]` with the absolute path of `spec.md`.
 2. **Review Execution**:
    - Invoke the subagent. The subagent will analyze the plan against the specification, completeness requirements, and the No Placeholders rules.
 3. **Handle Review Result**:
@@ -41,7 +41,7 @@ If the `writing-plans` skill was successfully resolved in Step 0, the Controller
    - If the status is **Approved**, proceed to Step 2.
 
 ### Layer 2: Local fallback discipline
-If `writing-plans` is not installed, the current Agent must fallback to manually scanning `plan.md` for standard placeholder patterns:
+If `writing-plans` is not installed or subagent tools are unavailable, the current Agent must fallback to manually scanning `plan.md` for standard placeholder patterns:
 - `TODO`, `TKTK`, `???`, `<placeholder>`, and `TBD`.
 
 If any placeholders are found in this fallback scan:
@@ -84,8 +84,8 @@ If any task violates the FR-008 objective redlines or the 2-5 minutes window:
 
 If all quality checks in Step 1 and Step 2 pass successfully:
 
-1. Locate the feature's `tasks.md` template or the file being prepared.
-2. Inject the mandatory directive block at the top of `tasks.md` (directly below the main H1 header or description):
+1. Locate the feature's `plan.md` file.
+2. Inject the mandatory directive block at the top of `plan.md` (directly below the main H1 header or description):
 
 ### Layer 1: Native writing-plans Header (Preferred)
 If `writing-plans` was resolved, inject its official **Plan Document Header** directive:

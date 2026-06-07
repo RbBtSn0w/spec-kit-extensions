@@ -185,7 +185,7 @@ unexposed workflow skills.
 | Superpowers skill | Bridge surface | Spec Kit integration point | Mechanism | Boundary |
 |---|---|---|---|---|
 | `brainstorming` | `/speckit.superb.brainstorm` | After `/speckit.specify`, before `/speckit.clarify` or `/speckit.plan` | Optional `after_specify` hook or manual rerun/refinement | Refines the existing `spec.md` with user approval; does not create a feature, branch, parallel design doc, `plan.md`, `tasks.md`, or lifecycle status. |
-| `test-driven-development` | `/speckit.superb.controller` | Immediately before `/speckit.implement` writes production code | Required `before_implement` hook | Enforces RED/GREEN/REFACTOR readiness; does not own implementation orchestration. |
+| `test-driven-development` | `/speckit.superb.controller` | Immediately before `/speckit.implement` writes production code | Required `before_implement` hook | Enforces TDD discipline and orchestrates single/multi-agent implementation layers. |
 | `verification-before-completion` | `/speckit.superb.verify` | Immediately after `/speckit.implement` claims completion | Required `after_implement` hook | Requires fresh evidence before completion claims and synchronizes only bridge-owned verified state. |
 | `systematic-debugging` | `/speckit.superb.debug` | During implementation when failures repeat or behavior is unexplained | Manual support command | Produces root-cause investigation and evidence; does not bypass TDD or verification gates. |
 | `dispatching-parallel-agents` | `/speckit.superb.debug` parallel mode | Debugging only, when there are 2+ independent failure domains | Borrowed discipline inside `debug` | Creates independent investigation task packages; the controller performs final synthesis and verification. |
@@ -249,10 +249,10 @@ This forces the controller to run implementation inline inside the parent sessio
 
 ### How The Matrix Connects To Spec Kit
 
-- Hooked stages are limited to `after_specify`, `after_tasks`,
+- Hooked stages are limited to `after_specify`, `after_plan`, `after_tasks`,
   `before_implement`, and `after_implement`.
-- Required hooks are reserved for implementation trust boundaries:
-  `/speckit.superb.controller` before implementation and `/speckit.superb.verify`
+- Required hooks are reserved for plan quality and implementation trust boundaries:
+  `/speckit.superb.plan-gate` after plan, `/speckit.superb.controller` before implementation, and `/speckit.superb.verify`
   after implementation.
 - Optional hooks improve artifact quality after Spec Kit has created the
   relevant artifact, but they do not own the next stage.

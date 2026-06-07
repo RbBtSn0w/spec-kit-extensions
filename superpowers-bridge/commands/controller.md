@@ -35,7 +35,16 @@ scripts:
 
 ---
 
-## Step 2 — Bind Spec-Kit Task Context
+## Step 2 — Detect Subagent Capability and Mode Selection
+
+Before starting, the Controller must detect if subagent dispatch is supported and allowed:
+1. **Verify Tool Availability**: Check if the `define_subagent` tool is present in the assistant's tool declarations.
+2. **Check User Override**: Check `$ARGUMENTS` for explicit overrides (e.g. `--inline` or `--sdd=false`).
+3. **Fallback Decision**: If `define_subagent` is unavailable, OR if the user has explicitly requested inline execution, the Controller MUST degrade gracefully to **Single-Agent Mode** (Step 4a). Otherwise, proceed to **Multi-Agent SDD Mode** (Step 4b).
+
+---
+
+## Step 3 — Bind Spec-Kit Task Context
 
 1. Identify the task or context to work on:
    ```
@@ -64,18 +73,9 @@ Do not infer the feature path from the current branch name manually.
 
 ---
 
-## Step 1.5 — Detect Subagent Capability and Mode Selection
+## Step 4 — Execute
 
-Before starting, the Controller must detect if subagent dispatch is supported and allowed:
-1. **Verify Tool Availability**: Check if the `define_subagent` tool is present in the assistant's tool declarations.
-2. **Check User Override**: Check `$ARGUMENTS` for explicit overrides (e.g. `--inline` or `--sdd=false`).
-3. **Fallback Decision**: If `define_subagent` is unavailable, OR if the user has explicitly requested inline execution, the Controller MUST degrade gracefully to **Single-Agent Mode** (Step 3a). Otherwise, proceed to **Multi-Agent SDD Mode** (Step 3b).
-
----
-
-## Step 3 — Execute
-
-### Step 3a — Single-Agent Mode (Fallback)
+### Step 4a — Single-Agent Mode (Fallback)
 
 If fallback is active, run implementation locally within the parent conversation (Inline Execution):
 1. Synchronize the feature spec status to "Implementing" by running:
@@ -95,14 +95,14 @@ If fallback is active, run implementation locally within the parent conversation
        - Present evidence of RED and GREEN runs inline to the user.
        - Manually tick `[x]` for the completed task in `tasks.md`.
 
-### Step 3b — Multi-Agent SDD Mode (Default)
+### Step 4b — Multi-Agent SDD Mode (Default)
 
 If subagent dispatch is available and not overridden:
 
 1. **Layered Detection**:
    - **Layer 1 (Native SDD)**: Check for `subagent-driven-development/SKILL.md` in `./.agents/skills/` or `~/.agents/skills/`. If present, use it.
    - **Layer 2 (Composite TDD + Code-Review)**: If Layer 1 is absent, check for both `test-driven-development/SKILL.md` AND `code-review/SKILL.md` (or the `critique` command).
-   - If neither layer is ready, fallback to Single-Agent Mode (Step 3a).
+   - If neither layer is ready, fallback to Single-Agent Mode (Step 4a).
 
 2. **Initialize Discoveries Log**:
    - Create or read a stateful `discoveries.md` file in the feature directory. This file accumulates contracts, APIs, database schemas, and discoveries made by subagents during the workflow.
@@ -120,19 +120,19 @@ If subagent dispatch is available and not overridden:
    - **Layered Implementer Prompting**: If native SDD (Layer 1) is active, load and format the implementer prompt template from the resolved `subagent-driven-development` skill directory. Otherwise (Layer 2), construct a fallback TDD-implementer prompt based on `test-driven-development/SKILL.md` rules.
    - Invoke the Implementer subagent using `define_subagent` and `invoke_subagent`.
    - The subagent must run the TDD loop locally on the task file and report back when green.
-    - **Two-stage Review Quality Gate (Feedback Loop)**:
-      - Upon completion of the implementation task, if the code changes fail verification or the subagent completes, the Controller enters a review gate (up to **3 retries** total):
-        1. **Stage 1 (Spec Reviewer) (FR-012)**: Spawns a `Spec Reviewer` subagent to compare the task's code changes and test output directly against the functional requirements in `spec.md`. The objective passing criteria are:
-           - (a) All code modifications are strictly related to the target task.
-           - (b) Valid passing TDD test suite outputs are provided.
-           - If native SDD (Layer 1) is active, format the reviewer prompt using the resolved `subagent-driven-development/spec-reviewer-prompt.md`. Otherwise (Layer 2), fallback to using local bridge-native `critique.md` instructions.
-           - If it detects a mismatch, unrelated changes, or missing test evidence, it returns feedback, and the Controller triggers a retry.
-        2. **Stage 2 (Quality Reviewer) (FR-013)**: If Spec Review passes, spawns a `Quality Reviewer` subagent to check for security, style, and code quality regressions. If native SDD (Layer 1) is active, format the reviewer prompt using the resolved `subagent-driven-development/code-quality-reviewer-prompt.md`. Otherwise (Layer 2), fallback to the local `code-reviewer.md` template or `critique` command.
-        3. **Failures**: If either reviewer fails the check, return feedback to the Implementer subagent to make fixes.
-        4. **Meltdown (熔断) (FR-014)**: If a single task fails review **3 times**, the Controller must abort immediately, preserve the workspace state, and escalate to the user for manual troubleshooting.
-      - **Progress Sync & Continuous Execution (FR-015, FR-016)**:
-        - Upon a successful double-review pass, the Controller MUST **acquire an exclusive file lock** on `tasks.md`, then **automatically tick** the completed task's checkbox (changing `- [ ]` to `- [x]`) inside `tasks.md` without human intervention, and release the file lock.
-        - The Controller then **automatically proceeds** to the next task in sequence. It must NOT pause or ask the user for confirmation to start the next task, ensuring continuous, fully automated progression.
+   - **Two-stage Review Quality Gate (Feedback Loop)**:
+     - Upon completion of the implementation task, if the code changes fail verification or the subagent completes, the Controller enters a review gate (up to **3 retries** total):
+       1. **Stage 1 (Spec Reviewer) (FR-012)**: Spawns a `Spec Reviewer` subagent to compare the task's code changes and test output directly against the functional requirements in `spec.md`. The objective passing criteria are:
+          - (a) All code modifications are strictly related to the target task.
+          - (b) Valid passing TDD test suite outputs are provided.
+          - If native SDD (Layer 1) is active, format the reviewer prompt using the resolved `subagent-driven-development/spec-reviewer-prompt.md`. Otherwise (Layer 2), fallback to using local bridge-native `critique.md` instructions.
+          - If it detects a mismatch, unrelated changes, or missing test evidence, it returns feedback, and the Controller triggers a retry.
+       2. **Stage 2 (Quality Reviewer) (FR-013)**: If Spec Review passes, spawns a `Quality Reviewer` subagent to check for security, style, and code quality regressions. If native SDD (Layer 1) is active, format the reviewer prompt using the resolved `subagent-driven-development/code-quality-reviewer-prompt.md`. Otherwise (Layer 2), fallback to the local `code-reviewer.md` template or `critique` command.
+       3. **Failures**: If either reviewer fails the check, return feedback to the Implementer subagent to make fixes.
+       4. **Meltdown (熔断) (FR-014)**: If a single task fails review **3 times**, the Controller must abort immediately, preserve the workspace state, and escalate to the user for manual troubleshooting.
+     - **Progress Sync & Continuous Execution (FR-015, FR-016)**:
+       - Upon a successful double-review pass, the Controller MUST **acquire an exclusive file lock** on `tasks.md`, then **automatically tick** the completed task's checkbox (changing `- [ ]` to `- [x]`) inside `tasks.md` without human intervention, and release the file lock.
+       - The Controller then **automatically proceeds** to the next task in sequence. It must NOT pause or ask the user for confirmation to start the next task, ensuring continuous, fully automated progression.
    - Append any new API contracts or architectural discoveries returned by the subagent to `discoveries.md` before starting the next task.
 
 ### Step 3c — Concurrency, Error Handling, & Lifecycle Control (SDD Enhanced)
@@ -142,7 +142,7 @@ Under Multi-Agent SDD Mode (Step 3b), the Controller must adhere to the followin
 1. **Discoveries Lifecycle & 4000-Token Cap (FR-019)**:
    - The active `discoveries.md` log in memory must not exceed **4000 Tokens** (or roughly **16KB** in size).
    - If the log exceeds 4000 tokens during task accumulation, the Controller MUST dispatch a lightweight summary subagent to compress the historical log content before spawning the next Implementer subagent.
-   - Upon completion of the entire `/speckit-implement` run (all tasks done), the Controller MUST automatically archive the active discoveries log to `.specify/discoveries_archive/[Timestamp].md` and clear the active discoveries log.
+   - Upon completion of the entire `/speckit.implement` run (all tasks done), the Controller MUST automatically archive the active discoveries log to `.specify/discoveries_archive/[YYYYMMDD_HHMMSS].md` and clear the active discoveries log.
 
 2. **Concurrency Dependency & Conflict Serial Fallback (FR-020, FR-021)**:
    - When preparing to dispatch a batch of tasks marked with `[P]` (Parallelizable), the Controller must perform static analysis to detect logical dependencies:
@@ -158,7 +158,7 @@ Under Multi-Agent SDD Mode (Step 3b), the Controller must adhere to the followin
 
 4. **Controller Checkpoint Resume on Interruption (FR-023)**:
    - If the Controller process is aborted (e.g. by user SIGINT or CLI termination):
-     - Upon the next execution of `/speckit-implement`, the Controller must scan `tasks.md` to locate the first unticked task (`- [ ]`).
+     - Upon the next execution of `/speckit.implement`, the Controller must scan `tasks.md` to locate the first unticked task (`- [ ]`).
      - It MUST resume execution from that first incomplete checkpoint, keeping all previously ticked tasks (`- [x]`) intact without rolling them back.
 
 ---

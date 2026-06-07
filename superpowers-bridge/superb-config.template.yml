@@ -30,6 +30,7 @@ hook_policy:
   # completion truth; optional hooks improve upstream quality without taking
   # ownership of Spec Kit stages.
   required:
+    - after_plan
     - before_implement
     - after_implement
 
