@@ -33,12 +33,12 @@ provides:
         superpowers brainstorming skill into the active Spec Kit spec.md without
         creating a second design document or replacing speckit.specify.
 
-    - name: speckit.superb.tdd
-      file: commands/tdd.md
+    - name: speckit.superb.controller
+      file: commands/controller.md
       description: >
         Mandatory pre-implement gate. Bridges an installed superpowers
-        test-driven-development skill into spec-kit's tasks.md task structure
-        and enforces RED-GREEN-REFACTOR for every task.
+        test-driven-development, subagent-driven-development, and executing-plans
+        skills to manage task implementation, quality gates, and concurrency.
 
     - name: speckit.superb.review
       file: commands/review.md
@@ -87,6 +87,12 @@ provides:
         implementing feedback. Pairs with critique as the implementer
         counterpart.
 
+    - name: speckit.superb.plan-gate
+      file: commands/plan-gate.md
+      description: >
+        Plan-stage SDD readiness gate. Enforces checklist granularity,
+        placeholder rejection, and SDD worker directives injection.
+
   config:
     - name: superb-config.yml
       template: superb-config.template.yml
@@ -104,12 +110,11 @@ hooks:
       preserving Spec Kit ownership of specification creation.
 
   before_implement:
-    command: speckit.superb.tdd
+    command: speckit.superb.controller
     optional: false
     description: >
-      Mandatory TDD gate. Bridges an installed superpowers
-      test-driven-development skill into the spec-kit task structure before any
-      code is written.
+      Mandatory Controller gate. Bridges installed execution and quality skills
+      to orchestrate task implementation.
 
   after_tasks:
     command: speckit.superb.review
@@ -118,6 +123,13 @@ hooks:
     description: >
       Catches missing or under-specified tasks at planning time. Produces a
       requirement coverage and TDD-readiness report. Bridge-native logic.
+
+  after_plan:
+    command: speckit.superb.plan-gate
+    optional: false
+    description: >
+      Mandatory Plan gate. Verifies task list completeness and injects SDD
+      directives for agentic workers.
 
   after_implement:
     command: speckit.superb.verify

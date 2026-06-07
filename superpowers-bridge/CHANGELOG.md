@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- planned-bump: minor -->
+<!-- next-release-version: 1.6.0 -->
+
+### Added
+
+- Added mandatory `plan-gate` command and `after_plan` hook to verify task list granularity and prevent placeholder leakage.
+- Integrated `subagent-driven-development` (SDD) orchestration logic (Controller-Worker-Reviewer pattern) into the TDD implementation gate (`controller.md`).
+- Supported concurrent subagent dispatch for tasks marked with `[P]`.
+- Implemented stateful `discoveries.md` log propagation across worker subagents for isolated context implementation.
+
 ## [1.5.2] - 2026-06-05
 ### Changed
 
@@ -99,7 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standalone command: `/speckit.superb.respond`
 - Standalone command: `/speckit.superb.critique`
 - Hookable command: `/speckit.superb.clarify`
-- Hookable command: `/speckit.superb.tdd`
+- Hookable command: `/speckit.superb.controller`
 - Hookable command: `/speckit.superb.review`
 - Hookable command: `/speckit.superb.verify`
 - TDD escalation guidance to invoke debug protocol after repeated failed fixes

@@ -148,7 +148,7 @@ If **3 or more fix attempts** have failed:
 
 ## Integration with TDD Gate
 
-This command is the **escalation path** from `speckit.superb.tdd`.
+This command is the **escalation path** from `speckit.superb.controller`.
 When the TDD cycle hits repeated RED failures that don't resolve with simple
 GREEN fixes:
 

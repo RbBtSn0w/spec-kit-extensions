@@ -197,7 +197,7 @@ Beyond coverage, flag any task that has these quality issues:
 Also evaluate whether the task set is ready for a strict TDD gate:
 
 - Can each user-visible or testable requirement be linked to at least one test-first task?
-- Are test targets concrete enough that `/speckit.superb.tdd` can enforce RED before GREEN?
+- Are test targets concrete enough that `/speckit.superb.controller` can enforce RED before GREEN?
 - Are tasks ordered so foundational setup does not force speculative production code before tests?
 - Are broad tasks split enough that one failing test can drive one meaningful increment?
 

@@ -57,6 +57,7 @@ not ready and the bridge is not fully operational.
 ### Optional Skills
 
 - `brainstorming`
+- `subagent-driven-development`
 - `systematic-debugging`
 - `receiving-code-review`
 - `finishing-a-development-branch`
@@ -88,6 +89,7 @@ Produce a compact diagnostic report:
 | test-driven-development | Hard | workspace | ./.agents/skills/test-driven-development/SKILL.md | READY |
 | verification-before-completion | Hard | global | ~/.agents/skills/verification-before-completion/SKILL.md | READY |
 | brainstorming | Optional | workspace | ./.agents/skills/brainstorming/SKILL.md | READY |
+| subagent-driven-development | Optional | workspace | ./.agents/skills/subagent-driven-development/SKILL.md | READY |
 | systematic-debugging | Optional | — | — | MISSING |
 | dispatching-parallel-agents | Optional discipline | — | — | MISSING |
 | requesting-code-review | Optional discipline | global | ~/.agents/skills/requesting-code-review/SKILL.md | READY |
@@ -99,7 +101,7 @@ Produce a compact diagnostic report:
 |------|---------|-------------|--------|--------|
 | after_specify | /speckit.superb.brainstorm | Optional | READY | Optional brainstorming skill installed |
 | after_tasks | /speckit.superb.review | Optional | READY | Bridge-native command |
-| before_implement | /speckit.superb.tdd | Required | READY | Hard dependency installed |
+| before_implement | /speckit.superb.controller | Required | READY | Hard dependency installed |
 | after_implement | /speckit.superb.verify | Required | READY | Hard dependency installed |
 
 ## Standalone Commands
