@@ -24,8 +24,8 @@
         ]
       },
       "provides": {
-        "commands": 9,
-        "hooks": 4
+        "commands": 10,
+        "hooks": 5
       },
       "tags": [
         "methodology",
