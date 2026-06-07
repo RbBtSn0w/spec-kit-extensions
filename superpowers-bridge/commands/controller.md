@@ -135,9 +135,9 @@ If subagent dispatch is available and not overridden:
        - The Controller then **automatically proceeds** to the next task in sequence. It must NOT pause or ask the user for confirmation to start the next task, ensuring continuous, fully automated progression.
    - Append any new API contracts or architectural discoveries returned by the subagent to `discoveries.md` before starting the next task.
 
-### Step 3c — Concurrency, Error Handling, & Lifecycle Control (SDD Enhanced)
+### Step 4c — Concurrency, Error Handling, & Lifecycle Control (SDD Enhanced)
 
-Under Multi-Agent SDD Mode (Step 3b), the Controller must adhere to the following strict runtime lifecycle rules:
+Under Multi-Agent SDD Mode (Step 4b), the Controller must adhere to the following strict runtime lifecycle rules:
 
 1. **Discoveries Lifecycle & 4000-Token Cap (FR-019)**:
    - The active `discoveries.md` log in memory must not exceed **4000 Tokens** (or roughly **16KB** in size).
