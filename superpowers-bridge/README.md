@@ -218,6 +218,35 @@ To unlock the full, premium experience of the Superpowers Bridge across all Spec
 | **Review Feedback & Handoff** | `/speckit.superb.critique` / `respond` | `requesting-code-review` + `receiving-code-review` | Local critique only |
 | **Branch Completion** | `/speckit.superb.finish` | `finishing-a-development-branch` | Command disabled |
 
+### Runtime Mode Diagnostics (Q&A)
+
+**Q: How do I know if Subagent-Driven Development (SDD) is active or if the controller is running in Single-Agent serial mode?**
+
+**A:** The controller dynamically resolves the execution mode during startup and reports its selection in the run log. You can verify the active mode through static checks or dynamic run behaviors.
+
+1. **Static Diagnostics (Before Execution)**:
+   Run the diagnostics command:
+   ```text
+   /speckit.superb.check
+   ```
+   Check the **Skill Status** and **Discipline Enhancements** sections:
+   - If `subagent-driven-development` status is `READY`, the native SDD skill is installed.
+   - If `executing-plans` status is `READY`, the controller will use native Inline Execution discipline when degrading to Single-Agent mode.
+   - If `code-review` status is `READY`, the controller has access to the double-review quality gate under multi-agent mode.
+
+2. **Dynamic Log Signals (During Execution)**:
+   Look at the controller's initial startup output:
+   - **Multi-Agent SDD Mode**: The log displays `Multi-Agent SDD Mode (Default)` and resolves `subagent-driven-development/SKILL.md` (or composite TDD + Code-Review fallback). You will see subagents being defined and invoked (e.g., `Spec Reviewer` and `Quality Reviewer`), and tasks in `tasks.md` will be updated and ticked automatically without user prompts.
+   - **Single-Agent Mode**: The log displays `Single-Agent Mode (Fallback)` or mentions `degrading gracefully to Single-Agent Mode` (due to missing `define_subagent` tool capability, missing required skills, or explicit `--inline` / `--sdd=false` user overrides). Implementation code modifications and TDD verification will be performed directly within the parent conversation.
+
+**Q: Can I force the controller to run in Single-Agent mode?**
+
+**A:** Yes. You can bypass subagent dispatching by passing `--inline` or `--sdd=false` inside the command arguments:
+```text
+/speckit.implement --inline
+```
+This forces the controller to run implementation inline inside the parent session, even if subagent capabilities and SDD skills are fully available.
+
 ### How The Matrix Connects To Spec Kit
 
 - Hooked stages are limited to `after_specify`, `after_tasks`,
