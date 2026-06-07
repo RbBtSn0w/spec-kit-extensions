@@ -376,3 +376,41 @@ scripts that:
 - find the current `spec.md`
 - insert or update a canonical `**Status**:` line
 - preserve `Abandoned` as a terminal bridge-owned state
+
+## Multi-Agent SDD & Dual-Layer Fallback Refinements
+
+During the Multi-Agent SDD integration feature design, the implementation phase was enhanced from a simple test-driven-development gate into a full-featured Implementation Controller. The key architectural additions include:
+
+### 1. From TDD to Implementation Controller (`/speckit.superb.controller`)
+
+The previous `/speckit.superb.tdd` command was upgraded and renamed to `/speckit.superb.controller` to serve as the unified pre-implementation orchestrator. Instead of only checking for a failing test, it manages single-agent or multi-agent execution, task parallelism, concurrency analysis, state accumulation, and double-review verification loops.
+
+### 2. Dual-Layer Fallback Architecture for Execution
+
+To maintain compatibility when advanced superpowers skills are missing, the Controller introduces a strict two-layer discipline model:
+
+*   **Single-Agent Mode (Inline Execution)**:
+    *   **Layer 1 (Native executing-plans)**: Strictly adheres to the resolved `executing-plans/SKILL.md` inline execution rules and review checkpoints.
+    *   **Layer 2 (Local Fallback TDD)**: Standard TDD loop managed via simple prompts and manual progress updates.
+*   **Multi-Agent Mode (Subagent-Driven Development)**:
+    *   **Layer 1 (Native SDD)**: Uses the full `subagent-driven-development/SKILL.md` discipline and prompt templates.
+    *   **Layer 2 (Composite TDD + Code-Review)**: Combines the baseline `test-driven-development` and `code-review` skills to simulate SDD workers.
+    *   **Automatic Degrade**: If subagent tool capability (`define_subagent`) is missing or explicitly disabled by the user, the Controller automatically falls back to Single-Agent Mode.
+
+### 3. Parallel Dispatch & Write Conflict Serial Fallback
+
+*   **Parallel Detection**: Recognizes adjacent tasks marked with `[P]` in `tasks.md` and runs them concurrently in the background by dispatching them in a single `invoke_subagent` call.
+*   **Conflict Serial Fallback**: Performs static analysis on parallel tasks. If any tasks modify the same files/directories or reference newly created symbols in other tasks, the Controller automatically downgrades them to serial execution to prevent write conflicts or state fragmentation.
+
+### 4. Two-Stage Review Quality Gates & Meltdown
+
+Upon task completion, the Controller spawns two specialized subagents to enforce verification:
+*   **Stage 1 (Spec Reviewer)**: Compares the task's code changes and test outputs directly against functional requirements in `spec.md`. Fallbacks to `critique` command instructions when native SDD is missing.
+*   **Stage 2 (Quality Reviewer)**: Checks for regressions in security, style, and code quality. Fallbacks to `code-review` skill rules or local templates.
+*   **Meltdown (熔断)**: If a task fails double review **3 times**, the Controller aborts immediately to preserve the workspace state and requests manual troubleshooting.
+*   **Continuous Automation**: On successful review pass, the Controller acquires a file lock on `tasks.md`, ticks `[x]`, and automatically proceeds to the next task without interrupting the user.
+
+### 5. Diagnostics & Mapping Alignment
+
+*   `check.md` was updated to diagnose the installation status of optional execution skills (`executing-plans`, `code-review`).
+*   The **"Superb" Skill Set Matrix** was added to the extension `README.md` to define recommended skills and fallback states across all lifecycle stages.
