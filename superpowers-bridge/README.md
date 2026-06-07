@@ -193,11 +193,30 @@ unexposed workflow skills.
 | `receiving-code-review` | `/speckit.superb.respond` | After critique output, PR comments, or external review feedback arrives | Manual support command | Triage, accept/reject/clarify, and implement accepted items; it does not produce the original review. |
 | `finishing-a-development-branch` | `/speckit.superb.finish` | After verification succeeds and integration is ready | Manual support command | Handles PR/merge/keep/discard decisions and bridge-owned handoff state; does not replace repository policy. |
 | `writing-plans` | `/speckit.superb.review` task-quality checks | After `/speckit.tasks`, before implementation | Borrowed discipline inside `review` | Checks file ownership, task granularity, RED/GREEN target, and review checkpoint readiness; does not generate or edit `plan.md` or `tasks.md`. |
-| `subagent-driven-development` | Not exposed | None | Not bridged | Integrated internally as a worker orchestration layer for controller.md and plan-gate.md. |
-| `executing-plans` | Not exposed | None | Not bridged | Would execute `plan.md` / `tasks.md` directly and compete with `/speckit.implement`. |
+| `subagent-driven-development` | Not exposed | None | Borrowed discipline inside `controller` | Integrated internally as a worker orchestration layer for `controller.md` and `plan-gate.md`. |
+| `executing-plans` | Not exposed | None | Borrowed discipline inside `controller` | Drives Inline Execution (Layer 1) in Single-Agent Mode; does not compete with `/speckit.implement`. |
 | `using-git-worktrees` | Not exposed | None | Not bridged | Repository/worktree strategy is project policy, not a required Spec Kit extension behavior. |
 | `using-superpowers` | Not exposed | Agent/bootstrap layer | Not part of the extension command surface | Skill installation and loading remain outside the feature lifecycle; `/speckit.superb.check` only reports readiness. |
 | `writing-skills` | Not exposed | Extension maintenance only | Not part of feature delivery | Useful for maintaining skills, but not for a Spec Kit feature workflow. |
+
+### Dual-Layer Fallback & The "Superb" Skill Set Matrix
+
+This bridge operates on a **Dual-Layer Fallback Architecture**:
+- **Hard Requirements** are skills that the bridge cannot run its baseline validation hooks without (no simple text/regex fallbacks exist).
+- **Optional Skills** improve workflow quality but are not strictly required because the bridge provides **Layer 2 local fallbacks** (such as regular expressions, local checklists, or embedded prompts) or treats the corresponding stages as non-blocking.
+
+To unlock the full, premium experience of the Superpowers Bridge across all Spec Kit workflow stages (the **"Superb" Suite**), the following skills are recommended:
+
+| Stage / Feature | Intended Command | Optimal Skills Required (Layer 1) | Local Fallback (Layer 2) |
+|---|---|---|---|
+| **Spec Refinement** | `/speckit.superb.brainstorm` | `brainstorming` | Hook skipped (optional) |
+| **Inline Implementation** | `/speckit.superb.controller` (`--inline`) | `executing-plans` + `test-driven-development` | Local TDD loop |
+| **Multi-Agent Dispatch** | `/speckit.superb.controller` | `subagent-driven-development` + `test-driven-development` | Single-Agent fallback |
+| **Double-Review Quality Gate** | `/speckit.superb.controller` (Review) | `code-review` | Local checklist / `critique` |
+| **Requirement Verification** | `/speckit.superb.verify` | `verification-before-completion` + `writing-plans` | Baseline verification |
+| **Troubleshooting Escalation** | `/speckit.superb.debug` | `systematic-debugging` + `dispatching-parallel-agents` | Command disabled |
+| **Review Feedback & Handoff** | `/speckit.superb.critique` / `respond` | `requesting-code-review` + `receiving-code-review` | Local critique only |
+| **Branch Completion** | `/speckit.superb.finish` | `finishing-a-development-branch` | Command disabled |
 
 ### How The Matrix Connects To Spec Kit
 

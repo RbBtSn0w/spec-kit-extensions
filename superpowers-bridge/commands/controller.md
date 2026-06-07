@@ -117,6 +117,7 @@ If subagent dispatch is available and not overridden:
      - The feature specification (`spec.md`).
      - The current `discoveries.md` log.
      - **Constraint**: Do NOT pass the global `plan.md` or other tasks to the subagent to prevent token pollution.
+   - **Layered Implementer Prompting**: If native SDD (Layer 1) is active, load and format the implementer prompt template from the resolved `subagent-driven-development` skill directory. Otherwise (Layer 2), construct a fallback TDD-implementer prompt based on `test-driven-development/SKILL.md` rules.
    - Invoke the Implementer subagent using `define_subagent` and `invoke_subagent`.
    - The subagent must run the TDD loop locally on the task file and report back when green.
     - **Two-stage Review Quality Gate (Feedback Loop)**:
@@ -124,8 +125,9 @@ If subagent dispatch is available and not overridden:
         1. **Stage 1 (Spec Reviewer) (FR-012)**: Spawns a `Spec Reviewer` subagent to compare the task's code changes and test output directly against the functional requirements in `spec.md`. The objective passing criteria are:
            - (a) All code modifications are strictly related to the target task.
            - (b) Valid passing TDD test suite outputs are provided.
+           - If native SDD (Layer 1) is active, format the reviewer prompt using the resolved `subagent-driven-development/spec-reviewer-prompt.md`. Otherwise (Layer 2), fallback to using local bridge-native `critique.md` instructions.
            - If it detects a mismatch, unrelated changes, or missing test evidence, it returns feedback, and the Controller triggers a retry.
-        2. **Stage 2 (Quality Reviewer) (FR-013)**: If Spec Review passes, spawns a `Quality Reviewer` subagent (using `code-reviewer.md` template or `critique` command) to check for security, style, and code quality regressions.
+        2. **Stage 2 (Quality Reviewer) (FR-013)**: If Spec Review passes, spawns a `Quality Reviewer` subagent to check for security, style, and code quality regressions. If native SDD (Layer 1) is active, format the reviewer prompt using the resolved `subagent-driven-development/code-quality-reviewer-prompt.md`. Otherwise (Layer 2), fallback to the local `code-reviewer.md` template or `critique` command.
         3. **Failures**: If either reviewer fails the check, return feedback to the Implementer subagent to make fixes.
         4. **Meltdown (熔断) (FR-014)**: If a single task fails review **3 times**, the Controller must abort immediately, preserve the workspace state, and escalate to the user for manual troubleshooting.
       - **Progress Sync & Continuous Execution (FR-015, FR-016)**:

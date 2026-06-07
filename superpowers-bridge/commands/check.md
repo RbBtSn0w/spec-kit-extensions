@@ -46,23 +46,28 @@ Do **not** claim a skill is available unless the file is actually present.
 
 ## Required Skills
 
+This bridge operates on a **Dual-Layer Fallback Architecture**. Skills are classified into Hard Requirements and Optional Skills based on whether the bridge can run its baseline validation hooks without them. For a detailed mapping of skills to Spec Kit stages and fallback states, refer to the **"Superb" Skill Set Matrix** in the extension [README.md](../README.md#dual-layer-fallback--the-superb-skill-set-matrix).
+
 ### Hard Requirements
 
 - `test-driven-development`
 - `verification-before-completion`
 
-If either hard requirement is unavailable, the corresponding mandatory hook is
-not ready and the bridge is not fully operational.
+If either hard requirement is unavailable, the corresponding mandatory hook cannot start, and the bridge is blocked.
 
 ### Optional Skills
 
+These skills are not strictly required for the baseline workflow because the bridge provides **Layer 2 local fallbacks** (such as regular expressions, local checklists, or embedded prompts) or treats the corresponding stages as non-blocking.
+
 - `brainstorming`
 - `subagent-driven-development`
+- `executing-plans`
 - `systematic-debugging`
 - `receiving-code-review`
 - `finishing-a-development-branch`
 - `dispatching-parallel-agents`
 - `requesting-code-review`
+- `code-review`
 - `writing-plans`
 
 Optional skills do not block the Spec Kit main flow, but their corresponding
@@ -90,9 +95,11 @@ Produce a compact diagnostic report:
 | verification-before-completion | Hard | global | ~/.agents/skills/verification-before-completion/SKILL.md | READY |
 | brainstorming | Optional | workspace | ./.agents/skills/brainstorming/SKILL.md | READY |
 | subagent-driven-development | Optional | workspace | ./.agents/skills/subagent-driven-development/SKILL.md | READY |
+| executing-plans | Optional | workspace | ./.agents/skills/executing-plans/SKILL.md | READY |
 | systematic-debugging | Optional | — | — | MISSING |
 | dispatching-parallel-agents | Optional discipline | — | — | MISSING |
 | requesting-code-review | Optional discipline | global | ~/.agents/skills/requesting-code-review/SKILL.md | READY |
+| code-review | Optional discipline | global | ~/.agents/skills/code-review/SKILL.md | READY |
 | writing-plans | Optional discipline | global | ~/.agents/skills/writing-plans/SKILL.md | READY |
 
 ## Hook Readiness
@@ -121,6 +128,8 @@ Produce a compact diagnostic report:
 | dispatching-parallel-agents | /speckit.superb.debug | UNAVAILABLE | optional skill missing |
 | requesting-code-review | /speckit.superb.critique | READY | context packaging discipline available |
 | writing-plans | /speckit.superb.review | READY | task quality discipline available |
+| executing-plans | /speckit.superb.controller | READY | inline execution discipline available |
+| code-review | /speckit.superb.controller | READY | quality reviewer discipline available |
 
 ## Verdict
 
