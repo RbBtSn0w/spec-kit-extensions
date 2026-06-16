@@ -230,9 +230,8 @@ To unlock the full, premium experience of the Superpowers Bridge across all Spec
    /speckit.superb.check
    ```
    Check the **Skill Status** and **Discipline Enhancements** sections:
-   - If `subagent-driven-development` status is `READY`, the native SDD skill is installed.
+   - If `subagent-driven-development` status is `READY`, the native SDD skill is installed and the controller has access to native SDD templates for the double-review quality gate under multi-agent mode (which falls back to the local `critique` command if SDD is absent).
    - If `executing-plans` status is `READY`, the controller will use native Inline Execution discipline when degrading to Single-Agent mode.
-   - If `subagent-driven-development` status is `READY`, the controller has access to the double-review quality gate prompts under multi-agent mode.
 
 2. **Dynamic Log Signals (During Execution)**:
    Look at the controller's initial startup output:

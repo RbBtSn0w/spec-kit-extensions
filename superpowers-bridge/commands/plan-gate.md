@@ -96,7 +96,7 @@ If `writing-plans` was resolved, inject its official **Plan Document Header** di
 ### Layer 2: Local fallback directive
 If `writing-plans` is missing, inject the local fallback directive:
 ```markdown
-> **For agentic workers:** Use test-driven-development and critique to implement each task sequentially. Do not proceed to the next task until both gates pass.
+> **For agentic workers:** Use test-driven-development and the bridge-native critique command to implement each task sequentially. Do not proceed to the next task until both gates pass.
 ```
 
 3. Output a success message confirming the gate has passed and the directive has been successfully injected.
