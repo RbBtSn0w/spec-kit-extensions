@@ -60,14 +60,13 @@ If either hard requirement is unavailable, the corresponding mandatory hook cann
 These skills are not strictly required for the baseline workflow because the bridge provides **Layer 2 local fallbacks** (such as regular expressions, local checklists, or embedded prompts) or treats the corresponding stages as non-blocking.
 
 - `brainstorming`
-- `subagent-driven-development`
-- `executing-plans`
-- `systematic-debugging`
-- `receiving-code-review`
-- `finishing-a-development-branch`
 - `dispatching-parallel-agents`
+- `executing-plans`
+- `finishing-a-development-branch`
+- `receiving-code-review`
 - `requesting-code-review`
-- `code-review`
+- `subagent-driven-development`
+- `systematic-debugging`
 - `writing-plans`
 
 Optional skills do not block the Spec Kit main flow, but their corresponding
@@ -99,7 +98,6 @@ Produce a compact diagnostic report:
 | systematic-debugging | Optional | — | — | MISSING |
 | dispatching-parallel-agents | Optional discipline | — | — | MISSING |
 | requesting-code-review | Optional discipline | global | ~/.agents/skills/requesting-code-review/SKILL.md | READY |
-| code-review | Optional discipline | global | ~/.agents/skills/code-review/SKILL.md | READY |
 | writing-plans | Optional discipline | global | ~/.agents/skills/writing-plans/SKILL.md | READY |
 
 ## Hook Readiness
@@ -130,7 +128,6 @@ Produce a compact diagnostic report:
 | requesting-code-review | /speckit.superb.critique | READY | context packaging discipline available |
 | writing-plans | /speckit.superb.review | READY | task quality discipline available |
 | executing-plans | /speckit.superb.controller | READY | inline execution discipline available |
-| code-review | /speckit.superb.controller | READY | quality reviewer discipline available |
 
 ## Verdict
 

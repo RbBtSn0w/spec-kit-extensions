@@ -394,7 +394,7 @@ To maintain compatibility when advanced superpowers skills are missing, the Cont
     *   **Layer 2 (Local Fallback TDD)**: Standard TDD loop managed via simple prompts and manual progress updates.
 *   **Multi-Agent Mode (Subagent-Driven Development)**:
     *   **Layer 1 (Native SDD)**: Uses the full `subagent-driven-development/SKILL.md` discipline and prompt templates.
-    *   **Layer 2 (Composite TDD + Code-Review)**: Combines the baseline `test-driven-development` and `code-review` skills to simulate SDD workers.
+    *   **Layer 2 (Composite TDD + Critique Fallback)**: Combines the baseline `test-driven-development` skill with bridge-native `critique` command to simulate SDD workers.
     *   **Automatic Degrade**: If subagent tool capability (`define_subagent`) is missing or explicitly disabled by the user, the Controller automatically falls back to Single-Agent Mode.
 
 ### 3. Parallel Dispatch & Write Conflict Serial Fallback
@@ -406,11 +406,11 @@ To maintain compatibility when advanced superpowers skills are missing, the Cont
 
 Upon task completion, the Controller spawns two specialized subagents to enforce verification:
 *   **Stage 1 (Spec Reviewer)**: Compares the task's code changes and test outputs directly against functional requirements in `spec.md`. Fallbacks to `critique` command instructions when native SDD is missing.
-*   **Stage 2 (Quality Reviewer)**: Checks for regressions in security, style, and code quality. Fallbacks to `code-review` skill rules or local templates.
+*   **Stage 2 (Quality Reviewer)**: Checks for regressions in security, style, and code quality. Fallbacks to local templates or the bridge-native `critique` command.
 *   **Meltdown (熔断)**: If a task fails double review **3 times**, the Controller aborts immediately to preserve the workspace state and requests manual troubleshooting.
 *   **Continuous Automation**: On successful review pass, the Controller acquires a file lock on `tasks.md`, ticks `[x]`, and automatically proceeds to the next task without interrupting the user.
 
 ### 5. Diagnostics & Mapping Alignment
 
-*   `check.md` was updated to diagnose the installation status of optional execution skills (`executing-plans`, `code-review`).
+*   `check.md` was updated to diagnose the installation status of optional execution skills (`executing-plans`).
 *   The **"Superb" Skill Set Matrix** was added to the extension `README.md` to define recommended skills and fallback states across all lifecycle stages.

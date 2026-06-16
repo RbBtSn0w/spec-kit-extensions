@@ -101,7 +101,7 @@ If subagent dispatch is available and not overridden:
 
 1. **Layered Detection**:
    - **Layer 1 (Native SDD)**: Check for `subagent-driven-development/SKILL.md` in `./.agents/skills/` or `~/.agents/skills/`. If present, use it.
-   - **Layer 2 (Composite TDD + Code-Review)**: If Layer 1 is absent, check for both `test-driven-development/SKILL.md` AND `code-review/SKILL.md` (or the `critique` command).
+   - **Layer 2 (Composite TDD + Critique Fallback)**: If Layer 1 is absent, check for `test-driven-development/SKILL.md`.
    - If neither layer is ready, fallback to Single-Agent Mode (Step 4a).
 
 2. **Initialize Discoveries Log**:

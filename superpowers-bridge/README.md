@@ -212,7 +212,7 @@ To unlock the full, premium experience of the Superpowers Bridge across all Spec
 | **Spec Refinement** | `/speckit.superb.brainstorm` | `brainstorming` | Hook skipped (optional) |
 | **Inline Implementation** | `/speckit.superb.controller` (`--inline`) | `executing-plans` + `test-driven-development` | Local TDD loop |
 | **Multi-Agent Dispatch** | `/speckit.superb.controller` | `subagent-driven-development` + `test-driven-development` | Single-Agent fallback |
-| **Double-Review Quality Gate** | `/speckit.superb.controller` (Review) | `code-review` | Local checklist / `critique` |
+| **Double-Review Quality Gate** | `/speckit.superb.controller` (Review) | `subagent-driven-development` | Local checklist / `critique` |
 | **Requirement Verification** | `/speckit.superb.verify` | `verification-before-completion` + `writing-plans` | Baseline verification |
 | **Troubleshooting Escalation** | `/speckit.superb.debug` | `systematic-debugging` + `dispatching-parallel-agents` | Command disabled |
 | **Review Feedback & Handoff** | `/speckit.superb.critique` / `respond` | `requesting-code-review` + `receiving-code-review` | Local critique only |
@@ -232,11 +232,11 @@ To unlock the full, premium experience of the Superpowers Bridge across all Spec
    Check the **Skill Status** and **Discipline Enhancements** sections:
    - If `subagent-driven-development` status is `READY`, the native SDD skill is installed.
    - If `executing-plans` status is `READY`, the controller will use native Inline Execution discipline when degrading to Single-Agent mode.
-   - If `code-review` status is `READY`, the controller has access to the double-review quality gate under multi-agent mode.
+   - If `subagent-driven-development` status is `READY`, the controller has access to the double-review quality gate prompts under multi-agent mode.
 
 2. **Dynamic Log Signals (During Execution)**:
    Look at the controller's initial startup output:
-   - **Multi-Agent SDD Mode**: The log displays `Multi-Agent SDD Mode (Default)` and resolves `subagent-driven-development/SKILL.md` (or composite TDD + Code-Review fallback). You will see subagents being defined and invoked (e.g., `Spec Reviewer` and `Quality Reviewer`), and tasks in `tasks.md` will be updated and ticked automatically without user prompts.
+   - **Multi-Agent SDD Mode**: The log displays `Multi-Agent SDD Mode (Default)` and resolves `subagent-driven-development/SKILL.md` (or composite TDD + Critique fallback). You will see subagents being defined and invoked (e.g., `Spec Reviewer` and `Quality Reviewer`), and tasks in `tasks.md` will be updated and ticked automatically without user prompts.
    - **Single-Agent Mode**: The log displays `Single-Agent Mode (Fallback)` or mentions `degrading gracefully to Single-Agent Mode` (due to missing `define_subagent` tool capability, missing required skills, or explicit `--inline` / `--sdd=false` user overrides). Implementation code modifications and TDD verification will be performed directly within the parent conversation.
 
 **Q: Can I force the controller to run in Single-Agent mode?**
