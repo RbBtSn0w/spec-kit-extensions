@@ -3,6 +3,9 @@ description: >
   Optional after-specify refinement gate. Bridges an installed
   obra/superpowers brainstorming skill into the active Spec Kit spec.md without
   creating a second design document or replacing speckit.specify.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Brainstorm — Spec Refinement Gate
@@ -31,25 +34,40 @@ feature. Do not treat it as permission to bypass Spec Kit artifact ownership.
 
 ## Step 1 — Resolve Installed Skill
 
-Look for `brainstorming/SKILL.md` in this exact order:
+Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill brainstorming`.
+
+The resolver is the canonical discovery helper for this bridge. It checks, in
+order:
 
 1. `./.agents/skills/brainstorming/SKILL.md`
-2. `~/.agents/skills/brainstorming/SKILL.md`
+2. `./.agents/plugins/*/skills/brainstorming/SKILL.md` and `./.agents/plugins/*/*/skills/brainstorming/SKILL.md`
+3. `~/.agents/skills/brainstorming/SKILL.md`
+4. `~/.agents/plugins/*/skills/brainstorming/SKILL.md` and `~/.agents/plugins/*/*/skills/brainstorming/SKILL.md`
 
-If the workspace and global copies both exist, use the workspace copy.
+Prefer the first readable match in that order. Any workspace match wins over
+any global match. A direct skill-root install wins over a plugin-provided skill
+at the same scope.
 
-If no readable file is found, **STOP**:
-
-```text
-ERROR: Optional superpowers skill `brainstorming` not found.
-Run /speckit.superb.check for diagnostics.
-```
+If no readable file is found, enter the **inline install recovery flow**:
+1. Run `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs`.
+2. If `npx` is available, show the missing-skill error plus the generated output from
+   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance`, then ask:
+   `Would you like to install now? (Select approach 1-3, or skip)`
+3. Only if the user explicitly selects `1`, `2`, or `3`, run:
+   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>`
+4. After a successful install, re-run the skill resolution by invoking
+   `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill brainstorming`
+   once before continuing.
+5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
+   cannot resolve the skill, print the guidance and halt execution. The command remains
+   unavailable until the skill is installed.
 
 Report the source you resolved before continuing:
 
 ```text
 Using installed skill: brainstorming
 Source: [workspace|global]
+Install type: [skill-root|plugin]
 Path: [resolved path]
 ```
 

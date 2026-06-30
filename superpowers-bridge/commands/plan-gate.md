@@ -13,12 +13,11 @@ description: >
 
 ## Step 0 — Resolve Installed Skill
 
-Look for `writing-plans/SKILL.md` in this exact order:
+Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill writing-plans`.
 
-1. `./.agents/skills/writing-plans/SKILL.md`
-2. `~/.agents/skills/writing-plans/SKILL.md`
-
-If the workspace and global copies both exist, use the workspace copy.
+The resolver is the canonical discovery helper for this bridge. It checks, in
+order, direct workspace installs, workspace plugin installs, direct global
+installs, then global plugin installs. Prefer the first readable match.
 
 ---
 

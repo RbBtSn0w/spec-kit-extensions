@@ -4,6 +4,9 @@ description: >
   systematic-debugging skill. Enforces root-cause investigation before any fix
   attempt. Use when TDD hits repeated failures or any unexpected behavior
   surfaces during implementation.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Systematic Debugging — Root Cause Before Fixes
@@ -16,25 +19,32 @@ description: >
 
 ## Step 1 — Resolve Installed Skill
 
-Look for `systematic-debugging/SKILL.md` in this exact order:
+Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill systematic-debugging`.
 
-1. `./.agents/skills/systematic-debugging/SKILL.md`
-2. `~/.agents/skills/systematic-debugging/SKILL.md`
+The resolver is the canonical discovery helper for this bridge. It checks, in
+order, direct workspace installs, workspace plugin installs, direct global
+installs, then global plugin installs.
 
-If the workspace and global copies both exist, use the workspace copy.
-
-If no readable file is found, **STOP**:
-
-```text
-ERROR: Optional superpowers skill `systematic-debugging` not found.
-Run /speckit.superb.check for diagnostics.
-```
+If no readable file is found, enter the **inline install recovery flow**:
+1. Run `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs`.
+2. If `npx` is available, show the missing-skill error plus the generated output from
+   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance`, then ask:
+   `Would you like to install now? (Select approach 1-3, or skip)`
+3. Only if the user explicitly selects `1`, `2`, or `3`, run:
+   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>`
+4. After a successful install, re-run the skill resolution by invoking
+   `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill systematic-debugging`
+   once before continuing.
+5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
+   cannot resolve the skill, print the guidance and halt execution. The command remains
+   unavailable until the skill is installed.
 
 Report the source you resolved before continuing:
 
 ```text
 Using installed skill: systematic-debugging
 Source: [workspace|global]
+Install type: [skill-root|plugin]
 Path: [resolved path]
 ```
 
@@ -93,11 +103,8 @@ single-root-cause systematic debugging.
 
 ### Optional Skill Resolution
 
-If parallel dispatch is appropriate, look for
-`dispatching-parallel-agents/SKILL.md` in the same discovery order:
-
-1. `./.agents/skills/dispatching-parallel-agents/SKILL.md`
-2. `~/.agents/skills/dispatching-parallel-agents/SKILL.md`
+If parallel dispatch is appropriate, resolve `dispatching-parallel-agents` with
+`bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill dispatching-parallel-agents`.
 
 If unavailable, still produce the domain breakdown and focused task prompts,
 but report that automated parallel dispatch guidance is unavailable.

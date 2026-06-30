@@ -18,20 +18,34 @@ scripts:
 
 ## Step 1 — Resolve Installed Skill
 
-1. Look for `test-driven-development/SKILL.md` in this exact order:
+1. Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill test-driven-development`.
+   The resolver is the canonical discovery helper for this bridge. It checks
+   direct skill roots first, then plugin-provided skills, in workspace scope
+   before global scope:
    - `./.agents/skills/test-driven-development/SKILL.md`
+   - `./.agents/plugins/*/skills/test-driven-development/SKILL.md`
+   - `./.agents/plugins/*/*/skills/test-driven-development/SKILL.md`
    - `~/.agents/skills/test-driven-development/SKILL.md`
-   If the workspace and global copies both exist, use the workspace copy.
-   If no readable file is found, **STOP**:
-   ```text
-   ERROR: Required superpowers skill `test-driven-development` not found.
-   Run /speckit.superb.check for diagnostics.
-   ```
-   Report the source resolved before continuing.
+   - `~/.agents/plugins/*/skills/test-driven-development/SKILL.md`
+   - `~/.agents/plugins/*/*/skills/test-driven-development/SKILL.md`
+   Prefer the first readable match in that order.
+   If no readable file is found, enter the **inline install recovery flow**:
+   1. Run `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs`.
+   2. If `npx` is available, show the missing-skill error plus the generated output from
+      `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance`, then ask:
+      `Would you like to install now? (Select approach 1-3, or skip)`
+   3. Only if the user explicitly selects `1`, `2`, or `3`, run:
+      `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>`
+   4. After a successful install, re-run the skill resolution by invoking
+      `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill test-driven-development`
+      once before continuing.
+   5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
+      cannot resolve the skill, print the guidance and halt execution with exit status 2.
+   Report the source resolved before continuing, including install type (`skill-root` or `plugin`).
 
 2. **Check for Optional Execution Skills**:
-   - Check for `executing-plans/SKILL.md` in the same order (workspace then global). This skill provides native Inline Execution discipline when running in Single-Agent Mode.
-   - Check for `subagent-driven-development/SKILL.md` in the same order. This skill provides native subagent dispatching.
+   - Check for `executing-plans` by running `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill executing-plans`. This skill provides native Inline Execution discipline when running in Single-Agent Mode.
+   - Check for `subagent-driven-development` by running `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill subagent-driven-development`. This skill provides native subagent dispatching.
 
 ---
 
@@ -100,8 +114,8 @@ If fallback is active, run implementation locally within the parent conversation
 If subagent dispatch is available and not overridden:
 
 1. **Layered Detection**:
-   - **Layer 1 (Native SDD)**: Check for `subagent-driven-development/SKILL.md` in `./.agents/skills/` or `~/.agents/skills/`. If present, use it.
-   - **Layer 2 (Composite TDD + Critique Fallback)**: If Layer 1 is absent, check for `test-driven-development/SKILL.md` (the bridge-native `critique` command is always available and used as the fallback reviewer).
+   - **Layer 1 (Native SDD)**: Resolve `subagent-driven-development` with `resolve-skill.sh`. If present, use it.
+   - **Layer 2 (Composite TDD + Critique Fallback)**: If Layer 1 is absent, resolve `test-driven-development` with `resolve-skill.sh` (the bridge-native `critique` command is always available and used as the fallback reviewer).
    - If neither layer is ready, fallback to Single-Agent Mode (Step 4a).
 
 2. **Initialize Discoveries Log**:

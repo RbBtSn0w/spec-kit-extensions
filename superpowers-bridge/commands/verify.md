@@ -25,25 +25,31 @@ Any user context provided:
 $ARGUMENTS
 ```
 
-Look for `verification-before-completion/SKILL.md` in this exact order:
+Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill verification-before-completion`.
 
-1. `./.agents/skills/verification-before-completion/SKILL.md`
-2. `~/.agents/skills/verification-before-completion/SKILL.md`
+The resolver is the canonical discovery helper for this bridge. It checks, in
+order, direct workspace installs, workspace plugin installs, direct global
+installs, then global plugin installs.
 
-If the workspace and global copies both exist, use the workspace copy.
-
-If no readable file is found, **STOP**:
-
-```text
-ERROR: Required superpowers skill `verification-before-completion` not found.
-Run /speckit.superb.check for diagnostics.
-```
+If no readable file is found, enter the **inline install recovery flow**:
+1. Run `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs`.
+2. If `npx` is available, show the missing-skill error plus the generated output from
+   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance`, then ask:
+   `Would you like to install now? (Select approach 1-3, or skip)`
+3. Only if the user explicitly selects `1`, `2`, or `3`, run:
+   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>`
+4. After a successful install, re-run the skill resolution by invoking
+   `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill verification-before-completion`
+   once before continuing.
+5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
+   cannot resolve the skill, print the guidance and halt execution with exit status 2.
 
 Report the source you resolved before continuing:
 
 ```text
 Using installed skill: verification-before-completion
 Source: [workspace|global]
+Install type: [skill-root|plugin]
 Path: [resolved path]
 ```
 

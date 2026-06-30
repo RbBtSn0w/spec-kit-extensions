@@ -3,6 +3,8 @@ description: >
   Bridge-native diagnostics command. Verifies that required and optional
   superpowers skills are installed in workspace or global skill roots and
   reports which hooks are ready to run.
+scripts:
+  sh: scripts/bash/ensure-skills.sh
 ---
 
 # Check — Superpowers Bridge Diagnostics
@@ -25,18 +27,30 @@ do not let it override filesystem reality.
 
 ## Discovery Rules
 
-Search for installed skills in this exact order:
+Resolve every skill using the shared helper:
+
+`bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill [skill-name]`
+
+That helper searches for installed skills in this exact order:
 
 1. `./.agents/skills/`
-2. `~/.agents/skills/`
+2. `./.agents/plugins/*/skills/` and `./.agents/plugins/*/*/skills/`
+3. `~/.agents/skills/`
+4. `~/.agents/plugins/*/skills/` and `~/.agents/plugins/*/*/skills/`
 
-Workspace wins over global when both contain the same skill.
+Workspace wins over global when both contain the same skill. Within the same
+scope, a direct skill-root install wins over a plugin-provided skill.
 
 A skill is considered **available** only if all of the following are true:
 
 - The skill directory exists
 - `SKILL.md` exists inside that directory
 - `SKILL.md` is readable
+
+**Guidance Rule**:
+For the `Guidance` column in the output table, populate:
+- `—` if the skill is READY (available).
+- `Install via adg` if the skill is MISSING.
 
 Do **not** fetch any remote content.
 Do **not** silently fall back to embedded summaries.
@@ -88,17 +102,17 @@ Produce a compact diagnostic report:
 
 ## Skill Status
 
-| Skill | Required | Source | Path | Status |
-|-------|----------|--------|------|--------|
-| test-driven-development | Hard | workspace | ./.agents/skills/test-driven-development/SKILL.md | READY |
-| verification-before-completion | Hard | global | ~/.agents/skills/verification-before-completion/SKILL.md | READY |
-| brainstorming | Optional | workspace | ./.agents/skills/brainstorming/SKILL.md | READY |
-| subagent-driven-development | Optional | workspace | ./.agents/skills/subagent-driven-development/SKILL.md | READY |
-| executing-plans | Optional | workspace | ./.agents/skills/executing-plans/SKILL.md | READY |
-| systematic-debugging | Optional | — | — | MISSING |
-| dispatching-parallel-agents | Optional discipline | — | — | MISSING |
-| requesting-code-review | Optional discipline | global | ~/.agents/skills/requesting-code-review/SKILL.md | READY |
-| writing-plans | Optional discipline | global | ~/.agents/skills/writing-plans/SKILL.md | READY |
+| Skill | Required | Source | Path | Status | Guidance |
+|-------|----------|--------|------|--------|----------|
+| test-driven-development | Hard | workspace | ./.agents/skills/test-driven-development/SKILL.md | READY | — |
+| verification-before-completion | Hard | global | ~/.agents/plugins/vendor__pack/superpowers/skills/verification-before-completion/SKILL.md | READY | — |
+| brainstorming | Optional | workspace | ./.agents/plugins/obra__superpowers/superpowers/skills/brainstorming/SKILL.md | READY | — |
+| subagent-driven-development | Optional | workspace | ./.agents/skills/subagent-driven-development/SKILL.md | READY | — |
+| executing-plans | Optional | workspace | ./.agents/plugins/obra__superpowers/superpowers/skills/executing-plans/SKILL.md | READY | — |
+| systematic-debugging | Optional | — | — | MISSING | Install via adg |
+| dispatching-parallel-agents | Optional discipline | — | — | MISSING | Install via adg |
+| requesting-code-review | Optional discipline | global | ~/.agents/plugins/vendor__pack/superpowers/skills/requesting-code-review/SKILL.md | READY | — |
+| writing-plans | Optional discipline | global | ~/.agents/skills/writing-plans/SKILL.md | READY | — |
 
 ## Hook Readiness
 
@@ -137,6 +151,46 @@ Produce a compact diagnostic report:
 
 - [Concrete installation or retry advice]
 ```
+
+---
+
+## Quick Setup & Auto-Installation Rules
+
+If any skills are `MISSING`, the assistant MUST check if `npx` is available by running:
+`{SCRIPT} --check-prereqs`
+
+### Case A: If npx is available
+The assistant MUST append a `## Quick Setup` section to the report:
+
+- Reference the adg repository URL: `https://github.com/RbBtSn0w/adg`
+
+1. **Grouped Impact Tables**:
+   - **Hard Requirements (blocking)**: List any missing hard-requirement skills and note that they block hooks.
+   - **Optional Skills (recommended)**: List any missing optional skills and note their feature impact.
+2. **Installation Options**: Present the three installation approaches:
+   - Approach 1 (Recommended): `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g`
+   - Approach 2 (Global): `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y`
+   - Approach 3 (Project): `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y`
+3. **Interactive Prompt**: Ask the user: `Would you like to install now? (Select approach 1-3, or skip)`
+4. **Execution**: If the user inputs a selection (1, 2, or 3), run the installation command:
+   `{SCRIPT} --install <selection>`
+5. **Re-Check**: Once installation completes, re-run the discovery rules and append a `## Post-Install Verification` section showing a before/after status table of the modified skills, using the format:
+   ```markdown
+   ## Post-Install Verification
+
+   | Skill | Before | After |
+   |-------|--------|-------|
+   | [skill-name] | MISSING | ✅ READY |
+   ```
+
+### Case B: If npx is NOT available
+The assistant MUST append the `## Quick Setup` section with manual instructions:
+- Output: `npx was not detected. Please install Node.js first, or manually install skills.`
+- Reference the adg repository URL: `https://github.com/RbBtSn0w/adg`
+- Provide the recommended command: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g`
+- Provide alternative manual cloning instructions:
+  `git clone https://github.com/obra/superpowers.git` and copy required skill folders into `./.agents/skills/`, `~/.agents/skills/`, or a plugin directory under `./.agents/plugins/` / `~/.agents/plugins/` that exposes `skills/<name>/SKILL.md`.
+- Do not offer any interactive prompt.
 
 ---
 
