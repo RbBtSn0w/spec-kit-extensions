@@ -225,10 +225,11 @@ class ManagedBlockConfig:
 
 
 def _parse_agent_context_config(text: str) -> dict[str, object]:
-    """Minimal parser for the flat agent-context-config.yml shape (no PyYAML dependency).
+    """Parse the supported flat config shape when PyYAML is unavailable.
 
     Recognizes ``context_file`` (scalar), ``context_files`` (inline or block list), and the
-    nested ``context_markers.start/.end`` keys. Unknown structure is ignored.
+    nested ``context_markers.start/.end`` keys. Unknown structure is ignored, while malformed
+    flow collections and quoted scalars fail safe instead of being partially accepted.
     """
     data: dict[str, object] = {}
     markers: dict[str, str] = {}
@@ -244,6 +245,12 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
         if not m:
             continue
         key, value = m.group(1), m.group(2).strip()
+        if value.startswith("[") and not value.endswith("]"):
+            raise ValueError(f"Malformed YAML flow sequence for {key}")
+        if value.startswith("{") and not value.endswith("}"):
+            raise ValueError(f"Malformed YAML flow mapping for {key}")
+        if value.startswith(("'", '"')) and not value.endswith(value[0]):
+            raise ValueError(f"Malformed YAML quoted scalar for {key}")
         if key == "context_file" and value:
             data["context_file"] = value.strip("'\"")
         elif key == "context_files":
@@ -270,6 +277,21 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
     return data
 
 
+def _load_agent_context_config(text: str) -> dict[str, object]:
+    """Load YAML safely, retaining a dependency-free parser for extension runtimes."""
+    try:
+        import yaml
+    except ModuleNotFoundError:
+        return _parse_agent_context_config(text)
+
+    loaded = yaml.safe_load(text)
+    if loaded is None:
+        return {}
+    if not isinstance(loaded, dict):
+        raise ValueError("agent-context config must be a YAML mapping")
+    return loaded
+
+
 def resolve_managed_block_config(workspace_root: Path) -> ManagedBlockConfig:
     """Resolve markers + managed file list from the agent-context extension's self-owned config.
 
@@ -282,7 +304,7 @@ def resolve_managed_block_config(workspace_root: Path) -> ManagedBlockConfig:
     config_path = workspace_root / AGENT_CONTEXT_CONFIG
     try:
         if config_path.is_file():
-            data = _parse_agent_context_config(config_path.read_text(encoding="utf-8"))
+            data = _load_agent_context_config(config_path.read_text(encoding="utf-8"))
             markers = data.get("context_markers")
             if isinstance(markers, dict):
                 start = str(markers.get("start") or start)

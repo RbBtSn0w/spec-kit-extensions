@@ -11,9 +11,30 @@ REVIEW="$ROOT_DIR/superpowers-bridge/commands/review.md"
 [ -f "$REVIEW" ] || { echo "FAIL: review.md missing" >&2; exit 1; }
 
 # 1. Coverage-gap remediation must delegate to converge, not recommend manual task additions.
-if ! grep -qi "converge" "$REVIEW"; then
-  echo "FAIL: review.md must delegate coverage-gap remediation to /speckit-converge" >&2; exit 1
-fi
+"$(command -v python3 || command -v python)" - "$REVIEW" <<'PY'
+from pathlib import Path
+import sys
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+normal_mode_rows = [
+    line for line in text.splitlines()
+    if line.startswith("|") and "coverage (Normal Mode)" in line
+]
+if len(normal_mode_rows) != 1:
+    raise SystemExit(f"FAIL: expected one Normal Mode coverage-gap row, got {len(normal_mode_rows)}")
+if "`/speckit-converge`" not in normal_mode_rows[0]:
+    raise SystemExit("FAIL: Normal Mode coverage-gap row must route to /speckit-converge")
+
+decision_schema = next(
+    (
+        line for line in text.splitlines()
+        if line.startswith("**Next command:**") and " | " in line
+    ),
+    "",
+)
+if "`/speckit-converge`" not in decision_schema:
+    raise SystemExit("FAIL: workflow decision schema must allow /speckit-converge")
+PY
 if grep -qi "adding missing tasks to tasks.md through the Spec Kit task flow" "$REVIEW"; then
   echo "FAIL: review.md still recommends manual task additions for coverage gaps" >&2; exit 1
 fi

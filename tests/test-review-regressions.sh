@@ -325,9 +325,10 @@ require(
     "brainstorm.md must resolve specs with hook paths or paths-only prerequisites before plan/tasks exist",
 )
 require(
-    "Recommend adding missing tasks" in review
+    "Delegate requirement-coverage-gap remediation to `/speckit-converge`" in review
+    and "This command does NOT itself add coverage tasks" in review
     and "Add missing tasks to tasks.md" not in review,
-    "review.md must recommend task edits without implying it edits tasks.md itself",
+    "review.md must delegate coverage remediation without implying it edits tasks.md itself",
 )
 require(
     "## Workflow Decision" in review
@@ -335,7 +336,7 @@ require(
     and "**Gate:** after_tasks.review" in review
     and "**Outcome:** PASS | BLOCKED | INCONCLUSIVE" in review
     and "**Reason:** none | coverage_gap | task_quality_issue | spec_ambiguity | plan_task_mismatch | missing_artifact | abandoned_feature" in review
-    and "**Next command:** `/speckit.implement` | `/speckit.clarify` | `/speckit.plan` | `/speckit.tasks` | none" in review
+    and "**Next command:** `/speckit.implement` | `/speckit.clarify` | `/speckit.plan` | `/speckit.tasks` | `/speckit-converge` | none" in review
     and "**Requires user approval:** true | false" in review,
     "review.md must emit a stable workflow decision block pinning the strict routing contract",
 )

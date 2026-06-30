@@ -18,9 +18,23 @@ PYTHON_BIN=$(find_python3)
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-# Baseline: a known fixture with no agent-context must still produce its stale-ref findings.
-BASE="$("$PYTHON_BIN" "$AUDIT_SCRIPT" "$FIXTURES_DIR/stale-command" --format json 2>/dev/null)"
-printf '%s' "$BASE" | grep -q "deploy.sh" || { echo "FAIL: baseline finding lost (deploy.sh)" >&2; exit 1; }
+# Baseline: repeated audit and report-only apply are byte-for-byte stable without agent-context.
+WS_BASE="$TMP_DIR/no-agent-context"
+cp -R "$FIXTURES_DIR/no-agent-context" "$WS_BASE"
+BASE_ONE="$TMP_DIR/baseline-one.json"
+BASE_TWO="$TMP_DIR/baseline-two.json"
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$WS_BASE" --json-out "$BASE_ONE" >/dev/null
+"$PYTHON_BIN" "$AUDIT_SCRIPT" "$WS_BASE" --json-out "$BASE_TWO" >/dev/null
+cmp -s "$BASE_ONE" "$BASE_TWO" || {
+  echo "FAIL: no-agent-context audit output is not byte-for-byte stable" >&2; exit 1;
+}
+
+APPLY_SCRIPT="$ROOT_DIR/memorylint/scripts/apply_report.py"
+"$PYTHON_BIN" "$APPLY_SCRIPT" "$BASE_ONE" --mode report-only > "$TMP_DIR/apply-one.txt"
+"$PYTHON_BIN" "$APPLY_SCRIPT" "$BASE_ONE" --mode report-only > "$TMP_DIR/apply-two.txt"
+cmp -s "$TMP_DIR/apply-one.txt" "$TMP_DIR/apply-two.txt" || {
+  echo "FAIL: no-agent-context apply output is not byte-for-byte stable" >&2; exit 1;
+}
 
 # Absent-file edge: config names a context file that does not exist -> no error, findings intact.
 WS="$TMP_DIR/absent"

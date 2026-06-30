@@ -139,3 +139,26 @@ _No cross-story blocking prerequisites. MemoryLint config/range helpers are scop
 - **Second increment = US2** (P1): close the converge evidence loop.
 - **Then US3 (P2), US4 (P3), Polish.**
 - Each story is independently testable and deliverable per its checkpoint.
+
+---
+
+## Phase 8: Convergence
+
+- [X] T025 Add a failing managed-block config regression that supplies syntactically invalid YAML containing otherwise recognizable custom markers/files and asserts authoritative default markers, an empty managed-file set, no crash, and normal extraction per FR-003, FR-015 (missing)
+- [X] T026 Make `resolve_managed_block_config()` reject syntactically invalid YAML and return authoritative default markers with an empty managed-file set while preserving plural-then-singular resolution for valid config per FR-003 (contradicts)
+- [X] T027 Strengthen `superpowers-bridge/tests/test-review-converge-split.sh` to parse or precisely match the Normal Mode coverage-gap decision row and require `/speckit-converge`, so unrelated prose cannot satisfy the assertion per T015 (partial)
+- [X] T028 Update `superpowers-bridge/commands/review.md` so the workflow decision schema and Normal Mode coverage-gap row route remediation to `/speckit-converge` while retaining BLOCKED outcomes for task-quality, TDD-readiness, and plan-task mismatches per FR-010 (contradicts)
+- [X] T029 Expand `memorylint/tests/test-managed-block-invariance.sh` to exercise both audit and apply and compare no-agent-context behavior byte-for-byte against the baseline while retaining the absent-context-file case per T006 (partial)
+- [X] T030 Strengthen `memorylint/tests/test-apply-staleness-message.sh` to snapshot the target before apply and assert it remains byte-for-byte unchanged after the staleness refusal per T005 (partial)
+- [X] T031 Add the specified plural, singular, absent-file, well-formed, and unterminated managed-block fixtures under `memorylint/tests/fixtures/managed-block/` using the authoritative default markers per T001 (missing)
+- [X] T032 Add the plain no-config, no-marker `AGENTS.md` baseline under `memorylint/tests/fixtures/no-agent-context/` per T002 (missing)
+- [X] T033 Add automated assertions mapping Quickstart US3 documentation and US4 README/config/catalog compatibility scenarios to passing tests per T024 (partial)
+
+---
+
+## Phase 9: Convergence
+
+- [ ] T034 Extend `memorylint/tests/test-managed-block-config.sh` with non-flow invalid YAML cases such as invalid indentation and missing mapping colons, asserting authoritative defaults, an empty managed-file set, no crash, and normal default-marker extraction when PyYAML is unavailable per FR-003, FR-015 (partial)
+- [ ] T035 Make the dependency-free agent-context config path reject every unsupported or syntactically invalid construct instead of partially accepting recognizable keys, while preserving valid plural/singular/marker parsing and fail-safe defaults per FR-003 (partial)
+- [ ] T036 Strengthen `superpowers-bridge/tests/test-after-converge-hook.sh` to reject lifecycle descriptions that claim converge implements appended tasks and require wording consistent with its assess-and-append-only boundary per T012, FR-015 (partial)
+- [ ] T037 Correct the `after_converge` description in `superpowers-bridge/extension.yml` so converge only assesses and appends remaining tasks and the hook runs verification at convergence completion per FR-007 (contradicts)

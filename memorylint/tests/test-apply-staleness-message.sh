@@ -27,6 +27,7 @@ ORIG="$(cat "$TMP_DIR/ws/AGENTS.md")"
   printf '<!-- SPECKIT START -->\n- Plan: specs/x/plan.md\n<!-- SPECKIT END -->\n\n'
   printf '%s\n' "$ORIG"
 } > "$TMP_DIR/ws/AGENTS.md"
+cp "$TMP_DIR/ws/AGENTS.md" "$TMP_DIR/agents-before-apply.md"
 
 OUT="$TMP_DIR/apply.txt"
 if "$PYTHON_BIN" "$APPLY_SCRIPT" "$TMP_DIR/report.json" --mode apply-safe-fixes >"$OUT" 2>&1; then
@@ -36,5 +37,8 @@ grep -q "Staleness check failed" "$OUT" || { echo "FAIL: staleness failure missi
 if ! grep -qi "audit" "$OUT" || ! grep -qi "re-run\|rerun\|re-audit" "$OUT"; then
   echo "FAIL: staleness message must direct the user to re-run the audit" >&2; cat "$OUT" >&2; exit 1
 fi
+cmp -s "$TMP_DIR/agents-before-apply.md" "$TMP_DIR/ws/AGENTS.md" || {
+  echo "FAIL: staleness refusal modified AGENTS.md" >&2; exit 1;
+}
 
 echo "PASS: test-apply-staleness-message.sh"
