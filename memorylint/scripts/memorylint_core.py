@@ -251,14 +251,27 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
         if not m:
             raise ValueError(f"Syntactically invalid line: {line}")
         key, value = m.group(1), m.group(2).strip()
-        if key not in {"context_file", "context_files", "context_markers"}:
-            raise ValueError(f"Unsupported configuration key: {key}")
         if value.startswith("[") and not value.endswith("]"):
             raise ValueError(f"Malformed YAML flow sequence for {key}")
         if value.startswith("{") and not value.endswith("}"):
             raise ValueError(f"Malformed YAML flow mapping for {key}")
         if value.startswith(("'", '"')) and not value.endswith(value[0]):
             raise ValueError(f"Malformed YAML quoted scalar for {key}")
+        if key not in {"context_file", "context_files", "context_markers"}:
+            # Skip nested block/list for unknown keys to avoid parsing errors on subsequent lines
+            while i < n:
+                next_raw = lines[i]
+                next_line = next_raw.rstrip()
+                if not next_line.strip() or next_line.lstrip().startswith("#"):
+                    i += 1
+                    continue
+                has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
+                is_list_item = next_line.lstrip().startswith("-")
+                if not has_leading_space and not is_list_item:
+                    break
+                i += 1
+            continue
+
         if key == "context_file":
             if not value:
                 raise ValueError("context_file cannot be empty")
@@ -341,9 +354,13 @@ def resolve_managed_block_config(workspace_root: Path) -> ManagedBlockConfig:
                 end = str(markers.get("end") or end)
             files = data.get("context_files")
             if isinstance(files, list) and files:
-                managed = [str(f) for f in files]
+                managed = [
+                    str(f).replace("\\", "/")[2:] if str(f).replace("\\", "/").startswith("./") else str(f).replace("\\", "/")
+                    for f in files
+                ]
             elif data.get("context_file"):
-                managed = [str(data["context_file"])]
+                f = str(data["context_file"]).replace("\\", "/")
+                managed = [f[2:] if f.startswith("./") else f]
     except Exception:
         return ManagedBlockConfig(DEFAULT_BLOCK_START, DEFAULT_BLOCK_END, ())
     return ManagedBlockConfig(start, end, tuple(managed))

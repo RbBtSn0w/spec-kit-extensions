@@ -71,8 +71,7 @@ def test_config(content, yaml_available=True):
 # 1. Flow sequence error (original)
 # 2. Invalid indentation under context_markers
 # 3. Missing mapping colons
-# 4. Unsupported keys
-cases = [
+invalid_cases = [
     """context_file: AGENTS.md
 context_markers:
   start: CUSTOM START
@@ -81,13 +80,49 @@ broken: [""",
     """context_markers:
 start: CUSTOM START""",
     """context_file AGENTS.md""",
-    """context_file: AGENTS.md
-unknown_key: true""",
 ]
 
-for content in cases:
+# Supported behavior: unknown keys must be gracefully ignored, preserving valid keys
+ignore_cases = [
+    """context_file: AGENTS.md
+unknown_key: true""",
+    """context_file: AGENTS.md
+unknown_key:
+  nested_key: value""",
+]
+
+def test_ignore_config(content, yaml_available=True):
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(content, encoding="utf-8")
+
+    # Simulate yaml module availability/unavailability
+    if not yaml_available:
+        sys.modules['yaml'] = None
+    else:
+        sys.modules.pop('yaml', None)
+
+    if 'memorylint_core' in sys.modules:
+        del sys.modules['memorylint_core']
+
+    from memorylint_core import (  # noqa: E402
+        DEFAULT_BLOCK_END,
+        DEFAULT_BLOCK_START,
+        resolve_managed_block_config,
+    )
+
+    config = resolve_managed_block_config(ws)
+    if config.start_marker != DEFAULT_BLOCK_START or config.end_marker != DEFAULT_BLOCK_END:
+        raise SystemExit(f"FAIL: ignore YAML (yaml_avail={yaml_available}) changed markers: {config}")
+    if config.managed_files != ('AGENTS.md',):
+        raise SystemExit(f"FAIL: ignore YAML (yaml_avail={yaml_available}) did not retain managed files: {config.managed_files}")
+
+for content in invalid_cases:
     test_config(content, yaml_available=True)
     test_config(content, yaml_available=False)
+
+for content in ignore_cases:
+    test_ignore_config(content, yaml_available=True)
+    test_ignore_config(content, yaml_available=False)
 
 # Restore normal module state
 sys.modules.pop('yaml', None)
