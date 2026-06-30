@@ -235,7 +235,8 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
     markers: dict[str, str] = {}
     lines = text.splitlines()
     i = 0
-    while i < len(lines):
+    n = len(lines)
+    while i < n:
         raw = lines[i]
         line = raw.rstrip()
         i += 1
@@ -243,33 +244,57 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
             continue
         m = re.match(r"^(\w+):\s*(.*)$", line)
         if not m:
-            continue
+            raise ValueError(f"Syntactically invalid line: {line}")
         key, value = m.group(1), m.group(2).strip()
+        if key not in {"context_file", "context_files", "context_markers"}:
+            raise ValueError(f"Unsupported configuration key: {key}")
         if value.startswith("[") and not value.endswith("]"):
             raise ValueError(f"Malformed YAML flow sequence for {key}")
         if value.startswith("{") and not value.endswith("}"):
             raise ValueError(f"Malformed YAML flow mapping for {key}")
         if value.startswith(("'", '"')) and not value.endswith(value[0]):
             raise ValueError(f"Malformed YAML quoted scalar for {key}")
-        if key == "context_file" and value:
+        if key == "context_file":
+            if not value:
+                raise ValueError("context_file cannot be empty")
             data["context_file"] = value.strip("'\"")
         elif key == "context_files":
             items: list[str] = []
             if value.startswith("[") and value.endswith("]"):
                 items = [v.strip().strip("'\"") for v in value[1:-1].split(",") if v.strip()]
             else:
-                while i < len(lines):
-                    item = re.match(r"^\s*-\s*(.+?)\s*$", lines[i])
-                    if not item:
+                if value:
+                    raise ValueError(f"Unsupported format for context_files: {value}")
+                while i < n:
+                    next_raw = lines[i]
+                    next_line = next_raw.rstrip()
+                    if not next_line.strip() or next_line.lstrip().startswith("#"):
+                        i += 1
+                        continue
+                    has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
+                    if not has_leading_space and not next_line.lstrip().startswith("-"):
                         break
+                    item = re.match(r"^\s*-\s*(.+?)\s*$", next_line)
+                    if not item:
+                        raise ValueError(f"Invalid block list item or indentation: {next_line}")
                     items.append(item.group(1).strip().strip("'\""))
                     i += 1
             data["context_files"] = [v for v in items if v]
         elif key == "context_markers":
-            while i < len(lines):
-                sub = re.match(r"^\s+(start|end):\s*(.+?)\s*$", lines[i])
-                if not sub:
+            if value:
+                raise ValueError(f"Unsupported inline context_markers value: {value}")
+            while i < n:
+                next_raw = lines[i]
+                next_line = next_raw.rstrip()
+                if not next_line.strip() or next_line.lstrip().startswith("#"):
+                    i += 1
+                    continue
+                has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
+                if not has_leading_space:
                     break
+                sub = re.match(r"^\s+(start|end):\s*(.+?)\s*$", next_line)
+                if not sub:
+                    raise ValueError(f"Invalid context_markers subkey or indentation: {next_line}")
                 markers[sub.group(1)] = sub.group(2).strip().strip("'\"")
                 i += 1
     if markers:

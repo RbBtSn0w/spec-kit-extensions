@@ -143,12 +143,10 @@ hooks:
     command: speckit.superb.verify
     optional: false
     description: >
-      Mandatory evidence-first gate after convergence. speckit-converge appends
-      and implements remaining tasks but never runs tests, and its "converged"
-      verdict ignores test evidence; reusing the verify gate here ensures
-      convergence-driven work still proves completion with fresh evidence.
-      Blocking-on-missing-evidence is inherited from the same verify command used
-      by after_implement.
+      Mandatory evidence-first gate after convergence. speckit-converge only assesses
+      and appends remaining tasks to tasks.md; the hook runs verification at convergence
+      completion to ensure convergence-driven work still proves completion with fresh evidence.
+      Blocking-on-missing-evidence is inherited from the same verify command used by after_implement.
 
 tags:
   - quality-gates

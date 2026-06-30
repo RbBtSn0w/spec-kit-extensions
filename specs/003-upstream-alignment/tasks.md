@@ -158,7 +158,7 @@ _No cross-story blocking prerequisites. MemoryLint config/range helpers are scop
 
 ## Phase 9: Convergence
 
-- [ ] T034 Extend `memorylint/tests/test-managed-block-config.sh` with non-flow invalid YAML cases such as invalid indentation and missing mapping colons, asserting authoritative defaults, an empty managed-file set, no crash, and normal default-marker extraction when PyYAML is unavailable per FR-003, FR-015 (partial)
-- [ ] T035 Make the dependency-free agent-context config path reject every unsupported or syntactically invalid construct instead of partially accepting recognizable keys, while preserving valid plural/singular/marker parsing and fail-safe defaults per FR-003 (partial)
-- [ ] T036 Strengthen `superpowers-bridge/tests/test-after-converge-hook.sh` to reject lifecycle descriptions that claim converge implements appended tasks and require wording consistent with its assess-and-append-only boundary per T012, FR-015 (partial)
-- [ ] T037 Correct the `after_converge` description in `superpowers-bridge/extension.yml` so converge only assesses and appends remaining tasks and the hook runs verification at convergence completion per FR-007 (contradicts)
+- [X] T034 Extend `memorylint/tests/test-managed-block-config.sh` with non-flow invalid YAML cases such as invalid indentation and missing mapping colons, asserting authoritative defaults, an empty managed-file set, no crash, and normal default-marker extraction when PyYAML is unavailable per FR-003, FR-015 (partial)
+- [X] T035 Make the dependency-free agent-context config path reject every unsupported or syntactically invalid construct instead of partially accepting recognizable keys, while preserving valid plural/singular/marker parsing and fail-safe defaults per FR-003 (partial)
+- [X] T036 Strengthen `superpowers-bridge/tests/test-after-converge-hook.sh` to reject lifecycle descriptions that claim converge implements appended tasks and require wording consistent with its assess-and-append-only boundary per T012, FR-015 (partial)
+- [X] T037 Correct the `after_converge` description in `superpowers-bridge/extension.yml` so converge only assesses and appends remaining tasks and the hook runs verification at convergence completion per FR-007 (contradicts)

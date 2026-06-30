@@ -39,18 +39,66 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, sys.argv[1])
-from memorylint_core import (  # noqa: E402
-    DEFAULT_BLOCK_END,
-    DEFAULT_BLOCK_START,
-    resolve_managed_block_config,
-)
+ws = Path(sys.argv[2])
+config_path = ws / ".specify/extensions/agent-context/agent-context-config.yml"
 
-config = resolve_managed_block_config(Path(sys.argv[2]))
-if config.start_marker != DEFAULT_BLOCK_START or config.end_marker != DEFAULT_BLOCK_END:
-    raise SystemExit(f"FAIL: invalid YAML retained non-default markers: {config}")
-if config.managed_files:
-    raise SystemExit(f"FAIL: invalid YAML retained managed files: {config.managed_files}")
+def test_config(content, yaml_available=True):
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(content, encoding="utf-8")
+
+    # Simulate yaml module availability/unavailability
+    if not yaml_available:
+        sys.modules['yaml'] = None
+    else:
+        sys.modules.pop('yaml', None)
+
+    if 'memorylint_core' in sys.modules:
+        del sys.modules['memorylint_core']
+
+    from memorylint_core import (  # noqa: E402
+        DEFAULT_BLOCK_END,
+        DEFAULT_BLOCK_START,
+        resolve_managed_block_config,
+    )
+
+    config = resolve_managed_block_config(ws)
+    if config.start_marker != DEFAULT_BLOCK_START or config.end_marker != DEFAULT_BLOCK_END:
+        raise SystemExit(f"FAIL: invalid YAML (yaml_avail={yaml_available}) retained non-default markers: {config}")
+    if config.managed_files:
+        raise SystemExit(f"FAIL: invalid YAML (yaml_avail={yaml_available}) retained managed files: {config.managed_files}")
+
+# Cases to test:
+# 1. Flow sequence error (original)
+# 2. Invalid indentation under context_markers
+# 3. Missing mapping colons
+# 4. Unsupported keys
+cases = [
+    """context_file: AGENTS.md
+context_markers:
+  start: CUSTOM START
+  end: CUSTOM END
+broken: [""",
+    """context_markers:
+start: CUSTOM START""",
+    """context_file AGENTS.md""",
+    """context_file: AGENTS.md
+unknown_key: true""",
+]
+
+for content in cases:
+    test_config(content, yaml_available=True)
+    test_config(content, yaml_available=False)
+
+# Restore normal module state
+sys.modules.pop('yaml', None)
+print("Python config assertions passed")
 PY
+
+# Set up an invalid config with bad indentation for the final integration check
+cat > "$WS/.specify/extensions/agent-context/agent-context-config.yml" <<'EOF'
+context_markers:
+start: CUSTOM START
+EOF
 
 JSON="$("$PYTHON_BIN" "$AUDIT_SCRIPT" "$WS" --format json 2>/dev/null)"
 printf '%s' "$JSON" | grep -q "outside-missing.md" || {

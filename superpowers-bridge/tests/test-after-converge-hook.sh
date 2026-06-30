@@ -35,6 +35,16 @@ if "command: speckit.superb.verify" not in block:
     print("FAIL: after_converge must run speckit.superb.verify", file=sys.stderr); sys.exit(1)
 if not re.search(r"optional:\s*false", block):
     print("FAIL: after_converge must be mandatory (optional: false)", file=sys.stderr); sys.exit(1)
+
+desc_match = re.search(r"description:\s*>\s*\n((?:\s{6}.*\n)+)", block)
+if not desc_match:
+    print("FAIL: after_converge has no description block", file=sys.stderr); sys.exit(1)
+desc = desc_match.group(1)
+if re.search(r"converge.*implements", desc.lower()) or re.search(r"converge.*executes", desc.lower()):
+    print("FAIL: description incorrectly claims converge implements or executes tasks", file=sys.stderr); sys.exit(1)
+if "assesses" not in desc.lower() or "appends" not in desc.lower():
+    print("FAIL: description must specify converge only assesses and appends tasks", file=sys.stderr); sys.exit(1)
+
 print("ok: manifest after_converge declaration")
 PY
 
