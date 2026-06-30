@@ -46,8 +46,13 @@ if ! grep -q -- "--skill test-driven-development" "$COMMANDS_DIR/check.md"; then
   exit 1
 fi
 
-if ! grep -q -- "subagent-driven-development -g -y" "$COMMANDS_DIR/check.md"; then
-  echo "FAIL: check.md recommended plugins command must include both -g and -y"
+if ! grep -q -- "subagent-driven-development -g" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md recommended plugins command must include -g"
+  exit 1
+fi
+
+if grep -q -- "subagent-driven-development -g -y" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md recommended plugins command must not include -y"
   exit 1
 fi
 
@@ -63,28 +68,28 @@ if ! grep -q "Optional Skills" "$COMMANDS_DIR/check.md"; then
   exit 1
 fi
 
-# Test install-skills.sh exit codes with invalid inputs (T022 verification)
+# Test ensure-skills.sh exit codes with invalid inputs (T022 verification)
 echo "=== Running Script Interface Validation ==="
-if [ -f "$SCRIPTS_DIR/bash/install-skills.sh" ]; then
+if [ -f "$SCRIPTS_DIR/bash/ensure-skills.sh" ]; then
   # Invalid approach option should exit with 3
-  if bash "$SCRIPTS_DIR/bash/install-skills.sh" --approach 4 2>/dev/null; then
-    echo "FAIL: install-skills.sh did not exit with code 3 on invalid approach"
+  if bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --install 4 2>/dev/null; then
+    echo "FAIL: ensure-skills.sh did not exit with code 3 on invalid approach"
     exit 1
   fi
   
   # Missing arguments should exit with 3
-  if bash "$SCRIPTS_DIR/bash/install-skills.sh" 2>/dev/null; then
-    echo "FAIL: install-skills.sh did not exit with code 3 on missing arguments"
+  if bash "$SCRIPTS_DIR/bash/ensure-skills.sh" 2>/dev/null; then
+    echo "FAIL: ensure-skills.sh did not exit with code 3 on missing arguments"
     exit 1
   fi
   
   # Unknown arguments should exit with 3
-  if bash "$SCRIPTS_DIR/bash/install-skills.sh" --invalid-flag 2>/dev/null; then
-    echo "FAIL: install-skills.sh did not exit with code 3 on unknown arguments"
+  if bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --invalid-flag 2>/dev/null; then
+    echo "FAIL: ensure-skills.sh did not exit with code 3 on unknown arguments"
     exit 1
   fi
 else
-  echo "FAIL: install-skills.sh does not exist"
+  echo "FAIL: ensure-skills.sh does not exist"
   exit 1
 fi
 

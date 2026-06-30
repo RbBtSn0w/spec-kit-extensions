@@ -35,8 +35,8 @@ if ! grep -q "For agentic workers" "$PLAN_GATE_CMD"; then
 fi
 
 # 4. Check writing-plans skill resolution description
-if ! grep -q "writing-plans/SKILL.md" "$PLAN_GATE_CMD" || ! grep -q "Layer 1: Native writing-plans" "$PLAN_GATE_CMD"; then
-    echo "FAIL: plan-gate.md does not define resolution and preferred usage of writing-plans skill"
+if ! grep -q "resolve-skill.sh" "$PLAN_GATE_CMD" || ! grep -q "Layer 1: Native writing-plans" "$PLAN_GATE_CMD"; then
+    echo "FAIL: plan-gate.md does not define shared skill resolution and preferred usage of writing-plans skill"
     exit 1
 fi
 

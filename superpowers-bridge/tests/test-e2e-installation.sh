@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # superpowers-bridge/tests/test-e2e-installation.sh
-# End-to-End test to verify the skill installation flow using adg with the -g -y flags.
+# End-to-End test to verify the recommended plugin installation flow using adg with the current global flag contract.
 # Uses a clean, temporary sandboxed HOME directory to avoid touching the user's actual files.
 
 set -euo pipefail
@@ -27,11 +27,11 @@ if [ -d "$GLOBAL_PLUGINS_DIR" ]; then
   exit 1
 fi
 
-# 3. Execute install-skills.sh with Approach 1 (Recommended plugins add with -g -y)
-echo "Executing install-skills.sh --approach 1..."
-# We run it with the override SPECIFY_FEATURE to bypass check-prerequisites if needed, 
-# although install-skills.sh doesn't restrict branches.
-bash "$SCRIPTS_DIR/bash/install-skills.sh" --approach 1
+# 3. Execute ensure-skills.sh with Approach 1 (Recommended plugins add with -g)
+echo "Executing ensure-skills.sh --install 1..."
+# We run it with the override SPECIFY_FEATURE to bypass check-prerequisites if needed,
+# although ensure-skills.sh doesn't restrict branches.
+bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --install 1
 
 # 4. Verify that the plugin directory and skills have been successfully created/cloned
 echo "Verifying installation output in sandbox..."

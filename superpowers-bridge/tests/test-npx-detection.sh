@@ -8,21 +8,22 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMANDS_DIR="$ROOT_DIR/commands"
 SCRIPTS_DIR="$ROOT_DIR/scripts"
-EXPECTED_PRINT_GUIDANCE='bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance'
-EXPECTED_CHECK_ONLY='bash "$(dirname "{SCRIPT}")/install-skills.sh" --check-only'
-EXPECTED_APPROACH='bash "$(dirname "{SCRIPT}")/install-skills.sh" --approach <selection>'
+EXPECTED_PRINT_GUIDANCE='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance'
+EXPECTED_CHECK_ONLY='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs'
+EXPECTED_APPROACH='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>'
+EXPECTED_RESOLVE='bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill'
 
 echo "=== Running User Story 2: npx Pre-detection & Inline Guidance Tests ==="
 
-# 1. Test install-skills.sh with simulated missing npx on PATH
-echo "Testing install-skills.sh npx detection fallback..."
+# 1. Test ensure-skills.sh with simulated missing npx on PATH
+echo "Testing ensure-skills.sh npx detection fallback..."
 (
   # Override PATH to hide npx
   export PATH="/usr/bin:/bin"
   
   # Allow the command to fail/exit with 2 under set -e
   set +e
-  output=$(bash "$SCRIPTS_DIR/bash/install-skills.sh" --check-only 2>&1)
+  output=$(bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --check-prereqs 2>&1)
   exit_status=$?
   set -e
   
@@ -30,12 +31,12 @@ echo "Testing install-skills.sh npx detection fallback..."
   echo "Simulated output: $output"
   
   if [ "$exit_status" -ne 2 ]; then
-    echo "FAIL: install-skills.sh did not exit with code 2 when npx is missing (got $exit_status)"
+    echo "FAIL: ensure-skills.sh did not exit with code 2 when npx is missing (got $exit_status)"
     exit 1
   fi
   
   if ! echo "$output" | grep -q '"npx_available": false'; then
-    echo "FAIL: install-skills.sh did not output npx_available: false"
+    echo "FAIL: ensure-skills.sh did not output npx_available: false"
     exit 1
   fi
 )
@@ -59,7 +60,7 @@ for file in "${COMMAND_FILES[@]}"; do
     exit 1
   fi
 
-  # Check that command file references the install-skills.sh print-guidance script
+  # Check that command file references the ensure-skills.sh print-guidance script
   if ! grep -Fq "$EXPECTED_PRINT_GUIDANCE" "$filepath"; then
     echo "FAIL: $file must include the exact print-guidance recovery command: $EXPECTED_PRINT_GUIDANCE"
     exit 1
@@ -67,6 +68,11 @@ for file in "${COMMAND_FILES[@]}"; do
 
   if ! grep -Fq "$EXPECTED_CHECK_ONLY" "$filepath"; then
     echo "FAIL: $file must include the exact check-only recovery command: $EXPECTED_CHECK_ONLY"
+    exit 1
+  fi
+
+  if ! grep -Fq "$EXPECTED_RESOLVE" "$filepath"; then
+    echo "FAIL: $file must include the shared skill resolution helper command prefix: $EXPECTED_RESOLVE"
     exit 1
   fi
 
@@ -86,22 +92,27 @@ for file in "${COMMAND_FILES[@]}"; do
   fi
 done
 
-# 3. Verify that running install-skills.sh --print-guidance outputs the correct details
+# 3. Verify that running ensure-skills.sh --print-guidance outputs the correct details
 echo "Testing print-guidance script output..."
-guidance_out=$(bash "$SCRIPTS_DIR/bash/install-skills.sh" --print-guidance)
+guidance_out=$(bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --print-guidance)
 
 if ! echo "$guidance_out" | grep -q "https://github.com/RbBtSn0w/adg"; then
-  echo "FAIL: install-skills.sh --print-guidance must reference the adg repository URL: https://github.com/RbBtSn0w/adg"
+  echo "FAIL: ensure-skills.sh --print-guidance must reference the adg repository URL: https://github.com/RbBtSn0w/adg"
   exit 1
 fi
 
 if ! echo "$guidance_out" | grep -q "npx adg plugins add"; then
-  echo "FAIL: install-skills.sh --print-guidance must include the plugins installation command"
+  echo "FAIL: ensure-skills.sh --print-guidance must include the plugins installation command"
   exit 1
 fi
 
-if ! echo "$guidance_out" | grep -q -- "-g -y"; then
-  echo "FAIL: install-skills.sh --print-guidance must include both -g and -y for the recommended plugins command"
+if ! echo "$guidance_out" | grep -q "plugins add .* -g"; then
+  echo "FAIL: ensure-skills.sh --print-guidance must include -g for the recommended plugins command"
+  exit 1
+fi
+
+if echo "$guidance_out" | grep -q "plugins add .* -g -y"; then
+  echo "FAIL: ensure-skills.sh --print-guidance must not include -y for the recommended plugins command"
   exit 1
 fi
 

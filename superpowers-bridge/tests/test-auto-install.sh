@@ -10,12 +10,12 @@ SCRIPTS_DIR="$ROOT_DIR/scripts"
 
 echo "=== Running User Story 3: Auto-Installation Flow & Interface Tests ==="
 
-# 1. Test check-only interface execution
-echo "Testing check-only execution..."
-output=$(bash "$SCRIPTS_DIR/bash/install-skills.sh" --check-only)
+# 1. Test check-prereqs interface execution
+echo "Testing check-prereqs execution..."
+output=$(bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --check-prereqs)
 echo "Output: $output"
 if ! echo "$output" | grep -q '"npx_available"'; then
-  echo "FAIL: install-skills.sh --check-only did not output npx json"
+  echo "FAIL: ensure-skills.sh --check-prereqs did not output npx json"
   exit 1
 fi
 
@@ -24,7 +24,7 @@ echo "Testing input validations..."
 
 # Test approach 0 (out of bounds)
 set +e
-bash "$SCRIPTS_DIR/bash/install-skills.sh" --approach 0 2>/dev/null
+bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --install 0 2>/dev/null
 exit_code=$?
 set -e
 if [ "$exit_code" -ne 3 ]; then
@@ -34,7 +34,7 @@ fi
 
 # Test approach 4 (out of bounds)
 set +e
-bash "$SCRIPTS_DIR/bash/install-skills.sh" --approach 4 2>/dev/null
+bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --install 4 2>/dev/null
 exit_code=$?
 set -e
 if [ "$exit_code" -ne 3 ]; then
@@ -44,7 +44,7 @@ fi
 
 # Test missing approach value
 set +e
-bash "$SCRIPTS_DIR/bash/install-skills.sh" --approach 2>/dev/null
+bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --install 2>/dev/null
 exit_code=$?
 set -e
 if [ "$exit_code" -ne 3 ]; then

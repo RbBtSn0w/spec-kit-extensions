@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added centralized missing skill guidance definition inside `install-skills.sh` script to serve as the single source of truth.
+- Added centralized missing skill guidance and installation orchestration in `ensure-skills.sh`, plus installation-agnostic skill discovery in `resolve-skill.sh`.
 - Added interactive `npx` checking, Quick Setup impact groupings (Hard Requirements vs Optional Skills), and prompt selection execution in `/speckit.superb.check`.
 - Added sandboxed HOME E2E installation test.
 

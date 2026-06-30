@@ -13,13 +13,17 @@ A superpowers discipline represented as a filesystem artifact.
 | name | string | Canonical skill name (e.g., `test-driven-development`) |
 | requirement_level | enum: `hard` \| `optional` | Whether missing skill blocks the main flow or only reduces capability |
 | discovery_source | enum: `workspace` \| `global` \| `none` | Where the skill was found (or `none` if missing) |
+| install_type | enum: `skill-root` \| `plugin` \| `none` | Whether the resolved skill came from a direct skill root or a plugin-provided skills directory |
 | path | string \| null | Resolved absolute path to `SKILL.md`, or null if missing |
 | status | enum: `READY` \| `MISSING` | Availability status after discovery |
 
 **Discovery rules**:
-- Workspace root: `./.agents/skills/<name>/SKILL.md`
-- Global root: `~/.agents/skills/<name>/SKILL.md`
+- Workspace direct root: `./.agents/skills/<name>/SKILL.md`
+- Workspace plugin roots: `./.agents/plugins/*/skills/<name>/SKILL.md` and `./.agents/plugins/*/*/skills/<name>/SKILL.md`
+- Global direct root: `~/.agents/skills/<name>/SKILL.md`
+- Global plugin roots: `~/.agents/plugins/*/skills/<name>/SKILL.md` and `~/.agents/plugins/*/*/skills/<name>/SKILL.md`
 - Workspace wins over global when both exist
+- Within the same scope, direct skill-root installs win over plugin-provided skills
 
 ### Skill Registry (static, from config)
 
@@ -53,7 +57,7 @@ One of three supported methods for installing skills via `adg`.
 
 | Priority | Label | Command |
 |----------|-------|---------|
-| 1 | Recommended | `npx adg plugins add obra/superpowers -g -y` |
+| 1 | Recommended | `npx adg plugins add obra/superpowers -g` |
 | 2 | Global | `npx adg skills add obra/superpowers --global -y` |
 | 3 | Project | `npx adg skills add obra/superpowers -y` |
 
@@ -68,6 +72,30 @@ A structured text fragment embedded in command output when skills are missing.
 | adg_url | string (constant) | `https://github.com/RbBtSn0w/adg` |
 | approaches | list\<InstallationApproach\> | The three installation methods |
 | is_blocking | boolean | Whether this missing skill blocks the current operation |
+
+### Discovery Helper
+
+Read-only helper contract used by commands and diagnostics to resolve one skill.
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| script_name | string | `resolve-skill.sh` |
+| input_skill | string | Requested skill name |
+| output_available | boolean | Whether a readable `SKILL.md` was found |
+| output_source | enum | `workspace`, `global`, or `none` |
+| output_install_type | enum | `skill-root`, `plugin`, or `none` |
+| output_path | string \| null | Resolved absolute path when available |
+
+### Ensure Helper
+
+Installation-oriented helper contract used only after a missing-skill condition is established.
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| script_name | string | `ensure-skills.sh` |
+| operation | enum | `check-prereqs`, `print-guidance`, `install` |
+| approach | int \| null | `1`, `2`, or `3` when operation is `install` |
+| side_effects | enum | `none` for check/guidance, `installs` for install |
 
 ### Quick Setup Summary
 
@@ -102,7 +130,7 @@ Start
   │   ├─ No  → show "All skills READY" verdict
   │   └─ Yes → show status table with per-skill guidance
   │            │
-  │            ├─ Detect npx
+  │            ├─ Detect npx via ensure helper
   │            │   ├─ Available → show Quick Setup with install prompt
   │            │   │               │
   │            │   │               ├─ User confirms → execute adg → re-check → show updated table

@@ -14,9 +14,9 @@ Emitted by individual bridge commands when a required skill is missing. Appended
 ERROR: [Required|Optional] superpowers skill `<skill-name>` not found.
 
 💡 Install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y
-   Global:       npx adg skills add obra/superpowers --global -y
-   Project:      npx adg skills add obra/superpowers -y
+   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g
+   Global:       npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y
+   Project:      npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
 
 Run /speckit-superb-check for full diagnostics and interactive installation.
 ```
@@ -30,7 +30,7 @@ Run /speckit-superb-check for full diagnostics and interactive installation.
 - Always ends with a pointer to the `check` command for full diagnostics
 - If `npx` is available, the command must next ask:
   `Would you like to install now? (Select approach 1-3, or skip)`
-- The command may run `install-skills.sh --approach <selection>` only after explicit
+- The command may run `ensure-skills.sh --install <selection>` only after explicit
   user confirmation, then must re-run the missing skill resolution once before proceeding
   or blocking.
 - If the command is in **graceful degradation** mode (Layer 2 fallback available), use `NOTE` instead of `ERROR`:
@@ -39,9 +39,9 @@ Run /speckit-superb-check for full diagnostics and interactive installation.
 NOTE: Optional superpowers skill `<skill-name>` not installed. Running with local fallback.
 
 💡 For enhanced behavior, install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y
-   Global:       npx adg skills add obra/superpowers --global -y
-   Project:      npx adg skills add obra/superpowers -y
+   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g
+   Global:       npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y
+   Project:      npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
 ```
 
 ## 2. Check Command: Skill Status Table Extension
@@ -98,9 +98,9 @@ Choose one approach to install all missing skills:
 
 | # | Approach | Command |
 |---|----------|---------|
-| 1 | **Recommended** (plugin bundle) | `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y` |
-| 2 | Global skills | `npx adg skills add obra/superpowers --global -y` |
-| 3 | Project skills | `npx adg skills add obra/superpowers -y` |
+| 1 | **Recommended** (plugin bundle) | `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g` |
+| 2 | Global skills | `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y` |
+| 3 | Project skills | `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y` |
 
 Would you like to install now? (Select approach 1-3, or skip)
 ```
@@ -125,11 +125,11 @@ Missing skills can be installed via [adg](https://github.com/RbBtSn0w/adg):
 `npx` was not detected. Install Node.js first, or manually install skills:
 
 1. Visit https://github.com/RbBtSn0w/adg for setup instructions
-2. Run: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y` (recommended)
+2. Run: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g` (recommended)
 
 Alternatively, clone the superpowers repository directly:
   `git clone https://github.com/obra/superpowers.git`
-  Then copy skill directories to `./.agents/skills/` or `~/.agents/skills/`
+  Then copy skill directories to `./.agents/skills/`, `~/.agents/skills/`, or a plugin directory under `./.agents/plugins/` / `~/.agents/plugins/` that exposes `skills/<name>/SKILL.md`
 ```
 
 ## 4. Post-Install Re-Check Output
@@ -159,16 +159,45 @@ Displayed after successful auto-installation to show transitions.
 - Shows remaining MISSING skills without emoji
 - Includes updated verdict reflecting current state
 
-## 5. install-skills.sh Script Contract
+## 5. resolve-skill.sh Script Contract
 
 ### Input
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `--approach` | Yes | `1` (plugins), `2` (global skills), or `3` (project skills) |
-| `--check-only` | No | If set, only run npx detection; do not install |
+| `--skill` | Yes | Canonical superpowers skill name to resolve |
 
-### Output (stdout, JSON when `--check-only`)
+### Output (stdout, JSON)
+
+```json
+{
+  "available": true,
+  "skill": "brainstorming",
+  "source": "workspace",
+  "install_type": "plugin",
+  "path": "/abs/path/.agents/plugins/vendor__pack/superpowers/skills/brainstorming/SKILL.md"
+}
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Skill found and resolved |
+| 1 | Skill not found in any supported discovery root |
+| 2 | Invalid arguments |
+
+## 6. ensure-skills.sh Script Contract
+
+### Input
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `--install` | No | `1` (plugins), `2` (global skills), or `3` (project skills) |
+| `--check-prereqs` | No | If set, only run npx detection; do not install |
+| `--print-guidance` | No | If set, print the canonical guidance block without side effects |
+
+### Output (stdout, JSON when `--check-prereqs`)
 
 ```json
 {
@@ -181,7 +210,7 @@ Displayed after successful auto-installation to show transitions.
 
 | Code | Meaning |
 |------|---------|
-| 0 | Installation completed successfully |
+| 0 | Check or installation completed successfully |
 | 1 | Installation failed (adg error) |
 | 2 | `npx` not available |
 | 3 | Invalid arguments |

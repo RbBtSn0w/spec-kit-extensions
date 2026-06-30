@@ -18,10 +18,11 @@ This guide provides runnable validation scenarios that prove the feature works e
 ### Setup
 
 ```bash
-# Ensure no superpowers skills are installed at project level
+# Ensure no superpowers skills are installed at project level or via project-local plugins
 rm -rf ./.agents/skills/test-driven-development
 rm -rf ./.agents/skills/verification-before-completion
 rm -rf ./.agents/skills/brainstorming
+rm -rf ./.agents/plugins
 # (remove all 11 skill directories if present)
 ```
 
@@ -55,6 +56,7 @@ rm -rf ./.agents/skills/brainstorming
 # Ensure no superpowers skills installed
 rm -rf ./.agents/skills/test-driven-development
 rm -rf ./.agents/skills/verification-before-completion
+rm -rf ./.agents/plugins
 # Verify npx is available
 command -v npx
 ```
@@ -69,7 +71,7 @@ command -v npx
 
 ### Expected Outcome
 
-1. `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y` is executed
+1. `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g` is executed
 2. After installation, an automatic re-check runs
 3. Post-Install Verification table shows `MISSING → ✅ READY` for all previously missing skills
 4. Updated verdict changes from `BLOCKED` to `READY`
@@ -85,7 +87,10 @@ command -v npx
 ```bash
 # Remove the skill that /speckit-superb-debug depends on
 rm -rf ./.agents/skills/systematic-debugging
+rm -rf ./.agents/plugins
 rm -rf ~/.agents/skills/systematic-debugging
+rm -rf ~/.agents/plugins/*/skills/systematic-debugging
+rm -rf ~/.agents/plugins/*/*/skills/systematic-debugging
 ```
 
 ### Run
@@ -102,7 +107,7 @@ rm -rf ~/.agents/skills/systematic-debugging
    ERROR: Optional superpowers skill `systematic-debugging` not found.
    
    💡 Install via adg (https://github.com/RbBtSn0w/adg):
-      Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y
+      Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g
       Global:       npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y
       Project:      npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
    
@@ -147,7 +152,7 @@ PATH=/usr/bin:/bin /speckit-superb-check
 ### Setup
 
 ```bash
-# Install only hard requirements manually
+# Install only hard requirements manually in direct skill roots
 mkdir -p ./.agents/skills/test-driven-development
 echo "# Test-Driven Development" > ./.agents/skills/test-driven-development/SKILL.md
 mkdir -p ./.agents/skills/verification-before-completion
@@ -180,6 +185,9 @@ bash superpowers-bridge/tests/test-install-guidance.sh
 
 # Run npx detection tests
 bash superpowers-bridge/tests/test-npx-detection.sh
+
+# Run discovery helper tests
+bash superpowers-bridge/tests/test-resolve-skill.sh
 
 # Run existing regression tests to ensure no breakage
 bash superpowers-bridge/tests/test-status-sync.sh

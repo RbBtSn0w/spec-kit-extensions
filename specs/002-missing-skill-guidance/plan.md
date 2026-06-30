@@ -14,7 +14,7 @@ Add installation guidance and interactive auto-installation to the superpowers-b
 
 **Primary Dependencies**: `adg` CLI (`https://github.com/RbBtSn0w/adg`) via `npx`; Spec Kit extension framework (schema_version 1.0)
 
-**Storage**: N/A — no persistent state; skill detection is filesystem-based (`./.agents/skills/` and `~/.agents/skills/`)
+**Storage**: N/A — no persistent state; skill detection is filesystem-based across direct skill roots and plugin-provided skill directories in workspace/global scope
 
 **Testing**: Bash test scripts (`superpowers-bridge/tests/test-*.sh`), PowerShell tests (`test-*.ps1`)
 
@@ -26,7 +26,7 @@ Add installation guidance and interactive auto-installation to the superpowers-b
 
 **Constraints**: No remote fetches during normal bridge operation; `adg` invocation only on explicit user confirmation; guidance must render as valid Markdown in terminals
 
-**Scale/Scope**: 10 existing command files to update with inline guidance; 1 check command to extend with Quick Setup section; 1 new helper script for npx detection + adg invocation
+**Scale/Scope**: 10 existing command files to update with inline guidance; 1 check command to extend with Quick Setup section; 2 helper scripts with separated responsibilities (discovery vs ensure/install)
 
 ## Constitution Check
 
@@ -72,7 +72,8 @@ superpowers-bridge/
 │   └── verify.md            # MODIFY — add inline guidance on missing verification-before-completion
 ├── scripts/
 │   └── bash/
-│       └── install-skills.sh    # NEW — npx detection, adg invocation, post-install re-check
+│       ├── resolve-skill.sh     # NEW — canonical skill discovery across direct and plugin roots
+│       ├── ensure-skills.sh     # NEW — npx detection, guidance output, adg invocation
 ├── tests/
 │   ├── test-install-guidance.sh # NEW — validate check output includes guidance for missing skills
 │   └── test-npx-detection.sh   # NEW — validate npx pre-detection and fallback behavior

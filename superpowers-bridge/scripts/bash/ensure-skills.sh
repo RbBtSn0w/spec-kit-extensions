@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# superpowers-bridge/scripts/bash/install-skills.sh
-# Core helper script to detect npx availability and invoke adg installation commands.
+# superpowers-bridge/scripts/bash/ensure-skills.sh
+# Canonical helper for prerequisite checks, guidance output, and explicit adg installation.
 
 set -eo pipefail
 
@@ -44,7 +44,7 @@ print_guidance() {
 
   cat <<EOF
 💡 Install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers ${skill_args[*]} -g -y
+   Recommended:  npx adg plugins add obra/superpowers ${skill_args[*]} -g
    Global:       npx adg skills add obra/superpowers ${skill_args[*]} --global -y
    Project:      npx adg skills add obra/superpowers ${skill_args[*]} -y
 
@@ -66,7 +66,7 @@ run_install() {
   case "$approach" in
     1)
       # Recommended: plugins add
-      cmd=("npx" "adg" "plugins" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-g" "-y")
+      cmd=("npx" "adg" "plugins" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-g")
       ;;
     2)
       # Alternative: skills add --global
@@ -95,25 +95,25 @@ run_install() {
 
 # Parse command line options
 APPROACH=""
-CHECK_ONLY=false
+CHECK_PREREQS=false
 PRINT_GUIDANCE=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --check-only)
-      CHECK_ONLY=true
+    --check-prereqs)
+      CHECK_PREREQS=true
       shift
       ;;
     --print-guidance)
       PRINT_GUIDANCE=true
       shift
       ;;
-    --approach)
+    --install)
       if [[ -n "$2" && "$2" =~ ^[1-3]$ ]]; then
         APPROACH="$2"
         shift 2
       else
-        echo "ERROR: --approach requires a value between 1 and 3." >&2
+        echo "ERROR: --install requires a value between 1 and 3." >&2
         exit 3
       fi
       ;;
@@ -124,13 +124,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ "$CHECK_ONLY" = true ]; then
+if [ "$CHECK_PREREQS" = true ]; then
   check_npx
 elif [ "$PRINT_GUIDANCE" = true ]; then
   print_guidance
 elif [ -n "$APPROACH" ]; then
   run_install "$APPROACH"
 else
-  echo "ERROR: Missing required option --approach, --check-only or --print-guidance." >&2
+  echo "ERROR: Missing required option --install, --check-prereqs or --print-guidance." >&2
   exit 3
 fi

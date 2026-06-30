@@ -30,7 +30,7 @@ adg plugins — manage agent plugins
 ## Decision 2: Three Installation Approaches
 
 **Decision**: Offer three approaches in priority order:
-1. **Recommended**: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y` — installs only the 11 required/optional superpowers skills as a plugin bundle, globally and non-interactively
+1. **Recommended**: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g` — installs only the 11 required/optional superpowers skills as a plugin bundle, globally, and matches the current plugin-install contract
 2. **Alternative (global)**: `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y` — installs only the 11 skills globally
 3. **Alternative (project)**: `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y` — installs only the 11 skills at project level
 
@@ -51,7 +51,7 @@ to:
 ERROR: [Required|Optional] superpowers skill `<skill-name>` not found.
 
 💡 Install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y
+   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g
    Global:       npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y
    Project:      npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
 
@@ -75,17 +75,27 @@ Run /speckit-superb-check for full diagnostics and interactive installation.
 - `npx --version` — heavier; spawns a process just to check availability
 - No pre-detection (try and catch) — user rejected this in clarification (Q4)
 
+**Current adg contract note**: Local verification on 2026-06-30 showed that `adg plugins add` accepts `-g` but rejects `-y`, while `adg skills add` still documents and recommends `-y`. The bridge therefore keeps `-y` only on the skills-based approaches.
+
 ## Decision 5: Post-Install Re-Check Implementation
 
-**Decision**: After `adg` installation completes, re-run the same discovery logic used by the `check` command (scan `./.agents/skills/` and `~/.agents/skills/` for each of the 11 skills) and display an updated Skill Status table.
+**Decision**: After `adg` installation completes, re-run the same canonical discovery logic used by the `check` command and bridge commands. That discovery is installation-mechanism agnostic and scans direct skill roots plus plugin-provided skill directories in workspace scope before global scope.
 
-**Rationale**: Reuses existing detection logic. Shows MISSING → READY transitions immediately, providing evidence-based confirmation (aligns with Constitution Principle I: Evidence-First Completion).
+**Rationale**: Reuses a single detection model everywhere. This avoids coupling runtime availability to `adg`-specific assumptions and correctly handles both `adg skills add` and `adg plugins add` outputs. It shows MISSING → READY transitions immediately, providing evidence-based confirmation (aligns with Constitution Principle I: Evidence-First Completion).
 
 **Alternatives considered**:
 - Trust `adg` exit code only — doesn't verify skills landed in the expected discovery roots
 - Full `/speckit-superb-check` re-invocation — heavier; the status table alone is sufficient
 
-## Decision 6: Three Failure Modes and Guidance Strategy
+## Decision 6: Split Discovery From Installation Orchestration
+
+**Decision**: Expose two helper scripts with distinct responsibilities:
+- `resolve-skill.sh` for read-only filesystem discovery of a named skill
+- `ensure-skills.sh` for `npx` prerequisite checks, guidance rendering, and explicit `adg` installation
+
+**Rationale**: A script named `install-skills` should not be the primary API for read-only operations. Separating discovery from installation reduces semantic ambiguity for downstream commands and keeps the bridge's runtime model independent from the chosen installer.
+
+## Decision 7: Three Failure Modes and Guidance Strategy
 
 **Decision**: Guidance insertion strategy varies by the command's failure mode:
 
