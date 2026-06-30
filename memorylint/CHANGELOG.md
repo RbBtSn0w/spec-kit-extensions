@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-06-30
 ### Added
 
 - Agent-context managed-block awareness: rule extraction now skips the
@@ -133,10 +134,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/RbBtSn0w/spec-kit-extensions/compare/memorylint-v1.5.1...HEAD
+[Unreleased]: https://github.com/RbBtSn0w/spec-kit-extensions/compare/memorylint-v1.8.0...HEAD
 [1.0.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/memorylint-v1.0.0
 [1.1.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/memorylint-v1.1.0
 [1.3.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/memorylint-v1.3.0
 [1.4.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/memorylint-v1.4.0
 [1.5.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/memorylint-v1.5.0
 [1.5.1]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/memorylint-v1.5.1
+[1.8.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/memorylint-v1.8.0

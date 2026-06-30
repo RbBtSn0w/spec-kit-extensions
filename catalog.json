@@ -49,8 +49,8 @@
       "id": "memorylint",
       "description": "Evidence-driven instruction drift checker: audits agent memory files for boundary, reality, conflict, and redundancy drift.",
       "author": "RbBtSn0w",
-      "version": "1.5.1",
-      "download_url": "https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/memorylint-v1.5.1/memorylint.zip",
+      "version": "1.8.0",
+      "download_url": "https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/memorylint-v1.8.0/memorylint.zip",
       "repository": "https://github.com/RbBtSn0w/spec-kit-extensions",
       "homepage": "https://github.com/RbBtSn0w/spec-kit-extensions/tree/main/memorylint",
       "documentation": "https://github.com/RbBtSn0w/spec-kit-extensions/blob/main/memorylint/README.md",
@@ -74,7 +74,7 @@
       "downloads": 0,
       "stars": 0,
       "created_at": "2026-04-09T00:00:00Z",
-      "updated_at": "2026-05-29T00:00:00Z"
+      "updated_at": "2026-06-30T00:00:00Z"
     }
   }
 }

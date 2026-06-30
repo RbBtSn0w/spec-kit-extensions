@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "memorylint"
   name: "MemoryLint"
-  version: 1.5.1
+  version: 1.8.0
   description: "Evidence-driven instruction drift checker: audits agent memory files for boundary, reality, conflict, and redundancy drift."
 
   author: "RbBtSn0w"
