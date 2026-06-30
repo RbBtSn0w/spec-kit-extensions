@@ -8,7 +8,7 @@ The current wedge is trustable AI-agent completion: when an agent says an implem
 
 | Extension | Version | Description |
 |---|---|---|
-| [Superpowers Bridge](./superpowers-bridge) | 1.6.1 | Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates for agent workflows. |
+| [Superpowers Bridge](./superpowers-bridge) | 1.7.0 | Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates for agent workflows. |
 | [MemoryLint](./memorylint) | 1.5.1 | Agent memory governance tool: Bidirectional audit and boundary management between AGENTS.md and the constitution. |
 
 ## Installation
@@ -38,7 +38,7 @@ For one-off installs without catalog-managed updates, install a single extension
 from a published release:
 
 ```bash
-specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.6.1/superpowers-bridge.zip
+specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.7.0/superpowers-bridge.zip
 specify extension add memorylint --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/memorylint-v1.5.1/memorylint.zip
 ```
 

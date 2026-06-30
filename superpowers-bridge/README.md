@@ -336,7 +336,7 @@ For one-off installs without catalog-managed updates, install directly from the
 published release asset:
 
 ```bash
-specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.6.1/superpowers-bridge.zip
+specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.7.0/superpowers-bridge.zip
 ```
 
 ### Install from GitHub Repository (Development)
