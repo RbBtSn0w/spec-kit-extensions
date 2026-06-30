@@ -127,7 +127,17 @@ def main() -> int:
             return 1
         current_hash = hashlib.sha256(target_path.read_bytes()).hexdigest()
         if source_hashes.get(relative) != current_hash:
-            print(format_apply_failure([f"Staleness check failed for {relative}"], []), end="")
+            print(
+                format_apply_failure(
+                    [
+                        f"Staleness check failed for {relative}: the file changed since the audit "
+                        "(an agent-context managed-block update is a common cause). Re-run "
+                        "/speckit-memorylint-audit to regenerate the report, then re-apply."
+                    ],
+                    [],
+                ),
+                end="",
+            )
             return 1
 
     originals = {relative: read_text(resolved_targets[relative]) for relative in target_paths}

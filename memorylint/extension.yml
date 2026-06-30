@@ -9,7 +9,7 @@ extension:
   author: "RbBtSn0w"
 
 requires:
-  speckit_version: ">=0.5.1"
+  speckit_version: ">=0.11.0"
 
 provides:
   commands:

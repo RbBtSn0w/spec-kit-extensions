@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Agent-context managed-block awareness: rule extraction now skips the
+  `<!-- SPECKIT START/END -->` block maintained by the opt-in `agent-context` extension across
+  all configured `context_files` (plural, with singular `context_file` fallback; defaults applied
+  when config is absent). Files containing the start marker are filtered defensively. Unterminated
+  blocks fail safe (skipped to EOF) with a warning. Prevents false findings and edit/churn loops
+  on machine-generated content.
+
+### Changed
+
+- `apply` staleness-check failure message now explicitly directs the user to re-run
+  `/speckit-memorylint-audit` (a common trigger is an `agent-context` block update between audit
+  and apply).
+- Declared Spec Kit compatibility raised to `>=0.12.0`.
+
 ## [1.5.1] - 2026-05-29
 ### Added
 

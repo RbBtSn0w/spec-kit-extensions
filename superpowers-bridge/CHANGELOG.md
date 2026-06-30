@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Mandatory `after_converge` hook running `speckit.superb.verify`, so work produced by upstream
+  `/speckit-converge` passes the evidence-first gate before it can be declared complete
+  (`implement → converge → implement → verify`).
+
+### Changed
+
+- `review` now delegates requirement-coverage-gap remediation to `/speckit-converge` instead of
+  recommending manual task additions, and focuses its own verdict on task quality, TDD-readiness,
+  and plan↔task consistency. README documents the `review` (plan-stage) vs `converge`
+  (delivery-stage) boundary.
+- Declared Spec Kit compatibility raised to `>=0.12.0`.
+
 ## [1.7.0] - 2026-06-30
 <!-- planned-bump: minor -->
 <!-- next-release-version: 1.7.0 -->

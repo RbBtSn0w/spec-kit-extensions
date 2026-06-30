@@ -261,8 +261,10 @@ If `C > 0` (gaps exist):
 
 Recommended action:
 1. Review each gap above
-2. Recommend adding missing tasks to tasks.md through the Spec Kit task flow or
-   explicit user-approved task edits
+2. Delegate requirement-coverage-gap remediation to `/speckit-converge`, which assesses the
+   code against spec/plan/tasks and append-only writes the remaining work as new, traceable
+   tasks. This command does NOT itself add coverage tasks — converge owns delivery-stage
+   coverage remediation; review owns plan-stage task-quality and TDD-readiness gating.
 3. Re-run coverage review OR proceed with explicit acknowledgment of scope reduction
 ```
 

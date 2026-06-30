@@ -11,6 +11,12 @@ The current wedge is trustable AI-agent completion: when an agent says an implem
 | [Superpowers Bridge](./superpowers-bridge) | 1.7.0 | Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates for agent workflows. |
 | [MemoryLint](./memorylint) | 1.5.1 | Agent memory governance tool: Bidirectional audit and boundary management between AGENTS.md and the constitution. |
 
+> **Compatibility**: These extensions target Spec Kit `>=0.12.0`. As of 0.12, the upstream
+> `agent-context` extension is a full opt-in — `specify init` no longer installs it, and nothing
+> in Spec Kit touches the agent context file unless you enable it. MemoryLint works with or
+> without `agent-context`: when it is enabled, MemoryLint skips the `<!-- SPECKIT START/END -->`
+> managed block it maintains in `AGENTS.md`/`CLAUDE.md`.
+
 ## Installation
 
 Register this repository's catalog once so Spec Kit can install and update

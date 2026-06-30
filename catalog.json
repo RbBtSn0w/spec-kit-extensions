@@ -14,7 +14,7 @@
       "changelog": "https://github.com/RbBtSn0w/spec-kit-extensions/blob/main/superpowers-bridge/CHANGELOG.md",
       "license": "MIT",
       "requires": {
-        "speckit_version": ">=0.4.3",
+        "speckit_version": ">=0.12.0",
         "tools": [
           {
             "name": "superpowers",
@@ -25,7 +25,7 @@
       },
       "provides": {
         "commands": 10,
-        "hooks": 5
+        "hooks": 6
       },
       "tags": [
         "methodology",
@@ -57,7 +57,7 @@
       "changelog": "https://github.com/RbBtSn0w/spec-kit-extensions/blob/main/memorylint/CHANGELOG.md",
       "license": "MIT",
       "requires": {
-        "speckit_version": ">=0.5.1"
+        "speckit_version": ">=0.12.0"
       },
       "provides": {
         "commands": 3,

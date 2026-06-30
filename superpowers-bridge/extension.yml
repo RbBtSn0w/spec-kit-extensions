@@ -11,7 +11,7 @@ extension:
   homepage: https://github.com/RbBtSn0w/spec-kit-extensions
 
 requires:
-  speckit_version: ">=0.4.3"
+  speckit_version: ">=0.11.0"
   tools:
     - name: superpowers
       required: false
@@ -138,6 +138,17 @@ hooks:
       Mandatory completion gate. Bridges an installed superpowers
       verification-before-completion skill and extends it with spec-kit
       spec-coverage checks. Prevents false completions.
+
+  after_converge:
+    command: speckit.superb.verify
+    optional: false
+    description: >
+      Mandatory evidence-first gate after convergence. speckit-converge appends
+      and implements remaining tasks but never runs tests, and its "converged"
+      verdict ignores test evidence; reusing the verify gate here ensures
+      convergence-driven work still proves completion with fresh evidence.
+      Blocking-on-missing-evidence is inherited from the same verify command used
+      by after_implement.
 
 tags:
   - quality-gates

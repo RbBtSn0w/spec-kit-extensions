@@ -175,6 +175,22 @@ The review-related surfaces intentionally have different roles:
 | `/speckit.superb.critique` | Local spec-aligned reviewer | Reviewing diff against `spec.md`, `plan.md`, `tasks.md`, and optionally producing a handoff package | Implementing fixes or receiving feedback |
 | `/speckit.superb.respond` | Feedback receiver / implementer response | Triage, accept/reject/clarify, and implement accepted review items | Producing the original review |
 
+#### `review` vs `converge`
+
+`/speckit.superb.review` and upstream `/speckit-converge` address the same coverage concern at
+two different stages and must not be confused:
+
+| Command | Stage | Owns | Does not own |
+|---|---|---|---|
+| `/speckit.superb.review` | Plan-stage prevention (after `tasks`, before `implement`) | Task quality, TDD-readiness, plan↔task consistency; flagging coverage gaps | Creating tasks for coverage gaps (delegates to converge) |
+| `/speckit-converge` | Delivery-stage remediation (after `implement`) | Assessing code vs spec/plan/tasks and append-only writing remaining work as tasks | Task-quality / TDD-readiness gating; running tests or proving completion |
+
+Because `converge` never runs tests and its `converged` verdict ignores evidence, the bridge
+registers a mandatory **`after_converge` hook** that runs `/speckit.superb.verify` — the same
+evidence-first gate used after `implement`. This closes the convergence loop so converge-driven
+work cannot be declared complete without fresh evidence (`implement → converge → implement →
+verify`).
+
 ## Superpowers Mapping Matrix
 
 This matrix is the compatibility map between Superpowers skills, the
