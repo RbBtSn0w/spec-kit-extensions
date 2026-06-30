@@ -224,6 +224,11 @@ class ManagedBlockConfig:
     managed_files: tuple[str, ...]
 
 
+_RE_YAML_KEY_VALUE = re.compile(r"^(\w+):\s*(.*)$")
+_RE_YAML_LIST_ITEM = re.compile(r"^\s*-\s*(.+?)\s*$")
+_RE_YAML_MARKER_SUBKEY = re.compile(r"^\s+(start|end):\s*(.+?)\s*$")
+
+
 def _parse_agent_context_config(text: str) -> dict[str, object]:
     """Parse the supported flat config shape when PyYAML is unavailable.
 
@@ -242,7 +247,7 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
         i += 1
         if not line.strip() or line.lstrip().startswith("#"):
             continue
-        m = re.match(r"^(\w+):\s*(.*)$", line)
+        m = _RE_YAML_KEY_VALUE.match(line)
         if not m:
             raise ValueError(f"Syntactically invalid line: {line}")
         key, value = m.group(1), m.group(2).strip()
@@ -274,7 +279,7 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
                     has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
                     if not has_leading_space and not next_line.lstrip().startswith("-"):
                         break
-                    item = re.match(r"^\s*-\s*(.+?)\s*$", next_line)
+                    item = _RE_YAML_LIST_ITEM.match(next_line)
                     if not item:
                         raise ValueError(f"Invalid block list item or indentation: {next_line}")
                     items.append(item.group(1).strip().strip("'\""))
@@ -292,7 +297,7 @@ def _parse_agent_context_config(text: str) -> dict[str, object]:
                 has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
                 if not has_leading_space:
                     break
-                sub = re.match(r"^\s+(start|end):\s*(.+?)\s*$", next_line)
+                sub = _RE_YAML_MARKER_SUBKEY.match(next_line)
                 if not sub:
                     raise ValueError(f"Invalid context_markers subkey or indentation: {next_line}")
                 markers[sub.group(1)] = sub.group(2).strip().strip("'\"")
