@@ -4,6 +4,9 @@ description: >
   receiving-code-review skill. Enforces technical verification before
   implementing review feedback — no performative agreement, no blind fixes.
   Pairs with speckit.superb.critique as the implementer counterpart.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Respond — Receiving Code Review Feedback
@@ -35,11 +38,8 @@ Look for `receiving-code-review/SKILL.md` in this exact order:
 If the workspace and global copies both exist, use the workspace copy.
 
 If no readable file is found, **STOP**:
-
-```text
-ERROR: Optional superpowers skill `receiving-code-review` not found.
-Run /speckit.superb.check for diagnostics.
-```
+1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
+2. Halt execution.
 
 Report the source you resolved before continuing:
 

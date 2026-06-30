@@ -280,6 +280,23 @@ treated as stage-specific middleware rather than a second workflow engine:
   back to the active bridge command; they do not create a new owner for the
   feature lifecycle.
 
+### Missing Skill Diagnostics & Quick Setup
+
+If any Superpowers skills are missing on the host environment, the bridge provides an interactive diagnostics and installation workflow:
+
+1. **Diagnostics**:
+   Run `/speckit.superb.check` to scan workspace and global roots. The output contains a **Guidance** column specifying `Install via adg` for missing skills.
+2. **Auto-Installation**:
+   If the check command detects `npx` in the environment, it appends a `## Quick Setup` section presenting three installation approaches:
+   - **Approach 1 (Recommended)**: Installs all 11 skills under `adg plugins add obra/superpowers` with `-g` using `--skill` filters to avoid bloat.
+   - **Approach 2 (Global)**: Installs all 11 skills globally using `adg skills add obra/superpowers --global`.
+   - **Approach 3 (Project)**: Installs all 11 skills project-locally using `adg skills add obra/superpowers`.
+   The agent will prompt the user to choose an installation option (1-3) or skip, executing the helper script `install-skills.sh` accordingly.
+3. **Manual Fallback**:
+   If `npx` is not available, the check report lists manual cloning and setup steps pointing directly to the [adg repository (https://github.com/RbBtSn0w/adg)](https://github.com/RbBtSn0w/adg).
+4. **Command Inline Failures**:
+   If any bridge-native command (like `/speckit.superb.controller` or `/speckit.superb.verify`) is invoked when a required skill is missing, it will halt execution immediately, print the inline installation commands and the repository link, and redirect the user to `/speckit.superb.check` for full interactive setup.
+
 ## Design Notes
 
 The V2 redesign rationale is documented in

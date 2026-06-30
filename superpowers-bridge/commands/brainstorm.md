@@ -3,6 +3,9 @@ description: >
   Optional after-specify refinement gate. Bridges an installed
   obra/superpowers brainstorming skill into the active Spec Kit spec.md without
   creating a second design document or replacing speckit.specify.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Brainstorm — Spec Refinement Gate
@@ -39,11 +42,8 @@ Look for `brainstorming/SKILL.md` in this exact order:
 If the workspace and global copies both exist, use the workspace copy.
 
 If no readable file is found, **STOP**:
-
-```text
-ERROR: Optional superpowers skill `brainstorming` not found.
-Run /speckit.superb.check for diagnostics.
-```
+1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
+2. Halt execution.
 
 Report the source you resolved before continuing:
 

@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: superb
   name: Superpowers Bridge
-  version: 1.6.1
+  version: 1.7.0
   description: "Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates for agent workflows."
   author: RbBtSn0w
   repository: https://github.com/RbBtSn0w/spec-kit-extensions

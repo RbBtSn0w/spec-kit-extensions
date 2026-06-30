@@ -4,6 +4,9 @@ description: >
   systematic-debugging skill. Enforces root-cause investigation before any fix
   attempt. Use when TDD hits repeated failures or any unexpected behavior
   surfaces during implementation.
+scripts:
+  sh: scripts/bash/sync-spec-status.sh
+  ps: scripts/powershell/sync-spec-status.ps1
 ---
 
 # Systematic Debugging — Root Cause Before Fixes
@@ -24,11 +27,8 @@ Look for `systematic-debugging/SKILL.md` in this exact order:
 If the workspace and global copies both exist, use the workspace copy.
 
 If no readable file is found, **STOP**:
-
-```text
-ERROR: Optional superpowers skill `systematic-debugging` not found.
-Run /speckit.superb.check for diagnostics.
-```
+1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
+2. Halt execution.
 
 Report the source you resolved before continuing:
 

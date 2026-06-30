@@ -43,11 +43,8 @@ Look for `finishing-a-development-branch/SKILL.md` in this exact order:
 If the workspace and global copies both exist, use the workspace copy.
 
 If no readable file is found, **STOP**:
-
-```text
-ERROR: Optional superpowers skill `finishing-a-development-branch` not found.
-Run /speckit.superb.check for diagnostics.
-```
+1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
+2. Halt execution.
 
 Report the source you resolved before continuing:
 

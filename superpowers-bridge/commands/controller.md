@@ -22,12 +22,10 @@ scripts:
    - `./.agents/skills/test-driven-development/SKILL.md`
    - `~/.agents/skills/test-driven-development/SKILL.md`
    If the workspace and global copies both exist, use the workspace copy.
-   If no readable file is found, **STOP**:
-   ```text
-   ERROR: Required superpowers skill `test-driven-development` not found.
-   Run /speckit.superb.check for diagnostics.
-   ```
-   Report the source resolved before continuing.
+    If no readable file is found, **STOP**:
+    1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
+    2. Halt execution with exit status 2.
+    Report the source resolved before continuing.
 
 2. **Check for Optional Execution Skills**:
    - Check for `executing-plans/SKILL.md` in the same order (workspace then global). This skill provides native Inline Execution discipline when running in Single-Agent Mode.

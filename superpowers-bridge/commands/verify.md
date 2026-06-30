@@ -33,11 +33,8 @@ Look for `verification-before-completion/SKILL.md` in this exact order:
 If the workspace and global copies both exist, use the workspace copy.
 
 If no readable file is found, **STOP**:
-
-```text
-ERROR: Required superpowers skill `verification-before-completion` not found.
-Run /speckit.superb.check for diagnostics.
-```
+1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
+2. Halt execution with exit status 2.
 
 Report the source you resolved before continuing:
 
