@@ -12,10 +12,18 @@ echo "=== Running User Story 3: Auto-Installation Flow & Interface Tests ==="
 
 # 1. Test check-prereqs interface execution
 echo "Testing check-prereqs execution..."
-output=$(bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --check-prereqs)
+set +e
+output=$(bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --check-prereqs 2>&1)
+exit_code=$?
+set -e
 echo "Output: $output"
 if ! echo "$output" | grep -q '"npx_available"'; then
   echo "FAIL: ensure-skills.sh --check-prereqs did not output npx json"
+  exit 1
+fi
+
+if [ "$exit_code" -ne 0 ] && [ "$exit_code" -ne 2 ]; then
+  echo "FAIL: ensure-skills.sh --check-prereqs returned unexpected exit code $exit_code"
   exit 1
 fi
 

@@ -18,12 +18,9 @@ echo "=== Running User Story 2: npx Pre-detection & Inline Guidance Tests ==="
 # 1. Test ensure-skills.sh with simulated missing npx on PATH
 echo "Testing ensure-skills.sh npx detection fallback..."
 (
-  # Override PATH to hide npx
-  export PATH="/usr/bin:/bin"
-  
   # Allow the command to fail/exit with 2 under set -e
   set +e
-  output=$(bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --check-prereqs 2>&1)
+  output=$(PATH="" /bin/bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --check-prereqs 2>&1)
   exit_status=$?
   set -e
   

@@ -12,6 +12,11 @@ SANDBOX_DIR="$ROOT_DIR/tests/sandbox_e2e"
 
 echo "=== Running E2E Installation Test ==="
 
+if ! command -v npx &>/dev/null; then
+  echo "Skipping E2E installation test: npx is not available."
+  exit 0
+fi
+
 # 1. Setup clean sandboxed HOME environment
 echo "Setting up sandbox environment..."
 rm -rf "$SANDBOX_DIR"
