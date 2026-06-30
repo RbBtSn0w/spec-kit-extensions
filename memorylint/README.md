@@ -96,6 +96,26 @@ MemoryLint now applies one canonical ownership matrix during audit:
 This matrix is what drives `recommended_destination`, redundancy cleanup, and
 constitution handoff generation.
 
+## Agent-Context Coexistence
+
+The upstream `agent-context` extension (a full opt-in as of Spec Kit 0.12) maintains a
+machine-generated managed block in agent context files, delimited by
+`<!-- SPECKIT START -->` / `<!-- SPECKIT END -->`. MemoryLint treats that block as
+off-limits:
+
+- Rule extraction **skips** every managed block across all configured `context_files`
+  (resolved from `.specify/extensions/agent-context/agent-context-config.yml`, reading plural
+  `context_files` then singular `context_file`; defaults to the markers above). Files are also
+  filtered defensively if they physically contain the start marker.
+- No finding or edit ever targets a managed-block line, so agent-context updates and MemoryLint
+  fixes do not fight over the same lines.
+- An unterminated block fails safe (skipped to end of file) with a warning.
+- `apply` already refuses to write when a target file changed since the audit (whole-file
+  staleness check) — common when agent-context rewrites its block between audit and apply —
+  and directs you to re-run the audit.
+
+MemoryLint works identically whether or not `agent-context` is enabled.
+
 ## Apply Modes
 
 | Mode | Behaviour |

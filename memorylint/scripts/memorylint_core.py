@@ -9,6 +9,7 @@ import json
 import re
 import shlex
 import subprocess
+import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -35,6 +36,13 @@ CANONICAL_OWNER_MATRIX = {
     "tooling": "AGENTS.md",
     "personal_preference": "AGENTS.md",
 }
+
+# Agent-context extension (opt-in post-0.12) self-owns the managed "Spec Kit" section of agent
+# context files. MemoryLint must never treat that machine-generated block as human rules.
+AGENT_CONTEXT_CONFIG = ".specify/extensions/agent-context/agent-context-config.yml"
+# Authoritative defaults per the agent-context `speckit.agent-context.update` command docs.
+DEFAULT_BLOCK_START = "<!-- SPECKIT START -->"
+DEFAULT_BLOCK_END = "<!-- SPECKIT END -->"
 
 
 @dataclass(frozen=True)
@@ -209,10 +217,195 @@ def discover_sources(workspace_root: Path) -> list[Path]:
     return sorted(discovered)
 
 
-def markdown_rules(path: Path, workspace_root: Path, next_rule_id: int) -> tuple[list[Rule], int]:
+@dataclass(frozen=True)
+class ManagedBlockConfig:
+    start_marker: str
+    end_marker: str
+    managed_files: tuple[str, ...]
+
+
+_RE_YAML_KEY_VALUE = re.compile(r"^(\w+):\s*(.*)$")
+_RE_YAML_LIST_ITEM = re.compile(r"^\s*-\s*(.+?)\s*$")
+_RE_YAML_MARKER_SUBKEY = re.compile(r"^\s+(start|end):\s*(.+?)\s*$")
+
+
+def _parse_agent_context_config(text: str) -> dict[str, object]:
+    """Parse the supported flat config shape when PyYAML is unavailable.
+
+    Recognizes ``context_file`` (scalar), ``context_files`` (inline or block list), and the
+    nested ``context_markers.start/.end`` keys. Unknown structure is ignored, while malformed
+    flow collections and quoted scalars fail safe instead of being partially accepted.
+    """
+    data: dict[str, object] = {}
+    markers: dict[str, str] = {}
+    lines = text.splitlines()
+    i = 0
+    n = len(lines)
+    while i < n:
+        raw = lines[i]
+        line = raw.rstrip()
+        i += 1
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        m = _RE_YAML_KEY_VALUE.match(line)
+        if not m:
+            raise ValueError(f"Syntactically invalid line: {line}")
+        key, value = m.group(1), m.group(2).strip()
+        if value.startswith("[") and not value.endswith("]"):
+            raise ValueError(f"Malformed YAML flow sequence for {key}")
+        if value.startswith("{") and not value.endswith("}"):
+            raise ValueError(f"Malformed YAML flow mapping for {key}")
+        if value.startswith(("'", '"')) and not value.endswith(value[0]):
+            raise ValueError(f"Malformed YAML quoted scalar for {key}")
+        if key not in {"context_file", "context_files", "context_markers"}:
+            # Skip nested block/list for unknown keys to avoid parsing errors on subsequent lines
+            while i < n:
+                next_raw = lines[i]
+                next_line = next_raw.rstrip()
+                if not next_line.strip() or next_line.lstrip().startswith("#"):
+                    i += 1
+                    continue
+                has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
+                is_list_item = next_line.lstrip().startswith("-")
+                if not has_leading_space and not is_list_item:
+                    break
+                i += 1
+            continue
+
+        if key == "context_file":
+            if not value:
+                raise ValueError("context_file cannot be empty")
+            data["context_file"] = value.strip("'\"")
+        elif key == "context_files":
+            items: list[str] = []
+            if value.startswith("[") and value.endswith("]"):
+                items = [v.strip().strip("'\"") for v in value[1:-1].split(",") if v.strip()]
+            else:
+                if value:
+                    raise ValueError(f"Unsupported format for context_files: {value}")
+                while i < n:
+                    next_raw = lines[i]
+                    next_line = next_raw.rstrip()
+                    if not next_line.strip() or next_line.lstrip().startswith("#"):
+                        i += 1
+                        continue
+                    has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
+                    if not has_leading_space and not next_line.lstrip().startswith("-"):
+                        break
+                    item = _RE_YAML_LIST_ITEM.match(next_line)
+                    if not item:
+                        raise ValueError(f"Invalid block list item or indentation: {next_line}")
+                    items.append(item.group(1).strip().strip("'\""))
+                    i += 1
+            data["context_files"] = [v for v in items if v]
+        elif key == "context_markers":
+            if value:
+                raise ValueError(f"Unsupported inline context_markers value: {value}")
+            while i < n:
+                next_raw = lines[i]
+                next_line = next_raw.rstrip()
+                if not next_line.strip() or next_line.lstrip().startswith("#"):
+                    i += 1
+                    continue
+                has_leading_space = len(next_raw) - len(next_raw.lstrip(' ')) > 0
+                if not has_leading_space:
+                    break
+                sub = _RE_YAML_MARKER_SUBKEY.match(next_line)
+                if not sub:
+                    raise ValueError(f"Invalid context_markers subkey or indentation: {next_line}")
+                markers[sub.group(1)] = sub.group(2).strip().strip("'\"")
+                i += 1
+    if markers:
+        data["context_markers"] = markers
+    return data
+
+
+def _load_agent_context_config(text: str) -> dict[str, object]:
+    """Load YAML safely, retaining a dependency-free parser for extension runtimes."""
+    try:
+        import yaml
+    except ModuleNotFoundError:
+        return _parse_agent_context_config(text)
+
+    loaded = yaml.safe_load(text)
+    if loaded is None:
+        return {}
+    if not isinstance(loaded, dict):
+        raise ValueError("agent-context config must be a YAML mapping")
+    return loaded
+
+
+def resolve_managed_block_config(workspace_root: Path) -> ManagedBlockConfig:
+    """Resolve markers + managed file list from the agent-context extension's self-owned config.
+
+    Never raises: a missing/unreadable/invalid config yields the authoritative default markers
+    with an empty managed-file set. Reads plural ``context_files`` first, then singular
+    ``context_file`` (both are current upstream-supported keys).
+    """
+    start, end = DEFAULT_BLOCK_START, DEFAULT_BLOCK_END
+    managed: list[str] = []
+    config_path = workspace_root / AGENT_CONTEXT_CONFIG
+    try:
+        if config_path.is_file():
+            data = _load_agent_context_config(config_path.read_text(encoding="utf-8"))
+            markers = data.get("context_markers")
+            if isinstance(markers, dict):
+                start = str(markers.get("start") or start)
+                end = str(markers.get("end") or end)
+            files = data.get("context_files")
+            if isinstance(files, list) and files:
+                managed = [
+                    str(f).replace("\\", "/")[2:] if str(f).replace("\\", "/").startswith("./") else str(f).replace("\\", "/")
+                    for f in files
+                ]
+            elif data.get("context_file"):
+                f = str(data["context_file"]).replace("\\", "/")
+                managed = [f[2:] if f.startswith("./") else f]
+    except Exception:
+        return ManagedBlockConfig(DEFAULT_BLOCK_START, DEFAULT_BLOCK_END, ())
+    return ManagedBlockConfig(start, end, tuple(managed))
+
+
+def managed_block_ranges(text: str, config: ManagedBlockConfig) -> list[tuple[int, int, bool]]:
+    """Return inclusive 1-based (start_line, end_line, terminated) spans for each managed block.
+
+    An unterminated start marker yields a single span to EOF with ``terminated=False``.
+    """
+    ranges: list[tuple[int, int, bool]] = []
+    lines = text.splitlines()
+    n = len(lines)
+    i = 0
+    while i < n:
+        if config.start_marker in lines[i]:
+            start_line = i + 1
+            j = i + 1
+            while j < n and config.end_marker not in lines[j]:
+                j += 1
+            if j < n:
+                ranges.append((start_line, j + 1, True))
+                i = j + 1
+            else:
+                ranges.append((start_line, n, False))
+                break
+        else:
+            i += 1
+    return ranges
+
+
+def markdown_rules(
+    path: Path,
+    workspace_root: Path,
+    next_rule_id: int,
+    exclude_ranges: list[tuple[int, int, bool]] | None = None,
+) -> tuple[list[Rule], int]:
+    excluded: set[int] = set()
+    for start_line, end_line, _terminated in exclude_ranges or []:
+        excluded.update(range(start_line, end_line + 1))
     rules: list[Rule] = []
     current_heading = ""
     for line_number, line in enumerate(read_text(path).splitlines(), start=1):
+        if line_number in excluded:
+            continue
         heading_match = re.match(r"^\s{0,3}#{1,6}\s+(.+?)\s*$", line)
         if heading_match:
             current_heading = heading_match.group(1).strip()
@@ -363,10 +556,27 @@ def manifest_rules(path: Path, workspace_root: Path, next_rule_id: int) -> tuple
 def extract_rules(workspace_root: Path, sources: list[Path]) -> list[Rule]:
     rules: list[Rule] = []
     next_rule_id = 1
+    block_config = resolve_managed_block_config(workspace_root)
+    managed_set = {f.replace("\\", "/") for f in block_config.managed_files}
     for path in sources:
         kind = path_kind(path)
         if path.suffix in MARKDOWN_EXTENSIONS or kind in {"agents", "constitution", "claude", "cursor", "readme"}:
-            extracted, next_rule_id = markdown_rules(path, workspace_root, next_rule_id)
+            text = read_text(path)
+            rel = relative_path(path, workspace_root)
+            # A file is block-filtered if it is declared in the agent-context config OR it
+            # physically contains the start marker (defensive against config drift).
+            exclude: list[tuple[int, int, bool]] | None = None
+            if rel in managed_set or block_config.start_marker in text:
+                exclude = managed_block_ranges(text, block_config)
+                for start_line, _end_line, terminated in exclude:
+                    if not terminated:
+                        print(
+                            f"memorylint: warning: unterminated agent-context managed block in "
+                            f"{rel} (start marker at line {start_line} has no matching end marker); "
+                            "skipping to end of file.",
+                            file=sys.stderr,
+                        )
+            extracted, next_rule_id = markdown_rules(path, workspace_root, next_rule_id, exclude)
             rules.extend(extracted)
             continue
         if kind == "manifest":

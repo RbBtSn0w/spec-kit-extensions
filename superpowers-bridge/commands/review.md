@@ -261,8 +261,10 @@ If `C > 0` (gaps exist):
 
 Recommended action:
 1. Review each gap above
-2. Recommend adding missing tasks to tasks.md through the Spec Kit task flow or
-   explicit user-approved task edits
+2. Delegate requirement-coverage-gap remediation to `/speckit-converge`, which assesses the
+   code against spec/plan/tasks and append-only writes the remaining work as new, traceable
+   tasks. This command does NOT itself add coverage tasks — converge owns delivery-stage
+   coverage remediation; review owns plan-stage task-quality and TDD-readiness gating.
 3. Re-run coverage review OR proceed with explicit acknowledgment of scope reduction
 ```
 
@@ -294,7 +296,7 @@ remediation loop.
 **Gate:** after_tasks.review
 **Outcome:** PASS | BLOCKED | INCONCLUSIVE
 **Reason:** none | coverage_gap | task_quality_issue | spec_ambiguity | plan_task_mismatch | missing_artifact | abandoned_feature
-**Next command:** `/speckit.implement` | `/speckit.clarify` | `/speckit.plan` | `/speckit.tasks` | none
+**Next command:** `/speckit.implement` | `/speckit.clarify` | `/speckit.plan` | `/speckit.tasks` | `/speckit-converge` | none
 **Requires user approval:** true | false
 
 **Why:** [One sentence explaining why the selected command owns the next step.]
@@ -308,7 +310,7 @@ Use this routing table:
 | Feature status is Abandoned | BLOCKED | abandoned_feature | none | true | Abandoned features cannot route to implementation. |
 | `spec.md` requirement is ambiguous or contradictory | BLOCKED | spec_ambiguity | `/speckit.clarify` | true | The spec owns requirement meaning; tasks should not guess. |
 | `plan.md` and `tasks.md` disagree about architecture, files, contracts, or sequencing | BLOCKED | plan_task_mismatch | `/speckit.plan` | true | The technical plan owns the implementation approach before tasks are regenerated. |
-| One or more requirements have `✗ Gap` or `~ Partial` task coverage (Normal Mode) | BLOCKED | coverage_gap | `/speckit.tasks` | false | Task generation or explicit task refinement owns missing requirement coverage. |
+| One or more requirements have `✗ Gap` or `~ Partial` task coverage (Normal Mode) | BLOCKED | coverage_gap | `/speckit-converge` | false | Converge owns delivery-stage requirement-gap remediation and appends traceable remaining-work tasks. |
 | One or more requirements have `✗ Gap` or `~ Partial` task coverage (Non-blocking Mode with explicit gap acknowledgment) | PASS | none | `/speckit.implement` | false | The user explicitly acknowledged gaps to bypass task regeneration. |
 | Coverage is complete but tasks are too broad, vague, missing file ownership, missing RED/GREEN targets, missing test/commit steps, or TDD readiness is PARTIAL/NOT READY | BLOCKED | task_quality_issue | `/speckit.tasks` | false | The task artifact must be shaped before strict TDD can execute it. |
 | Required artifacts are missing or cannot be resolved | INCONCLUSIVE | missing_artifact | none | true | The gate lacks enough evidence to route safely. |
