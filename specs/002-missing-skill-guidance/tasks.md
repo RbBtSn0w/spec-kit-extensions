@@ -39,7 +39,7 @@
 
 **Goal**: Extend the diagnostic `check` command to display `adg` installation guidance for each missing skill.
 
-**Independent Test**: Run `/speckit-superb-check` with at least one missing skill and verify that the output displays the skill as MISSING and includes `adg` installation commands with the repo link.
+**Independent Test**: Run `/speckit.superb.check` with at least one missing skill and verify that the output displays the skill as MISSING and includes `adg` installation commands with the repo link.
 
 ### Tests for User Story 1 (MANDATORY)
 
@@ -60,7 +60,7 @@
 
 **Goal**: Inject inline error messages and install prompts with npx pre-detection into all bridge commands and hooks.
 
-**Independent Test**: Hide a skill (e.g. `systematic-debugging`), run `/speckit-superb-debug`, and confirm the error outputs the correct `adg` links.
+**Independent Test**: Hide a skill (e.g. `systematic-debugging`), run `/speckit.superb.debug`, and confirm the error outputs the correct `adg` links.
 
 ### Tests for User Story 2 (MANDATORY)
 
@@ -86,7 +86,7 @@
 
 **Goal**: Provide a "Quick Setup" aggregated section in the check report with interactive approach prompts and automatic re-check on success.
 
-**Independent Test**: Run `/speckit-superb-check` in a clean environment, select installation option 1, and verify that all 11 skills are successfully installed and verified on screen.
+**Independent Test**: Run `/speckit.superb.check` in a clean environment, select installation option 1, and verify that all 11 skills are successfully installed and verified on screen.
 
 ### Tests for User Story 3 (MANDATORY)
 
@@ -155,7 +155,7 @@ Task: "T007 Implement a test assertion verifying repository URL in test-install-
 
 1. Complete Phase 1 & 2.
 2. Complete Phase 3 (US1 - Diagnostics check guidance).
-3. Validate `/speckit-superb-check` produces the new `Guidance` column and points to `https://github.com/RbBtSn0w/adg`.
+3. Validate `/speckit.superb.check` produces the new `Guidance` column and points to `https://github.com/RbBtSn0w/adg`.
 4. Stop and confirm manual path works before introducing interactive execution logic.
 
 ### Incremental Delivery

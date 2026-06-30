@@ -13,7 +13,7 @@ This guide provides runnable validation scenarios that prove the feature works e
 
 ## Scenario 1: Check Command Shows Guidance for Missing Skills
 
-**Purpose**: Verify that `/speckit-superb-check` includes installation guidance when skills are missing.
+**Purpose**: Verify that `/speckit.superb.check` includes installation guidance when skills are missing.
 
 ### Setup
 
@@ -30,7 +30,7 @@ rm -rf ./.agents/plugins
 
 ```bash
 # Execute the check command via your coding agent
-/speckit-superb-check
+/speckit.superb.check
 ```
 
 ### Expected Outcome
@@ -65,7 +65,7 @@ command -v npx
 
 ```bash
 # Execute check, then select approach 1 (recommended: plugins)
-/speckit-superb-check
+/speckit.superb.check
 # When prompted: select "1" (plugins approach)
 ```
 
@@ -85,7 +85,7 @@ command -v npx
 ### Setup
 
 ```bash
-# Remove the skill that /speckit-superb-debug depends on
+# Remove the skill that /speckit.superb.debug depends on
 rm -rf ./.agents/skills/systematic-debugging
 rm -rf ./.agents/plugins
 rm -rf ~/.agents/skills/systematic-debugging
@@ -97,7 +97,7 @@ rm -rf ~/.agents/plugins/*/*/skills/systematic-debugging
 
 ```bash
 # Invoke the debug command
-/speckit-superb-debug
+/speckit.superb.debug
 ```
 
 ### Expected Outcome
@@ -111,7 +111,7 @@ rm -rf ~/.agents/plugins/*/*/skills/systematic-debugging
       Global:       npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y
       Project:      npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
    
-   Run /speckit-superb-check for full diagnostics and interactive installation.
+   Run /speckit.superb.check for full diagnostics and interactive installation.
    ```
 2. If `npx` is available, the command asks:
    `Would you like to install now? (Select approach 1-3, or skip)`
@@ -131,7 +131,7 @@ rm -rf ~/.agents/plugins/*/*/skills/systematic-debugging
 ```bash
 # Temporarily hide npx (simulate unavailability)
 # Option A: test in a clean PATH environment
-PATH=/usr/bin:/bin /speckit-superb-check
+PATH=/usr/bin:/bin /speckit.superb.check
 ```
 
 ### Expected Outcome
@@ -162,7 +162,7 @@ echo "# Verification" > ./.agents/skills/verification-before-completion/SKILL.md
 ### Run
 
 ```bash
-/speckit-superb-check
+/speckit.superb.check
 ```
 
 ### Expected Outcome

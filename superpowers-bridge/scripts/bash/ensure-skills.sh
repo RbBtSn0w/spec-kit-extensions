@@ -48,7 +48,7 @@ print_guidance() {
    Global:       npx adg skills add obra/superpowers ${skill_args[*]} --global -y
    Project:      npx adg skills add obra/superpowers ${skill_args[*]} -y
 
-Run /speckit-superb-check for full diagnostics and interactive installation.
+Run /speckit.superb.check for full diagnostics and interactive installation.
 EOF
 }
 

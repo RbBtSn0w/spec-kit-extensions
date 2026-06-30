@@ -6,6 +6,7 @@
 set -euo pipefail
 
 SKILL_NAME=""
+WORKSPACE_ROOT=""
 
 json_escape() {
   local value="$1"
@@ -65,9 +66,25 @@ check_plugin_root() {
   return 1
 }
 
+find_workspace_root() {
+  local dir="$PWD"
+
+  while [[ "$dir" != "/" ]]; do
+    if [[ -d "$dir/.specify" || -d "$dir/.git" || -d "$dir/.agents" ]]; then
+      printf '%s\n' "$dir"
+      return 0
+    fi
+    dir=$(dirname "$dir")
+  done
+
+  printf '%s\n' "$PWD"
+}
+
 resolve_skill() {
-  check_direct_root "workspace" "$PWD" && return 0
-  check_plugin_root "workspace" "$PWD" && return 0
+  WORKSPACE_ROOT=$(find_workspace_root)
+
+  check_direct_root "workspace" "$WORKSPACE_ROOT" && return 0
+  check_plugin_root "workspace" "$WORKSPACE_ROOT" && return 0
   check_direct_root "global" "$HOME" && return 0
   check_plugin_root "global" "$HOME" && return 0
 

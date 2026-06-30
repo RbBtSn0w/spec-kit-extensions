@@ -55,6 +55,25 @@ if ! echo "$plugin_output" | grep -q '"install_type":"plugin"'; then
   exit 1
 fi
 
+rm -rf "$SANDBOX_DIR/home/.agents/plugins"
+mkdir -p "$SANDBOX_DIR/workspace/.specify" "$SANDBOX_DIR/workspace/.agents/skills/brainstorming" "$SANDBOX_DIR/workspace/nested/path"
+printf '# Nested Workspace Brainstorming\n' > "$SANDBOX_DIR/workspace/.agents/skills/brainstorming/SKILL.md"
+
+nested_output="$(
+  cd "$SANDBOX_DIR/workspace/nested/path" &&
+  bash "$RESOLVER" --skill brainstorming
+)"
+
+if ! echo "$nested_output" | grep -q '"source":"workspace"'; then
+  echo "FAIL: nested execution should still resolve workspace skill"
+  exit 1
+fi
+
+if ! echo "$nested_output" | grep -q '"install_type":"skill-root"'; then
+  echo "FAIL: nested execution should preserve workspace skill-root resolution"
+  exit 1
+fi
+
 set +e
 missing_output="$(
   cd "$SANDBOX_DIR/workspace" &&

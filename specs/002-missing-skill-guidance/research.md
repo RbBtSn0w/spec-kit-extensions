@@ -55,7 +55,7 @@ ERROR: [Required|Optional] superpowers skill `<skill-name>` not found.
    Global:       npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y
    Project:      npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
 
-Run /speckit-superb-check for full diagnostics and interactive installation.
+Run /speckit.superb.check for full diagnostics and interactive installation.
 ```
 
 **Rationale**: Preserves backward compatibility (existing error line unchanged), adds actionable guidance below. All 10 command files share the same pattern, so the extension is mechanical and consistent.
@@ -85,7 +85,7 @@ Run /speckit-superb-check for full diagnostics and interactive installation.
 
 **Alternatives considered**:
 - Trust `adg` exit code only — doesn't verify skills landed in the expected discovery roots
-- Full `/speckit-superb-check` re-invocation — heavier; the status table alone is sufficient
+- Full `/speckit.superb.check` re-invocation — heavier; the status table alone is sufficient
 
 ## Decision 6: Split Discovery From Installation Orchestration
 
