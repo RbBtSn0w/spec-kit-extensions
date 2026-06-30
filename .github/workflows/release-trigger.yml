@@ -518,9 +518,10 @@ jobs:
           EXTENSION_ID: ${{ github.event.inputs.extension_id }}
           VERSION: ${{ env.version }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_NOTES: ${{ steps.notes.outputs.body }}
         run: |
           gh release create "$tag" \
             "${EXTENSION_ID}.zip" \
             --title "$EXTENSION_ID v$VERSION" \
-            --notes "${{ steps.notes.outputs.body }}" \
+            --notes "$RELEASE_NOTES" \
             --verify-tag
