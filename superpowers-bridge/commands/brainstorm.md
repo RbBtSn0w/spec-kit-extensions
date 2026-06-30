@@ -41,9 +41,18 @@ Look for `brainstorming/SKILL.md` in this exact order:
 
 If the workspace and global copies both exist, use the workspace copy.
 
-If no readable file is found, **STOP**:
-1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
-2. Halt execution.
+If no readable file is found, enter the **inline install recovery flow**:
+1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --check-only`.
+2. If `npx` is available, show the missing-skill error plus the generated output from
+   `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance`, then ask:
+   `Would you like to install now? (Select approach 1-3, or skip)`
+3. Only if the user explicitly selects `1`, `2`, or `3`, run:
+   `bash "$(dirname "{SCRIPT}")/install-skills.sh" --approach <selection>`
+4. After a successful install, re-run the skill resolution for
+   `brainstorming/SKILL.md` once before continuing.
+5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
+   cannot resolve the skill, print the guidance and halt execution. The command remains
+   unavailable until the skill is installed.
 
 Report the source you resolved before continuing:
 

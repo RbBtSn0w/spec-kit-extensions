@@ -46,6 +46,11 @@ if ! grep -q -- "--skill test-driven-development" "$COMMANDS_DIR/check.md"; then
   exit 1
 fi
 
+if ! grep -q -- "subagent-driven-development -g -y" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md recommended plugins command must include both -g and -y"
+  exit 1
+fi
+
 # Assertion 6: Check for Hard Requirements grouping under Quick Setup (T021)
 if ! grep -q "Hard Requirements" "$COMMANDS_DIR/check.md"; then
   echo "FAIL: check.md must group Hard Requirements under Quick Setup"

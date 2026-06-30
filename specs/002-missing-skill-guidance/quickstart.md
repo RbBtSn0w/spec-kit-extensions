@@ -69,7 +69,7 @@ command -v npx
 
 ### Expected Outcome
 
-1. `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y` is executed
+1. `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y` is executed
 2. After installation, an automatic re-check runs
 3. Post-Install Verification table shows `MISSING → ✅ READY` for all previously missing skills
 4. Updated verdict changes from `BLOCKED` to `READY`
@@ -102,13 +102,18 @@ rm -rf ~/.agents/skills/systematic-debugging
    ERROR: Optional superpowers skill `systematic-debugging` not found.
    
    💡 Install via adg (https://github.com/RbBtSn0w/adg):
-      Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
+      Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y
       Global:       npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y
       Project:      npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
    
    Run /speckit-superb-check for full diagnostics and interactive installation.
    ```
-2. Command does not execute (remains UNAVAILABLE)
+2. If `npx` is available, the command asks:
+   `Would you like to install now? (Select approach 1-3, or skip)`
+3. If the user selects an approach and installation succeeds, the command re-checks the
+   skill and proceeds.
+4. If the user skips, `npx` is unavailable, or install/re-check fails, the command does
+   not execute (remains UNAVAILABLE)
 
 ---
 

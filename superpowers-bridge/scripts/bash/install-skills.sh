@@ -44,7 +44,7 @@ print_guidance() {
 
   cat <<EOF
 💡 Install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers ${skill_args[*]} -g
+   Recommended:  npx adg plugins add obra/superpowers ${skill_args[*]} -g -y
    Global:       npx adg skills add obra/superpowers ${skill_args[*]} --global -y
    Project:      npx adg skills add obra/superpowers ${skill_args[*]} -y
 
@@ -66,7 +66,7 @@ run_install() {
   case "$approach" in
     1)
       # Recommended: plugins add
-      cmd=("npx" "adg" "plugins" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-g")
+      cmd=("npx" "adg" "plugins" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-g" "-y")
       ;;
     2)
       # Alternative: skills add --global

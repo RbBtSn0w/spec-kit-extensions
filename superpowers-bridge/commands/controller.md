@@ -22,10 +22,18 @@ scripts:
    - `./.agents/skills/test-driven-development/SKILL.md`
    - `~/.agents/skills/test-driven-development/SKILL.md`
    If the workspace and global copies both exist, use the workspace copy.
-    If no readable file is found, **STOP**:
-    1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance` and display the generated output to the user.
-    2. Halt execution with exit status 2.
-    Report the source resolved before continuing.
+   If no readable file is found, enter the **inline install recovery flow**:
+   1. Run `bash "$(dirname "{SCRIPT}")/install-skills.sh" --check-only`.
+   2. If `npx` is available, show the missing-skill error plus the generated output from
+      `bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance`, then ask:
+      `Would you like to install now? (Select approach 1-3, or skip)`
+   3. Only if the user explicitly selects `1`, `2`, or `3`, run:
+      `bash "$(dirname "{SCRIPT}")/install-skills.sh" --approach <selection>`
+   4. After a successful install, re-run the skill resolution for
+      `test-driven-development/SKILL.md` once before continuing.
+   5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
+      cannot resolve the skill, print the guidance and halt execution with exit status 2.
+   Report the source resolved before continuing.
 
 2. **Check for Optional Execution Skills**:
    - Check for `executing-plans/SKILL.md` in the same order (workspace then global). This skill provides native Inline Execution discipline when running in Single-Agent Mode.

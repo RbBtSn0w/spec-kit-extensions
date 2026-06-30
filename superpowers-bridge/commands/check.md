@@ -161,7 +161,7 @@ The assistant MUST append a `## Quick Setup` section to the report:
    - **Hard Requirements (blocking)**: List any missing hard-requirement skills and note that they block hooks.
    - **Optional Skills (recommended)**: List any missing optional skills and note their feature impact.
 2. **Installation Options**: Present the three installation approaches:
-   - Approach 1 (Recommended): `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g`
+   - Approach 1 (Recommended): `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y`
    - Approach 2 (Global): `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development --global -y`
    - Approach 3 (Project): `npx adg skills add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y`
 3. **Interactive Prompt**: Ask the user: `Would you like to install now? (Select approach 1-3, or skip)`
@@ -180,7 +180,7 @@ The assistant MUST append a `## Quick Setup` section to the report:
 The assistant MUST append the `## Quick Setup` section with manual instructions:
 - Output: `npx was not detected. Please install Node.js first, or manually install skills.`
 - Reference the adg repository URL: `https://github.com/RbBtSn0w/adg`
-- Provide the recommended command: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g`
+- Provide the recommended command: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y`
 - Provide alternative manual cloning instructions:
   `git clone https://github.com/obra/superpowers.git` and copy required skill folders into `./.agents/skills/` or `~/.agents/skills/`.
 - Do not offer any interactive prompt.

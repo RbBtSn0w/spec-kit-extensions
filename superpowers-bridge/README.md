@@ -288,9 +288,9 @@ If any Superpowers skills are missing on the host environment, the bridge provid
    Run `/speckit.superb.check` to scan workspace and global roots. The output contains a **Guidance** column specifying `Install via adg` for missing skills.
 2. **Auto-Installation**:
    If the check command detects `npx` in the environment, it appends a `## Quick Setup` section presenting three installation approaches:
-   - **Approach 1 (Recommended)**: Installs all 11 skills under `adg plugins add obra/superpowers` with `-g` using `--skill` filters to avoid bloat.
-   - **Approach 2 (Global)**: Installs all 11 skills globally using `adg skills add obra/superpowers --global`.
-   - **Approach 3 (Project)**: Installs all 11 skills project-locally using `adg skills add obra/superpowers`.
+   - **Approach 1 (Recommended)**: Installs all 11 skills under `adg plugins add obra/superpowers` with `-g -y` using `--skill` filters to avoid bloat and interactive confirmation stalls.
+   - **Approach 2 (Global)**: Installs all 11 skills globally using `adg skills add obra/superpowers --global -y`.
+   - **Approach 3 (Project)**: Installs all 11 skills project-locally using `adg skills add obra/superpowers -y`.
    The agent will prompt the user to choose an installation option (1-3) or skip, executing the helper script `install-skills.sh` accordingly.
 3. **Manual Fallback**:
    If `npx` is not available, the check report lists manual cloning and setup steps pointing directly to the [adg repository (https://github.com/RbBtSn0w/adg)](https://github.com/RbBtSn0w/adg).

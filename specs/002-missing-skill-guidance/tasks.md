@@ -164,3 +164,16 @@ Task: "T007 Implement a test assertion verifying repository URL in test-install-
 2. Phase 4 (US2) -> Prevents silent hook failure by adding command-level guides.
 3. Phase 5 (US3) -> Delivers interactive auto-installation.
 4. Phase 6 (Polish) -> Integrates regression checks and publishes documentation.
+
+## Phase 7: Convergence
+
+- [x] T031 Align the recommended plugin installation command in `superpowers-bridge/scripts/bash/install-skills.sh`, `superpowers-bridge/commands/check.md`, and related guidance/tests to the spec-approved `npx adg plugins add ... -g -y` flow per FR-009 (contradicts)
+- [x] T032 Add opt-in inline auto-install handling for missing required skills in the dependent superb command/hook flows, including `npx` pre-detection, explicit confirmation, selected approach execution, post-install re-check behavior, and regression coverage per FR-002 / FR-006 / US2/AC1 / US2/AC2 (partial)
+
+## Phase 8: Convergence
+
+- [x] T033 Implement and verify inline opt-in auto-install handling in the dependent superb command/hook flows so missing required skills trigger `npx` pre-detection, explicit confirmation, selected `adg` approach execution, and post-install re-check behavior per FR-002 / FR-006 / FR-011 / US2/AC1 / US2/AC2 (partial)
+
+## Phase 9: Convergence
+
+- [x] T034 Fix the malformed inline `install-skills.sh --print-guidance` shell examples in the dependent superb command flows and add regression coverage that validates the full recovery command strings per FR-006 / FR-011 / SC-004 / US2/AC1 / US2/AC2 (partial)

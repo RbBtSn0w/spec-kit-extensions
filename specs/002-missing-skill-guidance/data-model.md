@@ -53,7 +53,7 @@ One of three supported methods for installing skills via `adg`.
 
 | Priority | Label | Command |
 |----------|-------|---------|
-| 1 | Recommended | `npx adg plugins add obra/superpowers` |
+| 1 | Recommended | `npx adg plugins add obra/superpowers -g -y` |
 | 2 | Global | `npx adg skills add obra/superpowers --global -y` |
 | 3 | Project | `npx adg skills add obra/superpowers -y` |
 

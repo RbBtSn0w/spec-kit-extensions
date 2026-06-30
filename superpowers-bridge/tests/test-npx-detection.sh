@@ -8,6 +8,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMANDS_DIR="$ROOT_DIR/commands"
 SCRIPTS_DIR="$ROOT_DIR/scripts"
+EXPECTED_PRINT_GUIDANCE='bash "$(dirname "{SCRIPT}")/install-skills.sh" --print-guidance'
+EXPECTED_CHECK_ONLY='bash "$(dirname "{SCRIPT}")/install-skills.sh" --check-only'
+EXPECTED_APPROACH='bash "$(dirname "{SCRIPT}")/install-skills.sh" --approach <selection>'
 
 echo "=== Running User Story 2: npx Pre-detection & Inline Guidance Tests ==="
 
@@ -46,6 +49,7 @@ COMMAND_FILES=(
   "debug.md"
   "finish.md"
   "verify.md"
+  "respond.md"
 )
 
 for file in "${COMMAND_FILES[@]}"; do
@@ -56,8 +60,28 @@ for file in "${COMMAND_FILES[@]}"; do
   fi
 
   # Check that command file references the install-skills.sh print-guidance script
-  if ! grep -q "install-skills.sh.*--print-guidance" "$filepath"; then
-    echo "FAIL: $file must delegate missing skill guidance output to install-skills.sh --print-guidance"
+  if ! grep -Fq "$EXPECTED_PRINT_GUIDANCE" "$filepath"; then
+    echo "FAIL: $file must include the exact print-guidance recovery command: $EXPECTED_PRINT_GUIDANCE"
+    exit 1
+  fi
+
+  if ! grep -Fq "$EXPECTED_CHECK_ONLY" "$filepath"; then
+    echo "FAIL: $file must include the exact check-only recovery command: $EXPECTED_CHECK_ONLY"
+    exit 1
+  fi
+
+  if ! grep -q "Would you like to install now? (Select approach 1-3, or skip)" "$filepath"; then
+    echo "FAIL: $file must define the explicit inline install confirmation prompt"
+    exit 1
+  fi
+
+  if ! grep -Fq "$EXPECTED_APPROACH" "$filepath"; then
+    echo "FAIL: $file must include the exact approach execution command: $EXPECTED_APPROACH"
+    exit 1
+  fi
+
+  if ! grep -q "re-run the skill resolution" "$filepath"; then
+    echo "FAIL: $file must re-run skill resolution after a successful install"
     exit 1
   fi
 done
@@ -73,6 +97,11 @@ fi
 
 if ! echo "$guidance_out" | grep -q "npx adg plugins add"; then
   echo "FAIL: install-skills.sh --print-guidance must include the plugins installation command"
+  exit 1
+fi
+
+if ! echo "$guidance_out" | grep -q -- "-g -y"; then
+  echo "FAIL: install-skills.sh --print-guidance must include both -g and -y for the recommended plugins command"
   exit 1
 fi
 

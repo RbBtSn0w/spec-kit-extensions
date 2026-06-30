@@ -14,7 +14,7 @@ Emitted by individual bridge commands when a required skill is missing. Appended
 ERROR: [Required|Optional] superpowers skill `<skill-name>` not found.
 
 💡 Install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
+   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y
    Global:       npx adg skills add obra/superpowers --global -y
    Project:      npx adg skills add obra/superpowers -y
 
@@ -28,13 +28,18 @@ Run /speckit-superb-check for full diagnostics and interactive installation.
 - `💡` emoji prefix for visual scan-ability; fallback to `>` blockquote if emoji not supported
 - Three approaches listed in priority order (recommended first)
 - Always ends with a pointer to the `check` command for full diagnostics
+- If `npx` is available, the command must next ask:
+  `Would you like to install now? (Select approach 1-3, or skip)`
+- The command may run `install-skills.sh --approach <selection>` only after explicit
+  user confirmation, then must re-run the missing skill resolution once before proceeding
+  or blocking.
 - If the command is in **graceful degradation** mode (Layer 2 fallback available), use `NOTE` instead of `ERROR`:
 
 ```markdown
 NOTE: Optional superpowers skill `<skill-name>` not installed. Running with local fallback.
 
 💡 For enhanced behavior, install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y
+   Recommended:  npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y
    Global:       npx adg skills add obra/superpowers --global -y
    Project:      npx adg skills add obra/superpowers -y
 ```
@@ -93,7 +98,7 @@ Choose one approach to install all missing skills:
 
 | # | Approach | Command |
 |---|----------|---------|
-| 1 | **Recommended** (plugin bundle) | `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y` |
+| 1 | **Recommended** (plugin bundle) | `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y` |
 | 2 | Global skills | `npx adg skills add obra/superpowers --global -y` |
 | 3 | Project skills | `npx adg skills add obra/superpowers -y` |
 
@@ -120,7 +125,7 @@ Missing skills can be installed via [adg](https://github.com/RbBtSn0w/adg):
 `npx` was not detected. Install Node.js first, or manually install skills:
 
 1. Visit https://github.com/RbBtSn0w/adg for setup instructions
-2. Run: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -y` (recommended)
+2. Run: `npx adg plugins add obra/superpowers --skill test-driven-development --skill verification-before-completion --skill brainstorming --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --skill dispatching-parallel-agents --skill requesting-code-review --skill writing-plans --skill executing-plans --skill subagent-driven-development -g -y` (recommended)
 
 Alternatively, clone the superpowers repository directly:
   `git clone https://github.com/obra/superpowers.git`
