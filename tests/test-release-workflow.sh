@@ -21,6 +21,8 @@ checks = [
     (r"\.extensionignore", "Release Trigger must honor .extensionignore during zip assembly."),
     (r"pathspec", "Release Trigger must use pathspec-compatible ignore matching during packaging."),
     (r"pathspec==0\.12\.1", "Release Trigger must pin pathspec version for reproducible packaging."),
+    (r"actions/create-github-app-token@", "Release Trigger must mint a GitHub App token at runtime."),
+    (r"app-id:\s*\$\{\{\s*vars\.APP_ID\s*\}\}", "Release Trigger must read the release GitHub App ID from repo variables."),
     (r"^\s*- name: Generate release notes$", "Release Trigger must generate release notes itself."),
     (r"gh release create", "Release Trigger must create the GitHub Release itself."),
     (r"createCommitOnBranch", "Release Trigger must create the release metadata commit via GitHub GraphQL."),
@@ -36,6 +38,7 @@ for pattern, message in checks:
 for pattern, message in [
     (r"git commit -m ", "Release Trigger must not create an unsigned local git commit for release metadata."),
     (r"replace\(\"\\\\\", \"/\"\)", "Release Trigger must not rewrite backslashes in .extensionignore patterns."),
+    (r"secrets\.PUSH_TOKEN", "Release Trigger must not depend on the legacy PUSH_TOKEN secret."),
 ]:
     if re.search(pattern, trigger_text, re.MULTILINE):
         print(message, file=sys.stderr)

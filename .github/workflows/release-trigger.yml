@@ -79,14 +79,27 @@ jobs:
           git fetch origin "$DEFAULT_BRANCH"
           git checkout -B "$DEFAULT_BRANCH" "origin/$DEFAULT_BRANCH"
 
-      - name: Validate PUSH_TOKEN secret
+      - name: Validate GitHub App credentials
         env:
-          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          APP_ID: ${{ vars.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
         run: |
-          if [[ -z "$PUSH_TOKEN" ]]; then
-            echo "Error: Repository secret PUSH_TOKEN is not set" >&2
+          if [[ -z "$APP_ID" ]]; then
+            echo "Error: Repository variable APP_ID is not set" >&2
             exit 1
           fi
+          if [[ -z "$APP_PRIVATE_KEY" ]]; then
+            echo "Error: Repository secret APP_PRIVATE_KEY is not set" >&2
+            exit 1
+          fi
+
+      - name: Mint GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
 
       - name: Prepare release files
         env:
@@ -304,7 +317,7 @@ jobs:
           EXTENSION_ID: ${{ github.event.inputs.extension_id }}
           VERSION: ${{ env.version }}
           GITHUB_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           release_files=("$EXTENSION_ID/extension.yml")
           if [[ -f "$EXTENSION_ID/CHANGELOG.md" ]]; then
@@ -504,7 +517,7 @@ jobs:
         env:
           EXTENSION_ID: ${{ github.event.inputs.extension_id }}
           VERSION: ${{ env.version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh release create "$tag" \
             "${EXTENSION_ID}.zip" \

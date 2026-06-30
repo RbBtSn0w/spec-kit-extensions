@@ -138,12 +138,20 @@ require(
     "release-trigger.yml must create release metadata commits through GitHub GraphQL",
 )
 require(
+    "actions/create-github-app-token@" in release and "app-id: ${{ vars.APP_ID }}" in release,
+    "release-trigger.yml must mint a dedicated GitHub App token for release publishing",
+)
+require(
     "--verify-tag" in release,
     "release-trigger.yml must verify the release tag before publishing the GitHub Release",
 )
 require(
     'git commit -m "' not in release,
     "release-trigger.yml must not fall back to unsigned local git commits for release metadata",
+)
+require(
+    "secrets.PUSH_TOKEN" not in release,
+    "release-trigger.yml must not depend on the legacy PUSH_TOKEN secret",
 )
 
 require(
