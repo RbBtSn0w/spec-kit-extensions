@@ -109,12 +109,12 @@ hooks:
       brainstorming skill to strengthen the active Spec Kit spec.md while
       preserving Spec Kit ownership of specification creation.
 
-  before_implement:
-    command: speckit.superb.controller
+  after_plan:
+    command: speckit.superb.plan-gate
     optional: false
     description: >
-      Mandatory Controller gate. Bridges installed execution and quality skills
-      to orchestrate task implementation.
+      Mandatory Plan gate. Verifies plan completeness and injects SDD
+      directives into plan.md for agentic workers.
 
   after_tasks:
     command: speckit.superb.review
@@ -124,13 +124,13 @@ hooks:
       Catches missing or under-specified tasks at planning time. Produces a
       requirement coverage and TDD-readiness report. Bridge-native logic.
 
-  after_plan:
-    command: speckit.superb.plan-gate
+  before_implement:
+    command: speckit.superb.controller
     optional: false
     description: >
-      Mandatory Plan gate. Verifies plan completeness and injects SDD
-      directives into plan.md for agentic workers.
-
+      Mandatory Controller gate. Bridges installed execution and quality skills
+      to orchestrate task implementation.
+      
   after_implement:
     command: speckit.superb.verify
     optional: false
