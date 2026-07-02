@@ -115,12 +115,17 @@ superpowers-bridge/
 └── tests/
     ├── test-capability-contract.sh
     ├── test-lifecycle-routing.sh
+    ├── test-implementation-gate.sh
     ├── test-command-boundaries.sh
     ├── test-e2e-installation.sh
-    └── test-spec-kit-012-install.sh
+    ├── test-install-guidance.sh
+    ├── test-resolve-skill.sh
+    ├── test-spec-kit-012-install.sh
+    └── test-workflow-contract.sh
 
 catalog.json
 README.md
+.github/workflows/ci.yml
 tests/
 ├── test-review-regressions.sh
 ├── test-superb-path-contract.sh
@@ -139,6 +144,7 @@ superpowers-bridge/scripts/bash/archive-evidence.sh
 superpowers-bridge/scripts/bash/sync-spec-status.sh
 superpowers-bridge/scripts/powershell/archive-evidence.ps1
 superpowers-bridge/scripts/powershell/sync-spec-status.ps1
+superpowers-bridge/V2-DESIGN-NOTES.md
 ```
 
 Obsolete tests that assert removed behavior will be deleted or replaced rather
@@ -193,7 +199,7 @@ checks, and repository acceptance gates.
 3. Remove `review`, `verify`, `plan-gate`, status, and archive surfaces.
 4. Narrow `brainstorm`, `critique`, `debug`, `respond`, and `finish` to their contracts.
 5. Synchronize the five-skill installer/resolver/check/config contract.
-6. Synchronize manifest, README, WORKFLOW, CHANGELOG, root catalog/docs, and regression tests.
+6. Synchronize manifest, README, WORKFLOW, CHANGELOG, root catalog/docs, CI, and regression tests; remove obsolete V2 design notes.
 7. Run source, package-install, lifecycle, Bash, PowerShell, YAML, catalog, release, and diff checks.
 
 Tasks must preserve independent testability and must not combine unrelated

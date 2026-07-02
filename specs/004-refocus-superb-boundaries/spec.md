@@ -4,9 +4,9 @@
 
 **Created**: 2026-07-02
 
-**Status**: Draft
+**Status**: Ready for Implementation
 
-**Input**: User description: "Refocus Superb from a partial orchestration system into a focused Spec Kit enhancement extension. Retain capabilities that directly improve the spec -> plan -> tasks -> implement -> verify path, consolidate fallback-only capabilities into documentation, and reject exceptional-case control-flow layers by default."
+**Input**: User description: "Refocus Superb from a partial orchestration system into a focused Spec Kit enhancement extension. Retain capabilities that directly improve the spec -> plan -> tasks -> implement -> converge -> evidence-backed completion path, consolidate fallback-only capabilities into documentation, and reject exceptional-case control-flow layers by default."
 
 ## Clarifications
 
@@ -26,7 +26,7 @@
 
 ### User Story 1 - Follow One Coherent Workflow (Priority: P1)
 
-As a Spec Kit user, I want Superb to strengthen important lifecycle checkpoints without introducing a second planning or execution workflow, so that I can follow one clear path from specification through verification.
+As a Spec Kit user, I want Superb to strengthen important lifecycle checkpoints without introducing a second planning or execution workflow, so that I can follow one clear path from specification through evidence-backed completion.
 
 **Why this priority**: Competing workflow ownership is the primary source of complexity and makes it unclear whether Spec Kit or Superb controls implementation.
 
@@ -71,7 +71,7 @@ As a user, I want Superb prompts and reports to describe decisions in terms of m
 **Acceptance Scenarios**:
 
 1. **Given** a task can proceed normally, **When** Superb reports readiness, **Then** it communicates actionable constraints and returns control to Spec Kit without asking the user to choose an execution mode.
-2. **Given** concurrency is unavailable or unsafe, **When** Superb evaluates the task set, **Then** the workflow remains valid and continues serially without presenting a degraded or exceptional user path.
+2. **Given** concurrency is unavailable or unsafe, **When** the owning Spec Kit implementation flow or active agent runtime evaluates the task set, **Then** it may continue serially without requiring a Superb mode decision or presenting a degraded Superb fallback path.
 3. **Given** user-facing documentation describes a retained capability, **When** the user reads it, **Then** the description starts with the Spec Kit lifecycle benefit rather than Superb internals or upstream skill names.
 4. **Given** a user invokes a retained standalone command, **When** it evaluates or changes the current work, **Then** it stays within its declared review, debugging, feedback-response, or branch-handoff boundary and does not create lifecycle state or bypass the owning Spec Kit artifact stage.
 
@@ -79,7 +79,7 @@ As a user, I want Superb prompts and reports to describe decisions in terms of m
 
 - A capability benefits multiple lifecycle stages but has no single accountable stage or outcome.
 - An optional upstream capability is unavailable while the owning Spec Kit stage can still complete safely.
-- A task set is marked parallel but contains hidden file, artifact, or ordering conflicts.
+- A task set is marked parallel but contains hidden file, artifact, or ordering conflicts; the owning Spec Kit implementation flow or active agent runtime must resolve those conflicts without a Superb execution-mode decision.
 - Existing configuration refers to a capability that is consolidated, documented, or removed.
 - Documentation, hooks, commands, and validation checks disagree about which capabilities remain supported.
 - Existing installations or configuration still reference `speckit.superb.verify`, its lifecycle hooks, status synchronization, evidence archiving, or the `verification-before-completion` dependency after those surfaces are removed.
@@ -93,7 +93,7 @@ As a user, I want Superb prompts and reports to describe decisions in terms of m
 
 - **FR-001**: The refocus MUST inventory every user-visible command, lifecycle hook, configuration option, runtime dependency, and bridged Superpowers capability in Superb.
 - **FR-002**: Every inventoried capability MUST identify the Spec Kit lifecycle stage it serves, the user outcome it improves, and a disposition of `retain`, `consolidate`, `document`, or `remove`.
-- **FR-003**: A capability MUST be retained in the active workflow only when it directly helps users complete or validate a step in the Spec Kit `spec -> plan -> tasks -> implement -> verify` path.
+- **FR-003**: A capability MUST be retained in the active workflow only when it directly helps users complete or validate a step in the Spec Kit `spec -> plan -> tasks -> implement -> converge -> evidence-backed completion` path; verification is an evidence obligation, not a Superb command or lifecycle stage.
 - **FR-004**: A capability whose primary purpose is explaining or supporting another capability's fallback MUST be consolidated into its owning capability or moved to documentation.
 - **FR-005**: A capability that introduces an additional control-flow layer for exceptional scenarios MUST be excluded by default unless evidence demonstrates a critical common-path need that cannot be satisfied by the owning Spec Kit workflow.
 - **FR-006**: Spec Kit MUST remain the sole owner of specification, clarification, planning, task generation, implementation, convergence, and their canonical artifacts.
@@ -138,7 +138,7 @@ As a user, I want Superb prompts and reports to describe decisions in terms of m
 
 - **SC-001**: 100% of Superb's exposed capabilities and runtime dependencies have a documented lifecycle mapping, user outcome, and disposition.
 - **SC-002**: 100% of retained active-workflow capabilities map to at least one acceptance scenario and exactly one accountable lifecycle boundary.
-- **SC-003**: A full normal-path walkthrough completes from specification through verification with zero competing Superb-owned plans, task stores, execution lifecycles, journals, or completion states.
+- **SC-003**: A full normal-path walkthrough completes from specification through convergence and evidence-backed completion with zero competing Superb-owned plans, task stores, execution lifecycles, journals, verification commands, or completion states.
 - **SC-004**: Users complete both simple and concurrency-eligible implementation walkthroughs with zero Superb-generated agent-mode, parallel-batch, worker, or dispatch-policy decisions.
 - **SC-005**: All supported fallback walkthroughs return to a valid Spec Kit path without invoking an additional Superb-owned control-flow layer.
 - **SC-006**: Manifest, command, configuration, documentation, and validation audits report zero contradictions about the retained capability set or lifecycle routing.
