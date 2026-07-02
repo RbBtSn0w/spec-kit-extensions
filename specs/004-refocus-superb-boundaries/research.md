@@ -40,6 +40,58 @@ logical Superpowers skill dependencies:
 should not remain active commands. Spec Kit already owns task completeness,
 cross-artifact analysis, implementation validation, and convergence.
 
+## Phase 0 Decision Record
+
+### Decision: Use Spec Kit Artifact Ownership as the Routing Axis
+
+**Rationale**: Each defect returns to the command that owns the affected
+artifact, preventing Superb from becoming a repair workflow.
+
+**Alternatives considered**: A Superb controller for every lifecycle decision;
+a Superb-owned status machine. Both create competing ownership.
+
+### Decision: Keep Exactly Two Lifecycle Hooks
+
+**Rationale**: Optional `after_specify` refinement and mandatory
+`before_implement` TDD readiness are the only researched boundaries where a
+selected discipline adds value not already supplied by a core command.
+
+**Alternatives considered**: Keep all five hooks; retain `after_tasks`; add a
+conditional `after_converge`. Each duplicates native behavior.
+
+### Decision: Expose Exactly Seven Superb Commands
+
+**Rationale**: `check`, `brainstorm`, `implementation-gate`, `critique`,
+`debug`, `respond`, and `finish` each have a distinct bounded user outcome.
+
+**Alternatives considered**: Keep deprecated commands for compatibility; expose
+aliases for removed workflows. Both leave contradictory installed payload.
+
+### Decision: Resolve Exactly Five Superpowers Skills
+
+**Rationale**: The five retained disciplines materially change their Spec Kit
+context adapter's result. Complete-plugin installation is distribution only.
+
+**Alternatives considered**: Depend on the complete plugin runtime; reduce to
+only brainstorming and TDD. The former imports unrelated workflows; the latter
+removes useful standalone disciplines.
+
+### Decision: Validate Durable Principles, Not Skill Internals
+
+**Rationale**: Thirteen of fourteen compared skill documents differed between
+the public v5.1.0 source and the installed 6.1.0 cache.
+
+**Alternatives considered**: Pin prompt-template names or headings; support one
+exact document snapshot. Both make the bridge fragile to normal skill evolution.
+
+### Decision: Validate the Installed Package on Spec Kit 0.12.4
+
+**Rationale**: Source-only tests missed stale unregistered payload and simulated
+mandatory hook markers without proving current installed behavior.
+
+**Alternatives considered**: Continue regex-only manifest tests; validate only
+against local 0.11.9.dev0. Neither proves the declared compatibility floor.
+
 ## Evidence Baseline
 
 ### Authoritative Sources
