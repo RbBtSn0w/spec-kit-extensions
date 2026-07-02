@@ -4,8 +4,8 @@ description: >
   by bridging installed execution skills (subagent-driven-development or executing-plans)
   and quality gate reviews.
 scripts:
-  sh: scripts/bash/sync-spec-status.sh
-  ps: scripts/powershell/sync-spec-status.ps1
+  sh: .specify/extensions/superb/scripts/bash/sync-spec-status.sh
+  ps: .specify/extensions/superb/scripts/powershell/sync-spec-status.ps1
 ---
 
 # Implementation Controller Gate — Before Implementation
@@ -18,7 +18,7 @@ scripts:
 
 ## Step 1 — Resolve Installed Skill
 
-1. Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill test-driven-development`.
+1. Run `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill test-driven-development`.
    The resolver is the canonical discovery helper for this bridge. It checks
    direct skill roots first, then plugin-provided skills, in workspace scope
    before global scope:
@@ -30,22 +30,22 @@ scripts:
    - `~/.agents/plugins/*/*/skills/test-driven-development/SKILL.md`
    Prefer the first readable match in that order.
    If no readable file is found, enter the **inline install recovery flow**:
-   1. Run `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs`.
+   1. Run `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --check-prereqs`.
    2. If `npx` is available, show the missing-skill error plus the generated output from
-      `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance`, then ask:
+      `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --print-guidance`, then ask:
       `Would you like to install now? (Select approach 1-3, or skip)`
    3. Only if the user explicitly selects `1`, `2`, or `3`, run:
-      `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>`
+      `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --install <selection>`
    4. After a successful install, re-run the skill resolution by invoking
-      `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill test-driven-development`
+      `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill test-driven-development`
       once before continuing.
    5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
       cannot resolve the skill, print the guidance and halt execution with exit status 2.
    Report the source resolved before continuing, including install type (`skill-root` or `plugin`).
 
 2. **Check for Optional Execution Skills**:
-   - Check for `executing-plans` by running `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill executing-plans`. This skill provides native Inline Execution discipline when running in Single-Agent Mode.
-   - Check for `subagent-driven-development` by running `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill subagent-driven-development`. This skill provides native subagent dispatching.
+   - Check for `executing-plans` by running `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill executing-plans`. This skill provides native Inline Execution discipline when running in Single-Agent Mode.
+   - Check for `subagent-driven-development` by running `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill subagent-driven-development`. This skill provides native subagent dispatching.
 
 ---
 

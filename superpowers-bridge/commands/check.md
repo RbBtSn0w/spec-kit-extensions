@@ -4,7 +4,7 @@ description: >
   superpowers skills are installed in workspace or global skill roots and
   reports which hooks are ready to run.
 scripts:
-  sh: scripts/bash/ensure-skills.sh
+  sh: .specify/extensions/superb/scripts/bash/ensure-skills.sh
 ---
 
 # Check — Superpowers Bridge Diagnostics
@@ -29,7 +29,7 @@ do not let it override filesystem reality.
 
 Resolve every skill using the shared helper:
 
-`bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill [skill-name]`
+`bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill [skill-name]`
 
 That helper searches for installed skills in this exact order:
 

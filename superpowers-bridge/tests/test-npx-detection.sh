@@ -8,10 +8,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMANDS_DIR="$ROOT_DIR/commands"
 SCRIPTS_DIR="$ROOT_DIR/scripts"
-EXPECTED_PRINT_GUIDANCE='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance'
-EXPECTED_CHECK_ONLY='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs'
-EXPECTED_APPROACH='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>'
-EXPECTED_RESOLVE='bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill'
+EXPECTED_PRINT_GUIDANCE='bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --print-guidance'
+EXPECTED_CHECK_ONLY='bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --check-prereqs'
+EXPECTED_APPROACH='bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --install <selection>'
+EXPECTED_RESOLVE='bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill'
 
 echo "=== Running User Story 2: npx Pre-detection & Inline Guidance Tests ==="
 

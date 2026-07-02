@@ -163,8 +163,8 @@ require(
     "critique.md must resolve a concrete BASE_REF before calling git merge-base",
 )
 require(
-    "archive_sh: scripts/bash/archive-evidence.sh" in verify
-    and "archive_ps: scripts/powershell/archive-evidence.ps1" in verify,
+    "archive_sh: .specify/extensions/superb/scripts/bash/archive-evidence.sh" in verify
+    and "archive_ps: .specify/extensions/superb/scripts/powershell/archive-evidence.ps1" in verify,
     "verify.md must declare evidence capture scripts in frontmatter",
 )
 require(

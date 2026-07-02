@@ -5,8 +5,8 @@ description: >
   implementing review feedback — no performative agreement, no blind fixes.
   Pairs with speckit.superb.critique as the implementer counterpart.
 scripts:
-  sh: scripts/bash/sync-spec-status.sh
-  ps: scripts/powershell/sync-spec-status.ps1
+  sh: .specify/extensions/superb/scripts/bash/sync-spec-status.sh
+  ps: .specify/extensions/superb/scripts/powershell/sync-spec-status.ps1
 ---
 
 # Respond — Receiving Code Review Feedback
@@ -30,21 +30,21 @@ Do not use this command to create the original review. Use
 
 ## Step 1 — Resolve Installed Skill
 
-Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill receiving-code-review`.
+Run `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill receiving-code-review`.
 
 The resolver is the canonical discovery helper for this bridge. It checks, in
 order, direct workspace installs, workspace plugin installs, direct global
 installs, then global plugin installs.
 
 If no readable file is found, enter the **inline install recovery flow**:
-1. Run `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs`.
+1. Run `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --check-prereqs`.
 2. If `npx` is available, show the missing-skill error plus the generated output from
-   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance`, then ask:
+   `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --print-guidance`, then ask:
    `Would you like to install now? (Select approach 1-3, or skip)`
 3. Only if the user explicitly selects `1`, `2`, or `3`, run:
-   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>`
+   `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --install <selection>`
 4. After a successful install, re-run the skill resolution by invoking
-   `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill receiving-code-review`
+   `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill receiving-code-review`
    once before continuing.
 5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
    cannot resolve the skill, print the guidance and halt execution. The command remains

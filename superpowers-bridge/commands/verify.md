@@ -4,10 +4,10 @@ description: >
   verification-before-completion skill and extends it with spec-kit's
   spec-coverage checklist. No task may be marked done without fresh run evidence.
 scripts:
-  sh: scripts/bash/sync-spec-status.sh
-  ps: scripts/powershell/sync-spec-status.ps1
-  archive_sh: scripts/bash/archive-evidence.sh
-  archive_ps: scripts/powershell/archive-evidence.ps1
+  sh: .specify/extensions/superb/scripts/bash/sync-spec-status.sh
+  ps: .specify/extensions/superb/scripts/powershell/sync-spec-status.ps1
+  archive_sh: .specify/extensions/superb/scripts/bash/archive-evidence.sh
+  archive_ps: .specify/extensions/superb/scripts/powershell/archive-evidence.ps1
 ---
 
 # Verification Before Completion — After Implementation
@@ -25,21 +25,21 @@ Any user context provided:
 $ARGUMENTS
 ```
 
-Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill verification-before-completion`.
+Run `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill verification-before-completion`.
 
 The resolver is the canonical discovery helper for this bridge. It checks, in
 order, direct workspace installs, workspace plugin installs, direct global
 installs, then global plugin installs.
 
 If no readable file is found, enter the **inline install recovery flow**:
-1. Run `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs`.
+1. Run `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --check-prereqs`.
 2. If `npx` is available, show the missing-skill error plus the generated output from
-   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance`, then ask:
+   `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --print-guidance`, then ask:
    `Would you like to install now? (Select approach 1-3, or skip)`
 3. Only if the user explicitly selects `1`, `2`, or `3`, run:
-   `bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>`
+   `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --install <selection>`
 4. After a successful install, re-run the skill resolution by invoking
-   `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill verification-before-completion`
+   `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill verification-before-completion`
    once before continuing.
 5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
    cannot resolve the skill, print the guidance and halt execution with exit status 2.
@@ -113,7 +113,7 @@ Capture the verification results in the system temporary directory by executing 
 
 On Unix-like systems (sh):
 ```bash
-ARCHIVE_SCRIPT="$(dirname "{SCRIPT}")/archive-evidence.sh"
+ARCHIVE_SCRIPT=".specify/extensions/superb/scripts/bash/archive-evidence.sh"
 cat << 'EOF' | bash "$ARCHIVE_SCRIPT" --feature-name "[feature-name]" --build-status "[build-status]"
 [checklist]
 
@@ -124,7 +124,7 @@ EOF
 
 On Windows (PowerShell):
 ```powershell
-$ArchiveScript = Join-Path (Split-Path "{SCRIPT}") "archive-evidence.ps1"
+$ArchiveScript = ".specify/extensions/superb/scripts/powershell/archive-evidence.ps1"
 $EvidenceContent = @"
 [checklist]
 

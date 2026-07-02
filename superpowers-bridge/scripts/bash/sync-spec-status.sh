@@ -66,19 +66,23 @@ fi
 
 resolve_feature_json() {
   local output
-  local prereq="scripts/bash/check-prerequisites.sh"
-  
-  if [[ ! -f "$prereq" ]]; then
-    local script_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    # Try common extension layout relative to script location
-    if [[ -f "$script_dir/../../../scripts/bash/check-prerequisites.sh" ]]; then
-      prereq="$script_dir/../../../scripts/bash/check-prerequisites.sh"
-    fi
-  fi
+  local script_dir
+  local prereq_candidates=()
+  local prereq=""
 
-  if [[ ! -f "$prereq" || ! -r "$prereq" ]]; then
-    echo "ERROR: check-prerequisites.sh not found or not readable (checked project root and extension scripts dir)" >&2
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  prereq_candidates+=("$script_dir/check-prerequisites.sh")
+  prereq_candidates+=("$script_dir/../../../scripts/bash/check-prerequisites.sh")
+
+  for candidate in "${prereq_candidates[@]}"; do
+    if [[ -f "$candidate" && -r "$candidate" ]]; then
+      prereq="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "$prereq" ]]; then
+    echo "ERROR: check-prerequisites.sh not found or not readable relative to sync-spec-status.sh" >&2
     return 1
   fi
 

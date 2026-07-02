@@ -5,8 +5,8 @@ description: >
   and TDD-readiness assessment. Catches missing or under-specified tasks at
   planning time, not delivery time.
 scripts:
-  sh: scripts/bash/sync-spec-status.sh
-  ps: scripts/powershell/sync-spec-status.ps1
+  sh: .specify/extensions/superb/scripts/bash/sync-spec-status.sh
+  ps: .specify/extensions/superb/scripts/powershell/sync-spec-status.ps1
 ---
 
 # Task Coverage Review — After Task Generation

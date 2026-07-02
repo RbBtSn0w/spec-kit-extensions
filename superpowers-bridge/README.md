@@ -307,7 +307,7 @@ If any Superpowers skills are missing on the host environment, the bridge provid
    - **Approach 1 (Recommended)**: Installs all 11 skills under `adg plugins add obra/superpowers` with `-g` using `--skill` filters, which matches the current non-interactive plugin installation contract.
    - **Approach 2 (Global)**: Installs all 11 skills globally using `adg skills add obra/superpowers --global -y`.
    - **Approach 3 (Project)**: Installs all 11 skills project-locally using `adg skills add obra/superpowers -y`.
-   The agent will prompt the user to choose an installation option (1-3) or skip, executing the helper script `ensure-skills.sh` accordingly.
+   The agent will prompt the user to choose an installation option (1-3) or skip, executing the installed bridge helper script `.specify/extensions/superb/scripts/bash/ensure-skills.sh` accordingly.
 3. **Manual Fallback**:
    If `npx` is not available, the check report lists manual cloning and setup steps pointing directly to the [adg repository (https://github.com/RbBtSn0w/adg)](https://github.com/RbBtSn0w/adg).
 4. **Command Inline Failures**:
@@ -471,8 +471,8 @@ So the highest accurate PR-based state in the current design is:
 - It prefers `FEATURE_SPEC` when available, otherwise `FEATURE_DIR/spec.md`.
 - It never guesses the feature path from the branch name manually.
 - Status updates are executed through the bundled helper scripts:
-  - `scripts/bash/sync-spec-status.sh`
-  - `scripts/powershell/sync-spec-status.ps1`
+  - `.specify/extensions/superb/scripts/bash/sync-spec-status.sh`
+  - `.specify/extensions/superb/scripts/powershell/sync-spec-status.ps1`
 - If the status line is missing, the helper inserts it once near the top
   of the document: below the first H1 heading when present (after a blank
   line), otherwise at file start.

@@ -8,7 +8,6 @@
 $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $BridgeDir = Split-Path -Parent $ScriptDir
-$SyncScript = Join-Path $BridgeDir 'scripts/powershell/sync-spec-status.ps1'
 
 function Set-MockFeatureSpec {
     param(
@@ -56,9 +55,12 @@ $TmpDir = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), [System.IO.
 New-Item -ItemType Directory -Path $TmpDir | Out-Null
 
 try {
-    # 1. Setup mock check-prerequisites.ps1
+    # 1. Setup mock project with copied sync script
     $MockScriptsDir = New-Item -ItemType Directory -Path (Join-Path $TmpDir 'scripts/powershell')
+    $MockWorkDir = New-Item -ItemType Directory -Path (Join-Path $TmpDir 'work/subdir') -Force
     $MockPrereq = Join-Path $MockScriptsDir 'check-prerequisites.ps1'
+    $SyncScript = Join-Path $MockScriptsDir 'sync-spec-status.ps1'
+    Copy-Item (Join-Path $BridgeDir 'scripts/powershell/sync-spec-status.ps1') $SyncScript
 
     # 2. Setup initial spec.md
     $SpecDir = New-Item -ItemType Directory -Path (Join-Path $TmpDir 'specs/001-demo')
@@ -76,7 +78,7 @@ Testing status sync.
 
     # 1. Test: Initial Insertion
     Write-Host "Running Test 1: Initial Insertion..."
-    Push-Location $TmpDir
+    Push-Location $MockWorkDir.FullName
     try {
         & $SyncScript -Status 'Tasked' | Out-Null
         $Content = Get-Content $SpecFile -Raw
@@ -99,7 +101,7 @@ Testing status sync.
 
     # 2. Test: Status Update
     Write-Host "Running Test 2: Status Update..."
-    Push-Location $TmpDir
+    Push-Location $MockWorkDir.FullName
     try {
         & $SyncScript -Status 'Verified' | Out-Null
         $Content = Get-Content $SpecFile -Raw
@@ -114,7 +116,7 @@ Testing status sync.
     "Just some text without an H1 heading." | Set-Content $NoH1File -Encoding utf8
     Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $NoH1File
     
-    Push-Location $TmpDir
+    Push-Location $MockWorkDir.FullName
     try {
         & $SyncScript -Status 'Tasked' | Out-Null
         $Lines = Get-Content $NoH1File
@@ -135,7 +137,7 @@ Testing status sync.
     [System.IO.File]::WriteAllText($BomFile, $InitialContent, $Utf8WithBom)
     Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $BomFile
 
-    Push-Location $TmpDir
+    Push-Location $MockWorkDir.FullName
     try {
         & $SyncScript -Status 'Implementing' | Out-Null
         $Bytes = [System.IO.File]::ReadAllBytes($BomFile)
@@ -161,7 +163,7 @@ Testing status sync.
     $InReviewContent | Set-Content $InReviewFile -Encoding utf8
     Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $InReviewFile
 
-    Push-Location $TmpDir
+    Push-Location $MockWorkDir.FullName
     try {
         & $SyncScript -Status 'In Review' | Out-Null
         $Content = Get-Content $InReviewFile -Raw
@@ -185,7 +187,7 @@ Testing status sync.
     $AbandonedContent | Set-Content $AbandonedFile -Encoding utf8
     Set-MockFeatureSpec -MockPrereqPath $MockPrereq -SpecPath $AbandonedFile
 
-    Push-Location $TmpDir
+    Push-Location $MockWorkDir.FullName
     try {
         $Result = & $SyncScript -Status 'Verified' | ConvertFrom-Json
         $Content = Get-Content $AbandonedFile -Raw

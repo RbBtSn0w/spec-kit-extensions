@@ -13,7 +13,7 @@ description: >
 
 ## Step 0 — Resolve Installed Skill
 
-Run `bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill writing-plans`.
+Run `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill writing-plans`.
 
 The resolver is the canonical discovery helper for this bridge. It checks, in
 order, direct workspace installs, workspace plugin installs, direct global

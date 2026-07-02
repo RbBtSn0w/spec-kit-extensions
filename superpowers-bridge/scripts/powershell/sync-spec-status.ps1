@@ -7,13 +7,8 @@ param(
 $ErrorActionPreference = 'Stop'
 
 function Resolve-FeatureJson {
-    $scriptRelativePath = 'scripts/powershell/check-prerequisites.ps1'
     $scriptCandidates = [System.Collections.Generic.List[string]]::new()
     $scriptPath = $null
-
-    if ((Get-Location).Path) {
-        $scriptCandidates.Add((Join-Path (Get-Location).Path $scriptRelativePath))
-    }
 
     $currentScriptDir = if ($PSScriptRoot) {
         $PSScriptRoot
@@ -24,10 +19,8 @@ function Resolve-FeatureJson {
     }
 
     if ($currentScriptDir) {
-        # Try extension scripts dir and project root relative to script location
         $scriptCandidates.Add((Join-Path $currentScriptDir 'check-prerequisites.ps1'))
-        $projectRootPath = Join-Path $currentScriptDir '../../..'
-        $scriptCandidates.Add((Join-Path $projectRootPath $scriptRelativePath))
+        $scriptCandidates.Add((Join-Path $currentScriptDir '../../../scripts/powershell/check-prerequisites.ps1'))
     }
 
     foreach ($candidate in $scriptCandidates) {
