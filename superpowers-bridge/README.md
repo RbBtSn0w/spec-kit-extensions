@@ -60,7 +60,7 @@ specify extension update superb
 Published release installation:
 
 ```bash
-specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.8.0/superpowers-bridge.zip
+specify extension add superpowers-bridge --from https://github.com/RbBtSn0w/spec-kit-extensions/releases/download/superpowers-bridge-v1.9.0/superpowers-bridge.zip
 ```
 
 Local development installation:
