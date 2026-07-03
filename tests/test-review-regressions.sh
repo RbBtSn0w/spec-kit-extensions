@@ -4,7 +4,20 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-python3 - "$ROOT_DIR" <<'PY'
+find_python3() {
+  if command -v python3 >/dev/null 2>&1; then
+    echo "python3"
+  elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(0 if sys.version_info[0] >= 3 else 1)' >/dev/null 2>&1; then
+    echo "python"
+  else
+    echo "ERROR: test-review-regressions.sh requires Python 3 on PATH" >&2
+    exit 1
+  fi
+}
+
+PYTHON_BIN=$(find_python3)
+
+"$PYTHON_BIN" - "$ROOT_DIR" <<'PY'
 from pathlib import Path
 import os
 import sys
