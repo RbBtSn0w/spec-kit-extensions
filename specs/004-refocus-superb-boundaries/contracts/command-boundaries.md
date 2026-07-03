@@ -20,7 +20,8 @@
 - Trigger: mandatory `before_implement` hook or explicit invocation.
 - Reads: the current specification, plan, tasks, and availability of `test-driven-development`.
 - Writes: no feature artifacts and no runtime state.
-- Reports: implementation readiness, missing prerequisites, TDD guidance availability, and native `[P]` task parallelism already declared by Spec Kit.
+- Reports: implementation readiness, missing prerequisites, TDD guidance availability, and behavior-changing tasks without explicit test-first readiness.
+- Must not: inspect or report parallel markers, ordering, shared-file constraints, or any other task-scheduling metadata.
 - Fallback: provide the minimum native TDD gate when the Superpowers skill is unavailable.
 - Must not: select single-agent or multi-agent modes, form batches, dispatch agents, execute tasks, edit task checkboxes, commit changes, or persist status.
 

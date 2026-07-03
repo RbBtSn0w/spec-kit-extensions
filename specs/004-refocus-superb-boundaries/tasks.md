@@ -245,3 +245,8 @@ Task T052: finish boundary in superpowers-bridge/commands/finish.md
 - Complete-plugin installation is allowed, but only five skills belong to Superb's logical runtime contract.
 - Keep `extension.version` at the latest published value until the release workflow publishes a new version.
 - Preserve unrelated staged and unstaged workspace changes throughout implementation.
+
+## Phase 6: Convergence
+
+- [X] T059 Remove `[P]`, ordering, shared-file, and concurrency reporting from the implementation readiness gate and its tests/documentation so the gate reports only test-first readiness per Constitution VI / FR-021 (partial)
+- [X] T060 Replace the external `test-driven-development` hard-requirement classification with a required bridge-native TDD discipline plus optional upstream enhancement, and align config, diagnostics, documentation, and contract tests per FR-022 / SC-006 (contradicts)

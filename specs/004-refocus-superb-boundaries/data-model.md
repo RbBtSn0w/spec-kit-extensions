@@ -60,7 +60,7 @@ No other Superb hook is valid. In particular, `after_tasks`, `after_implement`,
 | Name | Consumer | Availability behavior | Stable dependency |
 |---|---|---|---|
 | `brainstorming` | `brainstorm` | Optional command/hook unavailable or skipped safely | Design alternatives, scope, approval |
-| `test-driven-development` | `implementation-gate` | Bridge-native minimum TDD readiness when absent | RED before production change |
+| `test-driven-development` | `implementation-gate` | Optional upstream enhancement; bridge-native minimum TDD readiness when absent | RED before production change |
 | `systematic-debugging` | `debug` | Standalone unavailable with install guidance | Evidence-led root-cause investigation |
 | `receiving-code-review` | `respond` | Standalone unavailable with install guidance | Technical verification of feedback |
 | `finishing-a-development-branch` | `finish` | Standalone unavailable with install guidance | Fresh tests and explicit branch choice |

@@ -1,7 +1,7 @@
 ---
 description: >
   Mandatory read-only pre-implementation gate. Reports test-first readiness
-  while leaving task execution and concurrency decisions with Spec Kit.
+  while leaving task execution decisions with Spec Kit.
 ---
 
 # Implementation Gate
@@ -49,11 +49,11 @@ Inspect incomplete tasks and report:
 
 - missing artifacts or unresolved prerequisites;
 - whether upstream or native minimum TDD guidance applies;
-- tasks that declare Spec Kit `[P]` independence markers;
-- ordering or shared-file constraints already stated by `tasks.md`.
+- behavior-changing tasks without a focused test command or explicit test-first
+  expectation.
 
-Do not convert `[P]` into an execution policy. The owning Spec Kit implementation
-flow and active agent runtime decide ordering and concurrency.
+Do not interpret task scheduling metadata. The owning Spec Kit implementation
+flow and active agent runtime decide how tasks execute.
 
 Return only a readiness result:
 
@@ -63,7 +63,7 @@ Return only a readiness result:
 **Artifacts:** READY | BLOCKED
 **TDD guidance:** UPSTREAM | NATIVE MINIMUM
 **Incomplete tasks:** [task ids]
-**Spec Kit `[P]` markers:** [task ids or none]
+**Missing test-first readiness:** [task ids or none]
 **Blocking findings:** [findings or none]
 
 Readiness checked; return control to `/speckit.implement`.

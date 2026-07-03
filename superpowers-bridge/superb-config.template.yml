@@ -11,11 +11,15 @@ discovery:
     - workspace
     - global
 
-requirements:
-  hard:
-    - test-driven-development
+disciplines:
+  # Test-first behavior is required even when no upstream skill is installed.
+  required:
+    - test-first
 
+upstream_skills:
+  # These skills deepen guidance but are not required for the Spec Kit path.
   optional:
+    - test-driven-development
     - brainstorming
     - systematic-debugging
     - receiving-code-review

@@ -40,6 +40,11 @@ Superb directly uses five Superpowers skills:
 - `receiving-code-review`
 - `finishing-a-development-branch`
 
+All five are optional upstream enhancements to the Spec Kit path. Test-first
+behavior remains required through the bridge-native minimum when
+`test-driven-development` is unavailable; missing standalone-command skills
+disable only their corresponding Superb command.
+
 The complete plugin may be installed for distribution convenience, but other
 bundled skills are not Superb runtime dependencies.
 

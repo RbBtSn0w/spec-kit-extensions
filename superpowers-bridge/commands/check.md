@@ -18,7 +18,8 @@ Resolve exactly these skills with
 `.specify/extensions/superb/scripts/bash/resolve-skill.sh`:
 
 - `brainstorming` - optional `after_specify` refinement
-- `test-driven-development` - required guidance for `before_implement`, with a native minimum fallback
+- `test-driven-development` - optional upstream enhancement for the required
+  test-first discipline, with a native minimum fallback
 - `systematic-debugging` - standalone `debug`
 - `receiving-code-review` - standalone `respond`
 - `finishing-a-development-branch` - standalone `finish`

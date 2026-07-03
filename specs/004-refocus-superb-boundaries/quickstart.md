@@ -17,7 +17,9 @@ Expected result:
 
 - Exactly seven public commands are declared.
 - Exactly two Superb hooks are declared.
-- Exactly five logical skills are required.
+- Exactly five optional upstream skills are declared in the logical contract;
+  the required test-first discipline remains available through the bridge-native
+  minimum when upstream TDD guidance is absent.
 - No lifecycle store or removed command remains active.
 
 ## Scenario 2: Validate a Pinned Spec Kit Installation
@@ -43,13 +45,13 @@ Expected result:
 
 ## Scenario 4: Exercise the Mandatory Implementation Gate
 
-Run `before_implement` with complete and incomplete feature artifacts, with TDD guidance available and unavailable, and with tasks containing Spec Kit `[P]` markers.
+Run `before_implement` with complete and incomplete feature artifacts, with TDD guidance available and unavailable, and with behavior-changing tasks that do and do not declare focused test-first expectations.
 
 Expected result:
 
 - Missing prerequisites block implementation with actionable output.
 - Missing Superpowers TDD guidance falls back to a native minimum gate.
-- `[P]` markers are reported as Spec Kit-owned parallelism.
+- Task-scheduling metadata is neither interpreted nor reported.
 - No agent mode, batch, dispatch, task execution, checkbox, commit, or status mutation occurs.
 
 ## Scenario 5: Confirm Native Lifecycle Ownership

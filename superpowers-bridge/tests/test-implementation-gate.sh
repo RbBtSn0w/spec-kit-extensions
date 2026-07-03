@@ -14,7 +14,6 @@ for required in \
   'spec.md' \
   'plan.md' \
   'tasks.md' \
-  '[P]' \
   'read-only'; do
   grep -Fq "$required" "$GATE" || { echo "missing gate contract: $required" >&2; exit 1; }
 done
@@ -23,6 +22,10 @@ for forbidden in \
   'Single-Agent' \
   'Multi-Agent' \
   'dispatch' \
+  '[P]' \
+  'ordering' \
+  'shared-file' \
+  'concurrency' \
   'invoke_subagent' \
   'update task checkboxes' \
   'sync-spec-status' \

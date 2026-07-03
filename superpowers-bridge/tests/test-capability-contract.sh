@@ -8,6 +8,7 @@ ruby - "$ROOT_DIR" <<'RUBY'
 require "yaml"
 root = ARGV.fetch(0)
 manifest = YAML.load_file(File.join(root, "extension.yml"))
+config = YAML.load_file(File.join(root, "superb-config.template.yml"))
 commands = manifest.fetch("provides").fetch("commands").map { |entry| entry.fetch("name") }
 expected = %w[
   speckit.superb.check speckit.superb.brainstorm
@@ -16,6 +17,13 @@ expected = %w[
 ]
 abort "command contract mismatch: #{commands}" unless commands == expected
 abort "hook contract mismatch" unless manifest.fetch("hooks").keys == %w[after_specify before_implement]
+abort "legacy hard dependency classification remains" if config.key?("requirements")
+abort "required discipline mismatch" unless config.dig("disciplines", "required") == %w[test-first]
+expected_skills = %w[
+  test-driven-development brainstorming systematic-debugging
+  receiving-code-review finishing-a-development-branch
+]
+abort "optional upstream skill mismatch" unless config.dig("upstream_skills", "optional") == expected_skills
 RUBY
 
 skills=(brainstorming test-driven-development systematic-debugging receiving-code-review finishing-a-development-branch)
