@@ -72,7 +72,7 @@ if ! echo "$guidance_out" | grep -q "https://github.com/RbBtSn0w/adg"; then
   exit 1
 fi
 
-if ! echo "$guidance_out" | grep -q "npx adg plugins add"; then
+if ! echo "$guidance_out" | grep -q "npx @rbbtsn0w/adg plugins add"; then
   echo "FAIL: ensure-skills.sh --print-guidance must include the plugins installation command"
   exit 1
 fi

@@ -38,9 +38,9 @@ print_guidance() {
 
   cat <<EOF
 💡 Install via adg (https://github.com/RbBtSn0w/adg):
-   Compatible:   npx adg plugins add obra/superpowers -g
-   Select global:npx adg skills add obra/superpowers ${skill_args[*]} --global -y
-   Select local: npx adg skills add obra/superpowers ${skill_args[*]} -y
+   Compatible:   npx @rbbtsn0w/adg plugins add obra/superpowers -g
+   Select global:npx @rbbtsn0w/adg skills add obra/superpowers ${skill_args[*]} --global -y
+   Select local: npx @rbbtsn0w/adg skills add obra/superpowers ${skill_args[*]} -y
 
 The compatible plugin path installs the complete upstream package. Superb uses
 only the five skills listed by the selective commands.
@@ -63,15 +63,15 @@ run_install() {
   case "$approach" in
     1)
       # Compatible path: installs the complete upstream plugin package.
-      cmd=("npx" "adg" "plugins" "add" "obra/superpowers" "-g")
+      cmd=("npx" "@rbbtsn0w/adg" "plugins" "add" "obra/superpowers" "-g")
       ;;
     2)
       # Selective global skill install, when supported by the installed adg.
-      cmd=("npx" "adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "--global" "-y")
+      cmd=("npx" "@rbbtsn0w/adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "--global" "-y")
       ;;
     3)
       # Selective project-local skill install, when supported by adg.
-      cmd=("npx" "adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-y")
+      cmd=("npx" "@rbbtsn0w/adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-y")
       ;;
     *)
       echo "ERROR: Invalid approach option '$approach'." >&2

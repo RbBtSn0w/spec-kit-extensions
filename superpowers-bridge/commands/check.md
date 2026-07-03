@@ -44,9 +44,9 @@ only after the user explicitly selects one of these approaches:
 Installer reference: `https://github.com/RbBtSn0w/adg`
 
 ```text
-npx adg plugins add obra/superpowers -g
-npx adg skills add obra/superpowers --skill brainstorming --skill test-driven-development --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --global -y
-npx adg skills add obra/superpowers --skill brainstorming --skill test-driven-development --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch -y
+npx @rbbtsn0w/adg plugins add obra/superpowers -g
+npx @rbbtsn0w/adg skills add obra/superpowers --skill brainstorming --skill test-driven-development --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --global -y
+npx @rbbtsn0w/adg skills add obra/superpowers --skill brainstorming --skill test-driven-development --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch -y
 ```
 
 The plugin choice is the compatibility path and may install additional upstream

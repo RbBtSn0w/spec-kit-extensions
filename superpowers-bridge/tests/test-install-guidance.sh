@@ -30,12 +30,12 @@ if ! grep -q "https://github.com/RbBtSn0w/adg" "$COMMANDS_DIR/check.md"; then
 fi
 
 # Assertion 4: Check check.md contains the Quick Setup templates and three approaches
-if ! grep -q "npx adg plugins add" "$COMMANDS_DIR/check.md"; then
+if ! grep -q "npx @rbbtsn0w/adg plugins add" "$COMMANDS_DIR/check.md"; then
   echo "FAIL: check.md must include the plugins installation command"
   exit 1
 fi
 
-if ! grep -q "npx adg skills add" "$COMMANDS_DIR/check.md"; then
+if ! grep -q "npx @rbbtsn0w/adg skills add" "$COMMANDS_DIR/check.md"; then
   echo "FAIL: check.md must include the skills installation commands"
   exit 1
 fi

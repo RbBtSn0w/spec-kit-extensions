@@ -72,8 +72,8 @@ specify extension add --dev ./superpowers-bridge
 Superpowers installation choices are offered only after explicit user approval:
 
 ```bash
-npx adg plugins add obra/superpowers -g
-npx adg skills add obra/superpowers --skill brainstorming --skill test-driven-development --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --global -y
+npx @rbbtsn0w/adg plugins add obra/superpowers -g
+npx @rbbtsn0w/adg skills add obra/superpowers --skill brainstorming --skill test-driven-development --skill systematic-debugging --skill receiving-code-review --skill finishing-a-development-branch --global -y
 ```
 
 ## Migration
