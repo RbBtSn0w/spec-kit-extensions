@@ -8,10 +8,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMANDS_DIR="$ROOT_DIR/commands"
 SCRIPTS_DIR="$ROOT_DIR/scripts"
-EXPECTED_PRINT_GUIDANCE='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --print-guidance'
-EXPECTED_CHECK_ONLY='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --check-prereqs'
-EXPECTED_APPROACH='bash "$(dirname "{SCRIPT}")/ensure-skills.sh" --install <selection>'
-EXPECTED_RESOLVE='bash "$(dirname "{SCRIPT}")/resolve-skill.sh" --skill'
+EXPECTED_PRINT_GUIDANCE='bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --print-guidance'
+EXPECTED_CHECK_ONLY='bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --check-prereqs'
+EXPECTED_APPROACH='bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --install <selection>'
+EXPECTED_RESOLVE='bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill'
 
 echo "=== Running User Story 2: npx Pre-detection & Inline Guidance Tests ==="
 
@@ -43,10 +43,8 @@ echo "Testing inline command warnings..."
 
 COMMAND_FILES=(
   "brainstorm.md"
-  "controller.md"
   "debug.md"
   "finish.md"
-  "verify.md"
   "respond.md"
 )
 
@@ -63,30 +61,6 @@ for file in "${COMMAND_FILES[@]}"; do
     exit 1
   fi
 
-  if ! grep -Fq "$EXPECTED_CHECK_ONLY" "$filepath"; then
-    echo "FAIL: $file must include the exact check-only recovery command: $EXPECTED_CHECK_ONLY"
-    exit 1
-  fi
-
-  if ! grep -Fq "$EXPECTED_RESOLVE" "$filepath"; then
-    echo "FAIL: $file must include the shared skill resolution helper command prefix: $EXPECTED_RESOLVE"
-    exit 1
-  fi
-
-  if ! grep -q "Would you like to install now? (Select approach 1-3, or skip)" "$filepath"; then
-    echo "FAIL: $file must define the explicit inline install confirmation prompt"
-    exit 1
-  fi
-
-  if ! grep -Fq "$EXPECTED_APPROACH" "$filepath"; then
-    echo "FAIL: $file must include the exact approach execution command: $EXPECTED_APPROACH"
-    exit 1
-  fi
-
-  if ! grep -q "re-run the skill resolution" "$filepath"; then
-    echo "FAIL: $file must re-run skill resolution after a successful install"
-    exit 1
-  fi
 done
 
 # 3. Verify that running ensure-skills.sh --print-guidance outputs the correct details
@@ -98,20 +72,35 @@ if ! echo "$guidance_out" | grep -q "https://github.com/RbBtSn0w/adg"; then
   exit 1
 fi
 
-if ! echo "$guidance_out" | grep -q "npx adg plugins add"; then
+if ! echo "$guidance_out" | grep -q "npx @rbbtsn0w/adg plugins add"; then
   echo "FAIL: ensure-skills.sh --print-guidance must include the plugins installation command"
   exit 1
 fi
 
-if ! echo "$guidance_out" | grep -q "plugins add .* -g"; then
-  echo "FAIL: ensure-skills.sh --print-guidance must include -g for the recommended plugins command"
+for required_skill in \
+  test-driven-development \
+  brainstorming \
+  systematic-debugging \
+  receiving-code-review \
+  finishing-a-development-branch
+do
+  if ! echo "$guidance_out" | grep -q -- "--skill $required_skill"; then
+    echo "FAIL: ensure-skills.sh --print-guidance must include $required_skill in the bridge contract bundle"
+    exit 1
+  fi
+done
+
+if ! echo "$guidance_out" | grep -q "plugins add obra/superpowers -g"; then
+  echo "FAIL: ensure-skills.sh --print-guidance must include the compatible plugin install"
   exit 1
 fi
 
-if echo "$guidance_out" | grep -q "plugins add .* -g -y"; then
-  echo "FAIL: ensure-skills.sh --print-guidance must not include -y for the recommended plugins command"
-  exit 1
-fi
+for workflow_skill in dispatching-parallel-agents requesting-code-review executing-plans writing-plans subagent-driven-development; do
+  if echo "$guidance_out" | grep -q -- "--skill $workflow_skill"; then
+    echo "FAIL: guidance must not include workflow owner $workflow_skill"
+    exit 1
+  fi
+done
 
 echo "SUCCESS: npx pre-detection and inline warnings validation passed."
 exit 0

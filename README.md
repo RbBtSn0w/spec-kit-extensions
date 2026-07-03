@@ -2,7 +2,9 @@
 
 Evidence-first extensions for [Spec Kit](https://github.com/github/spec-kit) workflows.
 
-The current wedge is trustable AI-agent completion: when an agent says an implementation is complete, the workflow should have fresh tests, requirement coverage, and durable evidence to prove it. Broader AI governance and cross-tool portability are roadmap items, not the first product promise.
+The current wedge is focused lifecycle reinforcement: selected disciplines add
+specification quality, test-first readiness, debugging, review, and branch
+handoff without creating a second Spec Kit workflow.
 
 ## Extensions
 
@@ -61,7 +63,7 @@ specify extension add --dev ./superpowers-bridge
 
 ## Product Direction
 
-- **Now:** evidence-based completion gates, status synchronization, and requirement drift review for Spec Kit users.
+- **Now:** focused specification refinement, test-first readiness, debugging, review, and branch handoff for Spec Kit users.
 - **Next:** MemoryLint semantic audits for long-lived agent instructions.
 - **Later:** Universal Bridge portability once the Spec Kit loop proves useful in real repositories.
 

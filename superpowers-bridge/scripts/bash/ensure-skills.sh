@@ -7,16 +7,10 @@ set -eo pipefail
 
 SKILL_LIST=(
   "test-driven-development"
-  "verification-before-completion"
   "brainstorming"
   "systematic-debugging"
   "receiving-code-review"
   "finishing-a-development-branch"
-  "dispatching-parallel-agents"
-  "requesting-code-review"
-  "writing-plans"
-  "executing-plans"
-  "subagent-driven-development"
 )
 
 # Build --skill parameters for adg command
@@ -44,9 +38,12 @@ print_guidance() {
 
   cat <<EOF
 💡 Install via adg (https://github.com/RbBtSn0w/adg):
-   Recommended:  npx adg plugins add obra/superpowers ${skill_args[*]} -g
-   Global:       npx adg skills add obra/superpowers ${skill_args[*]} --global -y
-   Project:      npx adg skills add obra/superpowers ${skill_args[*]} -y
+   Compatible:   npx @rbbtsn0w/adg plugins add obra/superpowers -g
+   Select global:npx @rbbtsn0w/adg skills add obra/superpowers ${skill_args[*]} --global -y
+   Select local: npx @rbbtsn0w/adg skills add obra/superpowers ${skill_args[*]} -y
+
+The compatible plugin path installs the complete upstream package. Superb uses
+only the five skills listed by the selective commands.
 
 Run /speckit.superb.check for full diagnostics and interactive installation.
 EOF
@@ -65,16 +62,16 @@ run_install() {
 
   case "$approach" in
     1)
-      # Recommended: plugins add
-      cmd=("npx" "adg" "plugins" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-g")
+      # Compatible path: installs the complete upstream plugin package.
+      cmd=("npx" "@rbbtsn0w/adg" "plugins" "add" "obra/superpowers" "-g")
       ;;
     2)
-      # Alternative: skills add --global
-      cmd=("npx" "adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "--global" "-y")
+      # Selective global skill install, when supported by the installed adg.
+      cmd=("npx" "@rbbtsn0w/adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "--global" "-y")
       ;;
     3)
-      # Alternative: skills add (project local)
-      cmd=("npx" "adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-y")
+      # Selective project-local skill install, when supported by adg.
+      cmd=("npx" "@rbbtsn0w/adg" "skills" "add" "obra/superpowers" "${SKILL_PARAMS[@]}" "-y")
       ;;
     *)
       echo "ERROR: Invalid approach option '$approach'." >&2

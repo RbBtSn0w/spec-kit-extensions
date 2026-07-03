@@ -11,47 +11,34 @@ discovery:
     - workspace
     - global
 
-requirements:
-  hard:
-    - test-driven-development
-    - verification-before-completion
+disciplines:
+  # Test-first behavior is required even when no upstream skill is installed.
+  required:
+    - test-first
 
+upstream_skills:
+  # These skills deepen guidance but are not required for the Spec Kit path.
   optional:
+    - test-driven-development
     - brainstorming
     - systematic-debugging
     - receiving-code-review
     - finishing-a-development-branch
-    - dispatching-parallel-agents
-    - requesting-code-review
-    - writing-plans
 
 hook_policy:
-  # Baseline hook requirements. Required hooks protect implementation and
-  # completion truth; optional hooks improve upstream quality without taking
-  # ownership of Spec Kit stages.
+  # Superb contributes only bounded refinement and readiness hooks.
   required:
-    - after_plan
     - before_implement
-    - after_implement
 
   optional:
     - after_specify
-    - after_tasks
 
 commands:
   enable_brainstorm: true
-  enable_review: true
   enable_critique: true
   enable_debug: true
   enable_finish: true
   enable_respond: true
-
-disciplines:
-  # These optional skills inform existing bridge commands rather than adding
-  # competing Spec Kit workflow stages.
-  enable_parallel_debug_dispatch: true
-  enable_review_handoff_packaging: true
-  enable_task_quality_checks: true
 
 # Local override file (recommended for experimentation, gitignored):
 # superb-config.local.yml

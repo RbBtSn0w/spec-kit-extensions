@@ -13,6 +13,8 @@ mkdir -p "$SANDBOX_DIR/workspace" "$SANDBOX_DIR/home"
 
 export HOME="$SANDBOX_DIR/home"
 
+CONTRACT_SKILLS=(brainstorming test-driven-development systematic-debugging receiving-code-review finishing-a-development-branch)
+
 if [ ! -x "$RESOLVER" ]; then
   echo "FAIL: resolver helper is missing or not executable: $RESOLVER"
   exit 1
@@ -91,6 +93,19 @@ if ! echo "$missing_output" | grep -q '"available":false'; then
   echo "FAIL: missing skill should report available:false"
   exit 1
 fi
+
+# Skill content may evolve across supported upstream versions. Resolution is
+# based only on the stable skill name and readable SKILL.md path.
+for version in v5 v6; do
+  for skill in "${CONTRACT_SKILLS[@]}"; do
+    skill_root="$SANDBOX_DIR/workspace/.agents/skills/$skill"
+    rm -rf "$skill_root"
+    mkdir -p "$skill_root"
+    printf '# %s fixture\nInternal heading %s\n' "$version" "$RANDOM" > "$skill_root/SKILL.md"
+    output="$(cd "$SANDBOX_DIR/workspace" && bash "$RESOLVER" --skill "$skill")"
+    echo "$output" | grep -q '"available":true' || { echo "FAIL: $version $skill did not resolve"; exit 1; }
+  done
+done
 
 rm -rf "$SANDBOX_DIR"
 

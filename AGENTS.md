@@ -17,6 +17,9 @@
 - Command names must follow `speckit.{extension-id}.{command-name}`.
 - Every command markdown file under `commands/` must include the `$ARGUMENTS` context block.
 - If a command depends on scripts, declare them in Markdown frontmatter under `scripts:` instead of relying on undocumented side effects.
+- Use `scripts:` frontmatter with `../../scripts/...` only for Spec Kit core shared helpers that are expected to rewrite to `.specify/scripts/...` at registration time.
+- For extension-owned scripts, templates, configs, or other runtime assets, reference the installed extension path explicitly as `.specify/extensions/<extension-id>/...`; do not rely on repo-relative source paths after installation.
+- Do not use `{SCRIPT}` as a directory anchor to discover sibling helpers. `{SCRIPT}` is only the resolved frontmatter command placeholder, not an extension-root locator.
 - Hook `command:` values must match an entry declared under `provides.commands` exactly.
 - Prefer extension-local config templates such as `*-config.template.yml` and declare them under `provides.config` instead of hardcoding machine-local paths.
 - Extensions in this repo must be additive. Do not directly edit `.specify/scripts/` or `.specify/templates/` from an extension implementation.

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Restored Spec Kit as the sole workflow owner by replacing the old controller
+  with a read-only implementation readiness gate and removing post-task,
+  post-implementation, and post-convergence Superb stages.
+- Reduced Superb's logical Superpowers contract to five directly used skills;
+  complete-plugin installation remains an explicit distribution compatibility
+  option rather than a runtime dependency claim.
+- Removed Superb lifecycle status synchronization, temporary evidence archives,
+  and obsolete orchestration design notes.
+- Narrowed critique, debug, respond, and finish to explicit read/write boundaries.
+
 ## [1.8.0] - 2026-06-30
 ### Added
 
