@@ -3,6 +3,12 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if ! command -v uvx >/dev/null 2>&1; then
+  echo "Skipping Spec Kit 0.12.4 installed-package contract: uvx is not available."
+  exit 0
+fi
+
 SPECIFY=(uvx --from "git+https://github.com/github/spec-kit.git@v0.12.4" specify)
 TEMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TEMP_DIR"' EXIT

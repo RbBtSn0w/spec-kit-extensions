@@ -17,6 +17,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+
       - name: Run shell regression tests
         shell: bash
         run: |
