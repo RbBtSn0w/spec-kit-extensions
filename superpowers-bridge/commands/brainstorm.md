@@ -3,9 +3,6 @@ description: >
   Optional after-specify refinement gate. Bridges an installed
   obra/superpowers brainstorming skill into the active Spec Kit spec.md without
   creating a second design document or replacing speckit.specify.
-scripts:
-  sh: .specify/extensions/superb/scripts/bash/sync-spec-status.sh
-  ps: .specify/extensions/superb/scripts/powershell/sync-spec-status.ps1
 ---
 
 # Brainstorm — Spec Refinement Gate
@@ -48,7 +45,7 @@ Prefer the first readable match in that order. Any workspace match wins over
 any global match. A direct skill-root install wins over a plugin-provided skill
 at the same scope.
 
-If no readable file is found, enter the **inline install recovery flow**:
+If no readable file is found, offer the **inline install recovery flow**:
 1. Run `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --check-prereqs`.
 2. If `npx` is available, show the missing-skill error plus the generated output from
    `bash .specify/extensions/superb/scripts/bash/ensure-skills.sh --print-guidance`, then ask:
@@ -58,9 +55,9 @@ If no readable file is found, enter the **inline install recovery flow**:
 4. After a successful install, re-run the skill resolution by invoking
    `bash .specify/extensions/superb/scripts/bash/resolve-skill.sh --skill brainstorming`
    once before continuing.
-5. If the user skips, `npx` is unavailable, installation fails, or the re-check still
-   cannot resolve the skill, print the guidance and halt execution. The command remains
-   unavailable until the skill is installed.
+5. If the user skips, `npx` is unavailable, installation fails, or the re-check
+   still cannot resolve the skill, leave `spec.md` unchanged, report that the
+   optional refinement was skipped, and return control to Spec Kit.
 
 Report the source you resolved before continuing:
 
@@ -114,7 +111,7 @@ Apply the resolved `brainstorming` skill with these mandatory overrides:
 1. The active Spec Kit `spec.md` is the only design output.
 2. Do **not** write to `docs/superpowers/specs/`.
 3. Do **not** create a new feature branch or feature directory.
-4. Do **not** invoke `writing-plans`.
+4. Do **not** invoke another planning discipline or workflow.
 5. Do **not** generate or modify `plan.md` or `tasks.md`.
 6. Preserve the Spec Kit spec structure and heading order when updating content.
 7. Do not synchronize lifecycle status. `brainstorm` does not write

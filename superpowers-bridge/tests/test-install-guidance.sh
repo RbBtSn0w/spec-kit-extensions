@@ -17,9 +17,9 @@ if [ ! -f "$COMMANDS_DIR/check.md" ]; then
   exit 1
 fi
 
-# Assertion 2: Check check.md contains the Guidance column header
-if ! grep -q "| Guidance |" "$COMMANDS_DIR/check.md"; then
-  echo "FAIL: check.md table must contain a 'Guidance' column"
+# Assertion 2: Check check.md defines installation recovery.
+if ! grep -q "Installation Recovery" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md must define installation recovery"
   exit 1
 fi
 
@@ -46,25 +46,56 @@ if ! grep -q -- "--skill test-driven-development" "$COMMANDS_DIR/check.md"; then
   exit 1
 fi
 
-if ! grep -q -- "subagent-driven-development -g" "$COMMANDS_DIR/check.md"; then
-  echo "FAIL: check.md recommended plugins command must include -g"
+for required_skill in \
+  test-driven-development \
+  systematic-debugging \
+  receiving-code-review \
+  finishing-a-development-branch \
+  brainstorming
+do
+  if ! grep -q -- "--skill $required_skill" "$COMMANDS_DIR/check.md"; then
+    echo "FAIL: check.md installation commands must include $required_skill in the bridge contract bundle"
+    exit 1
+  fi
+done
+
+if ! grep -q -- "plugins add obra/superpowers -g" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md must include the verified compatible plugin command"
   exit 1
 fi
 
-if grep -q -- "subagent-driven-development -g -y" "$COMMANDS_DIR/check.md"; then
-  echo "FAIL: check.md recommended plugins command must not include -y"
+for workflow_skill in executing-plans requesting-code-review writing-plans subagent-driven-development dispatching-parallel-agents; do
+  if grep -E -- "--skill $workflow_skill" "$COMMANDS_DIR/check.md" >/dev/null; then
+    echo "FAIL: check.md must not install workflow owner $workflow_skill"
+    exit 1
+  fi
+done
+
+if ! grep -q "plugin choice is the compatibility path" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md must distinguish full-plugin installation"
   exit 1
 fi
 
-# Assertion 6: Check for Hard Requirements grouping under Quick Setup (T021)
-if ! grep -q "Hard Requirements" "$COMMANDS_DIR/check.md"; then
-  echo "FAIL: check.md must group Hard Requirements under Quick Setup"
+# Assertion 6: Check for the required gate's native fallback behavior.
+if ! grep -q "native minimum" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md must describe the native TDD minimum"
   exit 1
 fi
 
-# Assertion 7: Check for Optional Skills grouping under Quick Setup (T021)
-if ! grep -q "Optional Skills" "$COMMANDS_DIR/check.md"; then
-  echo "FAIL: check.md must group Optional Skills under Quick Setup"
+# Assertion 7: Check for optional behavior.
+if ! grep -q "optional skill" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md must describe optional skills"
+  exit 1
+fi
+
+# Assertion 8: Check check.md exposes only the focused hook contract.
+if ! grep -q "before_implement | /speckit.superb.implementation-gate" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md must report the implementation readiness hook"
+  exit 1
+fi
+
+if grep -Eq "after_tasks|after_implement|after_converge" "$COMMANDS_DIR/check.md"; then
+  echo "FAIL: check.md must not report removed lifecycle hooks"
   exit 1
 fi
 

@@ -24,8 +24,8 @@
         ]
       },
       "provides": {
-        "commands": 10,
-        "hooks": 6
+        "commands": 7,
+        "hooks": 2
       },
       "tags": [
         "methodology",
@@ -34,7 +34,7 @@
         "workflow",
         "superpowers",
         "brainstorming",
-        "verification",
+        "readiness",
         "debugging",
         "branch-management"
       ],

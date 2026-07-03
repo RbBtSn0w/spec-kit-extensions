@@ -23,8 +23,16 @@ jobs:
           bash tests/test-review-regressions.sh
           bash tests/test-release-workflow.sh
           bash tests/test-catalog.sh
-          bash superpowers-bridge/tests/test-status-sync.sh
-          bash superpowers-bridge/tests/test-archive-evidence.sh
+          bash tests/test-superb-path-contract.sh
+          bash superpowers-bridge/tests/test-capability-contract.sh
+          bash superpowers-bridge/tests/test-lifecycle-routing.sh
+          bash superpowers-bridge/tests/test-implementation-gate.sh
+          bash superpowers-bridge/tests/test-command-boundaries.sh
+          bash superpowers-bridge/tests/test-workflow-contract.sh
+          bash superpowers-bridge/tests/test-install-guidance.sh
+          bash superpowers-bridge/tests/test-resolve-skill.sh
+          bash superpowers-bridge/tests/test-e2e-installation.sh
+          bash superpowers-bridge/tests/test-spec-kit-012-install.sh
           bash universal-bridge/tests/test-pre-commit.sh
           bash tests/verify-feasibility.sh
           bash memorylint/tests/test-memorylint-regressions.sh
@@ -33,16 +41,3 @@ jobs:
           bash memorylint/tests/test-workspace-audit.sh
           bash memorylint/tests/test-apply-workflow.sh
           bash memorylint/tests/test-load-agents-proof.sh
-
-  powershell-bridge-tests:
-    name: powershell-bridge-tests
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Run PowerShell bridge tests
-        shell: pwsh
-        run: |
-          pwsh -File superpowers-bridge/tests/test-status-sync.ps1
-          pwsh -File superpowers-bridge/tests/test-archive-evidence.ps1

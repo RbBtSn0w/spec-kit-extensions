@@ -15,14 +15,16 @@ root = Path(sys.argv[1])
 root_readme = (root / "README.md").read_text(encoding="utf-8")
 memorylint_readme = (root / "memorylint/README.md").read_text(encoding="utf-8")
 bridge_readme = (root / "superpowers-bridge/README.md").read_text(encoding="utf-8")
+workflow = (root / "superpowers-bridge/WORKFLOW.md").read_text(encoding="utf-8")
 extensions = (root / ".specify/extensions.yml").read_text(encoding="utf-8")
 catalog = json.loads((root / "catalog.json").read_text(encoding="utf-8"))
 
-if "`review` vs `converge`" not in bridge_readme:
-    raise SystemExit("FAIL: bridge README lacks the review-vs-converge boundary")
-for token in ("Plan-stage prevention", "Delivery-stage remediation", "after_converge"):
-    if token not in bridge_readme:
-        raise SystemExit(f"FAIL: bridge README lacks convergence documentation: {token}")
+for token in ("after_specify", "before_implement", "speckit.converge"):
+    if token not in workflow:
+        raise SystemExit(f"FAIL: workflow lacks focused lifecycle documentation: {token}")
+for forbidden in ("after_tasks", "after_implement", "after_converge"):
+    if f"| `{forbidden}` |" in workflow:
+        raise SystemExit(f"FAIL: workflow registers removed hook: {forbidden}")
 
 for name, text in (("README.md", root_readme), ("memorylint/README.md", memorylint_readme)):
     if "opt-in" not in text or "0.12" not in text:

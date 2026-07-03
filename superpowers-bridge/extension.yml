@@ -11,7 +11,7 @@ extension:
   homepage: https://github.com/RbBtSn0w/spec-kit-extensions
 
 requires:
-  speckit_version: ">=0.11.0"
+  speckit_version: ">=0.12.0"
   tools:
     - name: superpowers
       required: false
@@ -22,8 +22,8 @@ provides:
     - name: speckit.superb.check
       file: commands/check.md
       description: >
-        Bridge-native diagnostics command. Verifies that required and optional
-        superpowers skills are installed in workspace or global skill roots and
+        Bridge-native diagnostics command. Verifies that the five Superpowers
+        contract skills are installed in workspace or global skill roots and
         reports which hooks are ready to run.
 
     - name: speckit.superb.brainstorm
@@ -33,28 +33,11 @@ provides:
         superpowers brainstorming skill into the active Spec Kit spec.md without
         creating a second design document or replacing speckit.specify.
 
-    - name: speckit.superb.controller
-      file: commands/controller.md
+    - name: speckit.superb.implementation-gate
+      file: commands/implementation-gate.md
       description: >
-        Mandatory pre-implement gate. Bridges an installed superpowers
-        test-driven-development, subagent-driven-development, and executing-plans
-        skills to manage task implementation, quality gates, and concurrency.
-
-    - name: speckit.superb.review
-      file: commands/review.md
-      description: >
-        Verify the generated tasks.md covers every requirement in spec.md.
-        Produces a gap report and TDD-readiness check before implementation
-        begins so missing coverage is caught at planning time, not delivery
-        time. Bridge-native command.
-
-    - name: speckit.superb.verify
-      file: commands/verify.md
-      description: >
-        Mandatory completion gate. Bridges an installed superpowers
-        verification-before-completion skill and extends it with spec-kit's
-        spec-coverage checklist. No task may be marked done without fresh
-        evidence.
+        Mandatory pre-implement gate. Reports test-first readiness and falls
+        back to a bridge-native minimum when upstream TDD guidance is absent.
 
     - name: speckit.superb.critique
       file: commands/critique.md
@@ -71,14 +54,6 @@ provides:
         systematic-debugging skill. Enforces root-cause investigation before any
         fix attempt. Escalation path from the TDD gate when 2+ fixes fail.
 
-    - name: speckit.superb.finish
-      file: commands/finish.md
-      description: >
-        Development branch completion. Bridges an installed superpowers
-        finishing-a-development-branch skill. Presents structured options
-        (merge / PR / keep / discard) after verification passes. Call after
-        verify succeeds.
-
     - name: speckit.superb.respond
       file: commands/respond.md
       description: >
@@ -87,11 +62,11 @@ provides:
         implementing feedback. Pairs with critique as the implementer
         counterpart.
 
-    - name: speckit.superb.plan-gate
-      file: commands/plan-gate.md
+    - name: speckit.superb.finish
+      file: commands/finish.md
       description: >
-        Plan-stage SDD readiness gate. Enforces checklist granularity,
-        placeholder rejection, and SDD worker directives injection.
+        Development branch completion after Spec Kit convergence and fresh
+        project checks. Presents explicit merge, PR, keep, or discard options.
 
   config:
     - name: superb-config.yml
@@ -109,44 +84,12 @@ hooks:
       brainstorming skill to strengthen the active Spec Kit spec.md while
       preserving Spec Kit ownership of specification creation.
 
-  after_plan:
-    command: speckit.superb.plan-gate
-    optional: false
-    description: >
-      Mandatory Plan gate. Verifies plan completeness and injects SDD
-      directives into plan.md for agentic workers.
-
-  after_tasks:
-    command: speckit.superb.review
-    optional: true
-    prompt: "Review tasks.md for coverage and TDD-readiness before implementation?"
-    description: >
-      Catches missing or under-specified tasks at planning time. Produces a
-      requirement coverage and TDD-readiness report. Bridge-native logic.
-
   before_implement:
-    command: speckit.superb.controller
+    command: speckit.superb.implementation-gate
     optional: false
     description: >
-      Mandatory Controller gate. Bridges installed execution and quality skills
-      to orchestrate task implementation.
-      
-  after_implement:
-    command: speckit.superb.verify
-    optional: false
-    description: >
-      Mandatory completion gate. Bridges an installed superpowers
-      verification-before-completion skill and extends it with spec-kit
-      spec-coverage checks. Prevents false completions.
-
-  after_converge:
-    command: speckit.superb.verify
-    optional: false
-    description: >
-      Mandatory evidence-first gate after convergence. speckit-converge only assesses
-      and appends remaining tasks to tasks.md; the hook runs verification at convergence
-      completion to ensure convergence-driven work still proves completion with fresh evidence.
-      Blocking-on-missing-evidence is inherited from the same verify command used by after_implement.
+      Mandatory readiness gate. Reports test-first constraints without
+      executing tasks or taking ownership from speckit.implement.
 
 tags:
   - quality-gates

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # superpowers-bridge/tests/test-e2e-installation.sh
-# End-to-End test to verify the recommended plugin installation flow using adg with the current global flag contract.
+# End-to-End source-payload test for the focused bridge contract.
 # Uses a clean, temporary sandboxed HOME directory to avoid touching the user's actual files.
 
 set -euo pipefail
@@ -11,6 +11,18 @@ SCRIPTS_DIR="$ROOT_DIR/scripts"
 SANDBOX_DIR="$ROOT_DIR/tests/sandbox_e2e"
 
 echo "=== Running E2E Installation Test ==="
+
+EXPECTED_COMMANDS=(check brainstorm implementation-gate critique debug respond finish)
+for command in "${EXPECTED_COMMANDS[@]}"; do
+  test -f "$ROOT_DIR/commands/$command.md" || { echo "FAIL: missing command payload: $command"; exit 1; }
+done
+
+for removed in \
+  commands/controller.md commands/review.md commands/verify.md commands/plan-gate.md \
+  scripts/bash/sync-spec-status.sh scripts/bash/archive-evidence.sh \
+  scripts/powershell/sync-spec-status.ps1 scripts/powershell/archive-evidence.ps1; do
+  test ! -e "$ROOT_DIR/$removed" || { echo "FAIL: removed payload remains: $removed"; exit 1; }
+done
 
 if ! command -v npx &>/dev/null; then
   echo "Skipping E2E installation test: npx is not available."
@@ -32,30 +44,27 @@ if [ -d "$GLOBAL_PLUGINS_DIR" ]; then
   exit 1
 fi
 
-# 3. Execute ensure-skills.sh with Approach 1 (Recommended plugins add with -g)
+# 3. Execute Approach 1 (compatible complete-plugin install).
 echo "Executing ensure-skills.sh --install 1..."
 # We run it with the override SPECIFY_FEATURE to bypass check-prerequisites if needed,
 # although ensure-skills.sh doesn't restrict branches.
 bash "$SCRIPTS_DIR/bash/ensure-skills.sh" --install 1
 
-# 4. Verify that the plugin directory and skills have been successfully created/cloned
+# 4. Verify that the five bridge contract skills are available in the plugin.
 echo "Verifying installation output in sandbox..."
 
-TARGET_PLUGIN_DIR="$GLOBAL_PLUGINS_DIR/obra__superpowers/superpowers"
-if [ ! -d "$TARGET_PLUGIN_DIR" ]; then
-  echo "FAIL: Plugin directory was not created: $TARGET_PLUGIN_DIR"
-  exit 1
-fi
-
-# Let's check that some core skills exist in the plugin
 REQUIRED_SKILLS=(
   "test-driven-development"
-  "verification-before-completion"
   "brainstorming"
+  "systematic-debugging"
+  "receiving-code-review"
+  "finishing-a-development-branch"
 )
 
+TARGET_SKILLS_DIR="$GLOBAL_PLUGINS_DIR/obra__superpowers/superpowers/skills"
+
 for skill in "${REQUIRED_SKILLS[@]}"; do
-  skill_dir="$TARGET_PLUGIN_DIR/skills/$skill"
+  skill_dir="$TARGET_SKILLS_DIR/$skill"
   if [ ! -d "$skill_dir" ]; then
     echo "FAIL: Skill directory does not exist: $skill_dir"
     exit 1

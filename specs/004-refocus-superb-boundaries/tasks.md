@@ -23,7 +23,7 @@ description: "Implementation tasks for refocusing Superb as a bounded Spec Kit e
 
 **Purpose**: Establish the invariant that the Superb refocus does not alter the independent MemoryLint extension.
 
-- [ ] T001 Add and run a passing characterization guard for `memorylint/extension.yml` commands, hooks, dependencies, and mutation boundaries in `tests/test-review-regressions.sh`
+- [X] T001 Add and run a passing characterization guard for `memorylint/extension.yml` commands, hooks, dependencies, and mutation boundaries in `tests/test-review-regressions.sh`
 
 **Checkpoint**: The MemoryLint boundary is green before any Superb payload change and must remain green throughout implementation.
 
@@ -39,24 +39,24 @@ description: "Implementation tasks for refocusing Superb as a bounded Spec Kit e
 
 > Write these tests first and confirm they fail against the current five-hook payload for the intended contract reasons.
 
-- [ ] T002 [P] [US1] Add failing assertions for exactly `after_specify` and `before_implement`, native task/analyze/converge routing, and absence of Superb lifecycle status in `superpowers-bridge/tests/test-lifecycle-routing.sh`
-- [ ] T003 [P] [US1] Add failing read-only, missing-artifact, installed-TDD, missing-TDD fallback, and native `[P]` reporting scenarios in `superpowers-bridge/tests/test-implementation-gate.sh`
-- [ ] T004 [P] [US1] Add failing installed-payload assertions that reject `controller.md`, `review.md`, `verify.md`, `plan-gate.md`, status-sync helpers, and evidence archives in `superpowers-bridge/tests/test-e2e-installation.sh`
+- [X] T002 [P] [US1] Add failing assertions for exactly `after_specify` and `before_implement`, native task/analyze/converge routing, and absence of Superb lifecycle status in `superpowers-bridge/tests/test-lifecycle-routing.sh`
+- [X] T003 [P] [US1] Add failing read-only, missing-artifact, installed-TDD, missing-TDD fallback, and native `[P]` reporting scenarios in `superpowers-bridge/tests/test-implementation-gate.sh`
+- [X] T004 [P] [US1] Add failing installed-payload assertions that reject `controller.md`, `review.md`, `verify.md`, `plan-gate.md`, status-sync helpers, and evidence archives in `superpowers-bridge/tests/test-e2e-installation.sh`
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Replace controller/review/verify registrations and five hooks with `speckit.superb.implementation-gate` plus the exact two-hook routing in `superpowers-bridge/extension.yml`
-- [ ] T006 [US1] Implement the read-only TDD readiness and native-minimum fallback contract without mode selection, batching, dispatch, task mutation, commits, or status writes in `superpowers-bridge/commands/implementation-gate.md`
-- [ ] T007 [US1] Restrict optional spec refinement to user-approved `spec.md` changes and remove status-script declarations and parallel design outputs in `superpowers-bridge/commands/brainstorm.md`
-- [ ] T008 [P] [US1] Remove the superseded controller payload after T002-T004 establish replacement coverage in `superpowers-bridge/commands/controller.md`
-- [ ] T009 [P] [US1] Remove the post-tasks review payload after T002-T004 establish native task/analyze routing coverage in `superpowers-bridge/commands/review.md`
-- [ ] T010 [P] [US1] Remove the duplicate completion gate after T002-T004 establish implement/converge ownership coverage in `superpowers-bridge/commands/verify.md`
-- [ ] T011 [P] [US1] Remove the unregistered legacy planning gate after T004 rejects stale installed payload in `superpowers-bridge/commands/plan-gate.md`
-- [ ] T012 [P] [US1] Remove Superb status persistence from `superpowers-bridge/scripts/bash/sync-spec-status.sh`
-- [ ] T013 [P] [US1] Remove Superb status persistence from `superpowers-bridge/scripts/powershell/sync-spec-status.ps1`
-- [ ] T014 [P] [US1] Remove temporary evidence persistence from `superpowers-bridge/scripts/bash/archive-evidence.sh`
-- [ ] T015 [P] [US1] Remove temporary evidence persistence from `superpowers-bridge/scripts/powershell/archive-evidence.ps1`
-- [ ] T016 [US1] Run `bash superpowers-bridge/tests/test-lifecycle-routing.sh`, `bash superpowers-bridge/tests/test-implementation-gate.sh`, and `bash superpowers-bridge/tests/test-e2e-installation.sh` to prove the US1 workflow independently
+- [X] T005 [US1] Replace controller/review/verify registrations and five hooks with `speckit.superb.implementation-gate` plus the exact two-hook routing in `superpowers-bridge/extension.yml`
+- [X] T006 [US1] Implement the read-only TDD readiness and native-minimum fallback contract without mode selection, batching, dispatch, task mutation, commits, or status writes in `superpowers-bridge/commands/implementation-gate.md`
+- [X] T007 [US1] Restrict optional spec refinement to user-approved `spec.md` changes and remove status-script declarations and parallel design outputs in `superpowers-bridge/commands/brainstorm.md`
+- [X] T008 [P] [US1] Remove the superseded controller payload after T002-T004 establish replacement coverage in `superpowers-bridge/commands/controller.md`
+- [X] T009 [P] [US1] Remove the post-tasks review payload after T002-T004 establish native task/analyze routing coverage in `superpowers-bridge/commands/review.md`
+- [X] T010 [P] [US1] Remove the duplicate completion gate after T002-T004 establish implement/converge ownership coverage in `superpowers-bridge/commands/verify.md`
+- [X] T011 [P] [US1] Remove the unregistered legacy planning gate after T004 rejects stale installed payload in `superpowers-bridge/commands/plan-gate.md`
+- [X] T012 [P] [US1] Remove Superb status persistence from `superpowers-bridge/scripts/bash/sync-spec-status.sh`
+- [X] T013 [P] [US1] Remove Superb status persistence from `superpowers-bridge/scripts/powershell/sync-spec-status.ps1`
+- [X] T014 [P] [US1] Remove temporary evidence persistence from `superpowers-bridge/scripts/bash/archive-evidence.sh`
+- [X] T015 [P] [US1] Remove temporary evidence persistence from `superpowers-bridge/scripts/powershell/archive-evidence.ps1`
+- [X] T016 [US1] Run `bash superpowers-bridge/tests/test-lifecycle-routing.sh`, `bash superpowers-bridge/tests/test-implementation-gate.sh`, and `bash superpowers-bridge/tests/test-e2e-installation.sh` to prove the US1 workflow independently
 
 **Checkpoint**: The normal Spec Kit path works with two bounded Superb hooks and no Superb-owned lifecycle state.
 
@@ -72,39 +72,39 @@ description: "Implementation tasks for refocusing Superb as a bounded Spec Kit e
 
 > Write these tests first and confirm they fail against the current six-skill/config/documentation surface.
 
-- [ ] T017 [P] [US2] Add a failing source contract for exactly seven commands, two hooks, five logical skills, zero lifecycle stores, forbidden-surface absence, and all active Superb documents in `superpowers-bridge/tests/test-capability-contract.sh`
-- [ ] T018 [P] [US2] Add failing five-skill installation guidance and complete-plugin isolation scenarios in `superpowers-bridge/tests/test-install-guidance.sh`
-- [ ] T019 [P] [US2] Add a failing real temporary installation and registered-payload inspection using pinned Spec Kit 0.12.4 in `superpowers-bridge/tests/test-spec-kit-012-install.sh`
-- [ ] T020 [P] [US2] Add failing supported-version fixtures that resolve five disciplines without internal headings, prompt filenames, or agent names in `superpowers-bridge/tests/test-resolve-skill.sh`
+- [X] T017 [P] [US2] Add a failing source contract for exactly seven commands, two hooks, five logical skills, zero lifecycle stores, forbidden-surface absence, and all active Superb documents in `superpowers-bridge/tests/test-capability-contract.sh`
+- [X] T018 [P] [US2] Add failing five-skill installation guidance and complete-plugin isolation scenarios in `superpowers-bridge/tests/test-install-guidance.sh`
+- [X] T019 [P] [US2] Add a failing real temporary installation and registered-payload inspection using pinned Spec Kit 0.12.4 in `superpowers-bridge/tests/test-spec-kit-012-install.sh`
+- [X] T020 [P] [US2] Add failing supported-version fixtures that resolve five disciplines without internal headings, prompt filenames, or agent names in `superpowers-bridge/tests/test-resolve-skill.sh`
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Change prerequisite checks, selective install commands, and diagnostics from six skills to the five contracted disciplines in `superpowers-bridge/scripts/bash/ensure-skills.sh`
-- [ ] T022 [P] [US2] Align hard/optional requirements, two-hook policy, command toggles, and removal of mode-detection settings in `superpowers-bridge/superb-config.template.yml`
-- [ ] T023 [US2] Report exactly five skills, two hooks, four standalone commands, and bounded missing-skill recovery in `superpowers-bridge/commands/check.md`
-- [ ] T024 [P] [US2] Document the capability inventory, artifact-owner routing, five-skill logical contract, and migration from removed surfaces in `superpowers-bridge/WORKFLOW.md`
-- [ ] T025 [P] [US2] Update installation, command, hook, fallback, and compatibility guidance to the exact target contract in `superpowers-bridge/README.md`
-- [ ] T026 [P] [US2] Remove obsolete controller, review, verify, status, and multi-agent orchestration design notes from the active package by deleting `superpowers-bridge/V2-DESIGN-NOTES.md`
-- [ ] T027 [P] [US2] Record the breaking removals and planned release bump only under Unreleased metadata in `superpowers-bridge/CHANGELOG.md`
-- [ ] T028 [US2] Align catalog-facing command and capability metadata without changing the published extension version in `catalog.json`
-- [ ] T029 [P] [US2] Remove the replaced review/converge suite in `superpowers-bridge/tests/test-review-converge-split.sh`
-- [ ] T030 [P] [US2] Remove the replaced post-converge hook suite in `superpowers-bridge/tests/test-after-converge-hook.sh`
-- [ ] T031 [P] [US2] Remove the replaced Bash status-sync suite in `superpowers-bridge/tests/test-status-sync.sh`
-- [ ] T032 [P] [US2] Remove the replaced PowerShell status-sync suite in `superpowers-bridge/tests/test-status-sync.ps1`
-- [ ] T033 [P] [US2] Remove the replaced Bash evidence-archive suite in `superpowers-bridge/tests/test-archive-evidence.sh`
-- [ ] T034 [P] [US2] Remove the replaced PowerShell evidence-archive suite in `superpowers-bridge/tests/test-archive-evidence.ps1`
-- [ ] T035 [P] [US2] Remove the replaced legacy planning-gate suite in `superpowers-bridge/tests/test-plan-gate.sh`
-- [ ] T036 [P] [US2] Remove the replaced stage-runtime controller suite in `superpowers-bridge/tests/test-stage-runtime-contract.sh`
-- [ ] T037 [P] [US2] Remove the replaced concurrency-cascade suite in `superpowers-bridge/tests/test-concurrency-cascade.sh`
-- [ ] T038 [P] [US2] Remove the replaced concurrency-dependency suite in `superpowers-bridge/tests/test-concurrency-dependency.sh`
-- [ ] T039 [P] [US2] Remove the replaced parallel-dispatch suite in `superpowers-bridge/tests/test-parallel-dispatch.sh`
-- [ ] T040 [P] [US2] Remove the replaced SDD-detection suite in `superpowers-bridge/tests/test-sdd-detection.sh`
-- [ ] T041 [P] [US2] Remove the replaced SDD-fallback suite in `superpowers-bridge/tests/test-sdd-fallback.sh`
-- [ ] T042 [P] [US2] Remove the replaced SDD-review suite in `superpowers-bridge/tests/test-sdd-reviews.sh`
-- [ ] T043 [P] [US2] Remove the replaced checkpoint-resume suite in `superpowers-bridge/tests/test-checkpoint-resume.sh`
-- [ ] T044 [P] [US2] Remove the replaced continuous-sync suite in `superpowers-bridge/tests/test-continuous-sync.sh`
-- [ ] T045 [P] [US2] Remove the replaced discoveries-lifecycle suite in `superpowers-bridge/tests/test-discoveries-lifecycle.sh`
-- [ ] T046 [US2] Run `bash superpowers-bridge/tests/test-capability-contract.sh`, `bash superpowers-bridge/tests/test-install-guidance.sh`, `bash superpowers-bridge/tests/test-resolve-skill.sh`, and `bash superpowers-bridge/tests/test-spec-kit-012-install.sh` to prove the US2 inventory independently
+- [X] T021 [US2] Change prerequisite checks, selective install commands, and diagnostics from six skills to the five contracted disciplines in `superpowers-bridge/scripts/bash/ensure-skills.sh`
+- [X] T022 [P] [US2] Align hard/optional requirements, two-hook policy, command toggles, and removal of mode-detection settings in `superpowers-bridge/superb-config.template.yml`
+- [X] T023 [US2] Report exactly five skills, two hooks, four standalone commands, and bounded missing-skill recovery in `superpowers-bridge/commands/check.md`
+- [X] T024 [P] [US2] Document the capability inventory, artifact-owner routing, five-skill logical contract, and migration from removed surfaces in `superpowers-bridge/WORKFLOW.md`
+- [X] T025 [P] [US2] Update installation, command, hook, fallback, and compatibility guidance to the exact target contract in `superpowers-bridge/README.md`
+- [X] T026 [P] [US2] Remove obsolete controller, review, verify, status, and multi-agent orchestration design notes from the active package by deleting `superpowers-bridge/V2-DESIGN-NOTES.md`
+- [X] T027 [P] [US2] Record the breaking removals and planned release bump only under Unreleased metadata in `superpowers-bridge/CHANGELOG.md`
+- [X] T028 [US2] Align catalog-facing command and capability metadata without changing the published extension version in `catalog.json`
+- [X] T029 [P] [US2] Remove the replaced review/converge suite in `superpowers-bridge/tests/test-review-converge-split.sh`
+- [X] T030 [P] [US2] Remove the replaced post-converge hook suite in `superpowers-bridge/tests/test-after-converge-hook.sh`
+- [X] T031 [P] [US2] Remove the replaced Bash status-sync suite in `superpowers-bridge/tests/test-status-sync.sh`
+- [X] T032 [P] [US2] Remove the replaced PowerShell status-sync suite in `superpowers-bridge/tests/test-status-sync.ps1`
+- [X] T033 [P] [US2] Remove the replaced Bash evidence-archive suite in `superpowers-bridge/tests/test-archive-evidence.sh`
+- [X] T034 [P] [US2] Remove the replaced PowerShell evidence-archive suite in `superpowers-bridge/tests/test-archive-evidence.ps1`
+- [X] T035 [P] [US2] Remove the replaced legacy planning-gate suite in `superpowers-bridge/tests/test-plan-gate.sh`
+- [X] T036 [P] [US2] Remove the replaced stage-runtime controller suite in `superpowers-bridge/tests/test-stage-runtime-contract.sh`
+- [X] T037 [P] [US2] Remove the replaced concurrency-cascade suite in `superpowers-bridge/tests/test-concurrency-cascade.sh`
+- [X] T038 [P] [US2] Remove the replaced concurrency-dependency suite in `superpowers-bridge/tests/test-concurrency-dependency.sh`
+- [X] T039 [P] [US2] Remove the replaced parallel-dispatch suite in `superpowers-bridge/tests/test-parallel-dispatch.sh`
+- [X] T040 [P] [US2] Remove the replaced SDD-detection suite in `superpowers-bridge/tests/test-sdd-detection.sh`
+- [X] T041 [P] [US2] Remove the replaced SDD-fallback suite in `superpowers-bridge/tests/test-sdd-fallback.sh`
+- [X] T042 [P] [US2] Remove the replaced SDD-review suite in `superpowers-bridge/tests/test-sdd-reviews.sh`
+- [X] T043 [P] [US2] Remove the replaced checkpoint-resume suite in `superpowers-bridge/tests/test-checkpoint-resume.sh`
+- [X] T044 [P] [US2] Remove the replaced continuous-sync suite in `superpowers-bridge/tests/test-continuous-sync.sh`
+- [X] T045 [P] [US2] Remove the replaced discoveries-lifecycle suite in `superpowers-bridge/tests/test-discoveries-lifecycle.sh`
+- [X] T046 [US2] Run `bash superpowers-bridge/tests/test-capability-contract.sh`, `bash superpowers-bridge/tests/test-install-guidance.sh`, `bash superpowers-bridge/tests/test-resolve-skill.sh`, and `bash superpowers-bridge/tests/test-spec-kit-012-install.sh` to prove the US2 inventory independently
 
 **Checkpoint**: Source, configuration, installer, all active documents, catalog, and installed package expose exactly 7 commands, 2 hooks, 5 skills, and 0 Superb lifecycle stores.
 
@@ -120,16 +120,16 @@ description: "Implementation tasks for refocusing Superb as a bounded Spec Kit e
 
 > Write these tests first and confirm they fail against the current broad standalone commands.
 
-- [ ] T047 [P] [US3] Add failing read/write and forbidden-behavior assertions for all four standalone commands in `superpowers-bridge/tests/test-command-boundaries.sh`
-- [ ] T048 [P] [US3] Add failing user-language assertions rejecting controller, worker, mode-selection, hidden dispatch, and Superb verify-prerequisite wording in `superpowers-bridge/tests/test-workflow-contract.sh`
+- [X] T047 [P] [US3] Add failing read/write and forbidden-behavior assertions for all four standalone commands in `superpowers-bridge/tests/test-command-boundaries.sh`
+- [X] T048 [P] [US3] Add failing user-language assertions rejecting controller, worker, mode-selection, hidden dispatch, and Superb verify-prerequisite wording in `superpowers-bridge/tests/test-workflow-contract.sh`
 
 ### Implementation for User Story 3
 
-- [ ] T049 [P] [US3] Narrow critique to read-only evidence-backed findings and artifact-owner remediation routing in `superpowers-bridge/commands/critique.md`
-- [ ] T050 [P] [US3] Narrow debug to the current failing task, focused RED-GREEN verification, and return to the owning implementation flow in `superpowers-bridge/commands/debug.md`
-- [ ] T051 [P] [US3] Route requirement, architecture, and task-scope feedback to the earliest Spec Kit owner before accepted in-scope fixes in `superpowers-bridge/commands/respond.md`
-- [ ] T052 [P] [US3] Replace Superb verify/status prerequisites with fresh checks, explicit branch choices, and foreign-workspace preservation in `superpowers-bridge/commands/finish.md`
-- [ ] T053 [US3] Run `bash superpowers-bridge/tests/test-command-boundaries.sh` and `bash superpowers-bridge/tests/test-workflow-contract.sh` to prove the US3 command boundaries independently
+- [X] T049 [P] [US3] Narrow critique to read-only evidence-backed findings and artifact-owner remediation routing in `superpowers-bridge/commands/critique.md`
+- [X] T050 [P] [US3] Narrow debug to the current failing task, focused RED-GREEN verification, and return to the owning implementation flow in `superpowers-bridge/commands/debug.md`
+- [X] T051 [P] [US3] Route requirement, architecture, and task-scope feedback to the earliest Spec Kit owner before accepted in-scope fixes in `superpowers-bridge/commands/respond.md`
+- [X] T052 [P] [US3] Replace Superb verify/status prerequisites with fresh checks, explicit branch choices, and foreign-workspace preservation in `superpowers-bridge/commands/finish.md`
+- [X] T053 [US3] Run `bash superpowers-bridge/tests/test-command-boundaries.sh` and `bash superpowers-bridge/tests/test-workflow-contract.sh` to prove the US3 command boundaries independently
 
 **Checkpoint**: All retained standalone commands describe user outcomes and evidence without exposing or recreating an orchestration system.
 
@@ -139,11 +139,11 @@ description: "Implementation tasks for refocusing Superb as a bounded Spec Kit e
 
 **Purpose**: Register completed suites and prove repository, package, documentation, and release consistency.
 
-- [ ] T054 Register the existing Superb capability, lifecycle, command-boundary, and pinned-install suites in `.github/workflows/ci.yml` after T002, T003, T004, T017, T019, T047, and T048 create them
-- [ ] T055 [P] Synchronize root Superb overview and published-version references with the final extension surface in `README.md`
-- [ ] T056 Preserve the T001 MemoryLint characterization guard while replacing root expectations for removed review/verify/status behavior with final capability and routing contracts in `tests/test-review-regressions.sh`
-- [ ] T057 Run `bash tests/test-review-regressions.sh`, `bash tests/test-release-workflow.sh`, `bash tests/test-superb-path-contract.sh`, and `bash tests/test-catalog.sh` for repository-level acceptance
-- [ ] T058 Run the YAML parser command and every acceptance command listed in `specs/004-refocus-superb-boundaries/quickstart.md`, then run `git diff --check` as the final evidence gate
+- [X] T054 Register the existing Superb capability, lifecycle, command-boundary, and pinned-install suites in `.github/workflows/ci.yml` after T002, T003, T004, T017, T019, T047, and T048 create them
+- [X] T055 [P] Synchronize root Superb overview and published-version references with the final extension surface in `README.md`
+- [X] T056 Preserve the T001 MemoryLint characterization guard while replacing root expectations for removed review/verify/status behavior with final capability and routing contracts in `tests/test-review-regressions.sh`
+- [X] T057 Run `bash tests/test-review-regressions.sh`, `bash tests/test-release-workflow.sh`, `bash tests/test-superb-path-contract.sh`, and `bash tests/test-catalog.sh` for repository-level acceptance
+- [X] T058 Run the YAML parser command and every acceptance command listed in `specs/004-refocus-superb-boundaries/quickstart.md`, then run `git diff --check` as the final evidence gate
 
 ---
 

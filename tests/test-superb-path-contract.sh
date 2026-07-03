@@ -12,7 +12,9 @@ fi
 
 assert_paths_payload() {
   local json_payload="$1"
-  local expected_feature_dir="$ROOT_DIR/specs/003-upstream-alignment"
+  local branch
+  branch="$(git -C "$ROOT_DIR" branch --show-current)"
+  local expected_feature_dir="$ROOT_DIR/specs/$branch"
   local expected_feature_spec="$expected_feature_dir/spec.md"
   local expected_tasks="$expected_feature_dir/tasks.md"
 
@@ -45,7 +47,7 @@ subdir_payload="$(
 )"
 assert_paths_payload "$subdir_payload"
 
-if rg -n '\.specify/scripts/bash/(sync-spec-status|resolve-skill|ensure-skills)\.sh' \
+if rg -n '\.specify/scripts/bash/(resolve-skill|ensure-skills)\.sh' \
   "$ROOT_DIR/superpowers-bridge" \
   "$ROOT_DIR/.specify" \
   "$ROOT_DIR/docs" \
@@ -54,10 +56,19 @@ if rg -n '\.specify/scripts/bash/(sync-spec-status|resolve-skill|ensure-skills)\
   exit 1
 fi
 
-if ! rg -n '\.specify/extensions/superb/scripts/(bash|powershell)/(sync-spec-status|resolve-skill|ensure-skills|archive-evidence)\.(sh|ps1)' \
+if ! rg -n '\.specify/extensions/superb/scripts/bash/(resolve-skill|ensure-skills)\.sh' \
   "$ROOT_DIR/superpowers-bridge" \
   "$ROOT_DIR/tests" >/dev/null; then
   echo "FAIL: missing explicit superb helper paths under .specify/extensions/superb/" >&2
+  exit 1
+fi
+
+if rg -n '(sync-spec-status|archive-evidence)' \
+  "$ROOT_DIR/superpowers-bridge/extension.yml" \
+  "$ROOT_DIR/superpowers-bridge/commands" \
+  "$ROOT_DIR/superpowers-bridge/scripts" \
+  "$ROOT_DIR/superpowers-bridge/superb-config.template.yml" >/dev/null; then
+  echo "FAIL: removed lifecycle helper remains referenced" >&2
   exit 1
 fi
 
