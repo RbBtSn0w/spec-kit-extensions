@@ -4,14 +4,14 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if rg -n '\.specify/scripts/bash/(resolve-skill|ensure-skills)\.sh' \
+if grep -R -n -E '\.specify/scripts/bash/(resolve-skill|ensure-skills)\.sh' \
   "$ROOT_DIR/superpowers-bridge" \
   "$ROOT_DIR/tests" >/dev/null; then
   echo "FAIL: found stale superb helper path under .specify/scripts/bash/" >&2
   exit 1
 fi
 
-if ! rg -n '\.specify/extensions/superb/scripts/bash/(resolve-skill|ensure-skills)\.sh' \
+if ! grep -R -n -E '\.specify/extensions/superb/scripts/bash/(resolve-skill|ensure-skills)\.sh' \
   "$ROOT_DIR/superpowers-bridge" \
   "$ROOT_DIR/tests" >/dev/null; then
   echo "FAIL: missing explicit superb helper paths under .specify/extensions/superb/" >&2
