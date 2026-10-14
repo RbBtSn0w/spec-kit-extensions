@@ -48,5 +48,8 @@ bash "$ROOT_DIR/superpowers-bridge/tests/test-lifecycle-routing.sh"
 bash "$ROOT_DIR/superpowers-bridge/tests/test-implementation-gate.sh"
 bash "$ROOT_DIR/superpowers-bridge/tests/test-command-boundaries.sh"
 bash "$ROOT_DIR/superpowers-bridge/tests/test-workflow-contract.sh"
+bash "$ROOT_DIR/gh-address-cr/tests/test-manifest.sh"
+bash "$ROOT_DIR/gh-address-cr/tests/test-commands.sh"
+bash "$ROOT_DIR/gh-address-cr/tests/test-runtime-fallback.sh"
 
 echo "review regressions passed"

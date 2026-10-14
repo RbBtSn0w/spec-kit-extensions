@@ -1,0 +1,62 @@
+schema_version: "1.0"
+
+extension:
+  id: "gh-address-cr"
+  name: "gh-address-cr"
+  version: 0.1.0
+  description: "Auditable GitHub PR review resolution & trust-gated address engine: resolves review threads, ingests findings, validates fixes, and proves closure."
+  author: "RbBtSn0w"
+  repository: "https://github.com/RbBtSn0w/spec-kit-extensions"
+  homepage: "https://github.com/RbBtSn0w/gh-address-cr"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.12.0"
+  tools:
+    - name: "gh-address-cr"
+      version: ">=3.16.0"
+      required: false
+    - name: "gh"
+      version: ">=2.0.0"
+      required: false
+
+provides:
+  commands:
+    - name: "speckit.gh-address-cr.address"
+      file: "commands/address.md"
+      description: >
+        Autonomous GitHub PR review resolution: iterates through review threads
+        with explicit validation proof and reply/resolve side effects.
+
+    - name: "speckit.gh-address-cr.review"
+      file: "commands/review.md"
+      description: >
+        Ingest structured code review findings and resolve them alongside
+        active GitHub PR review threads.
+
+    - name: "speckit.gh-address-cr.gate"
+      file: "commands/gate.md"
+      description: >
+        Run mandatory final-gate verification to prove zero unaddressed review
+        threads or pending findings before completion.
+
+    - name: "speckit.gh-address-cr.doctor"
+      file: "commands/doctor.md"
+      description: >
+        Diagnose gh-address-cr runtime availability, GitHub auth, and current
+        PR session health, with one-line install guidance.
+
+  config:
+    - name: "gh-address-cr-config.yml"
+      template: "gh-address-cr-config.template.yml"
+      description: "Configuration for gh-address-cr runtime options and review preferences."
+      required: false
+
+tags:
+  - code-review
+  - pull-request
+  - github
+  - audit
+  - trust-gates
+  - verification
+  - quality

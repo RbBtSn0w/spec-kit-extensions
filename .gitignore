@@ -30,6 +30,7 @@ superpowers-bridge/v/*
 
 # Local agent/tool state
 .antigravitycli/
+.agents/
 batch-fix.json
 .specify/
 docs/

@@ -12,6 +12,7 @@ handoff without creating a second Spec Kit workflow.
 |---|---|---|
 | [Superpowers Bridge](./superpowers-bridge) | 1.9.0 | Bridges selected Superpowers disciplines into Spec Kit as evidence-first trust gates for agent workflows. |
 | [MemoryLint](./memorylint) | 1.8.0 | Agent memory governance tool: Bidirectional audit and boundary management between AGENTS.md and the constitution. |
+| [gh-address-cr](./gh-address-cr) | 0.1.0 | Auditable GitHub PR review resolution & trust-gated address engine for Spec Kit workflows. |
 
 > **Compatibility**: These extensions target Spec Kit `>=0.12.0`. As of 0.12, the upstream
 > `agent-context` extension is a full opt-in — `specify init` no longer installs it, and nothing
@@ -58,13 +59,15 @@ cd spec-kit-extensions
 
 specify extension add --dev ./superpowers-bridge
 # or
+specify extension add --dev ./gh-address-cr
+# or register all extensions
 ./install.sh
 ```
 
 ## Product Direction
 
 - **Now:** focused specification refinement, test-first readiness, debugging, review, and branch handoff for Spec Kit users.
-- **Next:** MemoryLint semantic audits for long-lived agent instructions.
+- **Next:** MemoryLint semantic audits for long-lived agent instructions and `gh-address-cr` auditable PR review closure.
 - **Later:** Universal Bridge portability once the Spec Kit loop proves useful in real repositories.
 
 ## Development

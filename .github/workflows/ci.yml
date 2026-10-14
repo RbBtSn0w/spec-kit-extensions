@@ -44,3 +44,6 @@ jobs:
           bash memorylint/tests/test-workspace-audit.sh
           bash memorylint/tests/test-apply-workflow.sh
           bash memorylint/tests/test-load-agents-proof.sh
+          bash gh-address-cr/tests/test-manifest.sh
+          bash gh-address-cr/tests/test-commands.sh
+          bash gh-address-cr/tests/test-runtime-fallback.sh

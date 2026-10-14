@@ -1,0 +1,26 @@
+# Configuration for speckit.gh-address-cr extension
+# Place your overrides in .specify/extensions/gh-address-cr/gh-address-cr-config.yml
+
+runtime:
+  # Path or name of the gh-address-cr executable.
+  # Defaults to "gh-address-cr" (found via PATH).
+  binary_path: "gh-address-cr"
+
+  # Default display mode for review threads (lean / machine / human).
+  # "lean" produces token-efficient summaries optimal for AI agents.
+  default_mode: "lean"
+
+  # Whether to enforce validation command evidence (e.g., test execution)
+  # before marking any item resolved.
+  require_validation_proof: true
+
+review:
+  # Auto-detect active PR from current git branch if no PR number is passed.
+  auto_detect_pr: true
+
+  # Allow auto-resolving conversations on GitHub after verified fixes.
+  auto_resolve_threads: true
+
+telemetry:
+  # Propagate conversation session ID to OpenTelemetry backends if configured.
+  propagate_session: true
