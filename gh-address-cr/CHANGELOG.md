@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-14
 <!-- planned-bump: minor -->
 <!-- next-release-version: 0.1.0 -->
 
@@ -24,4 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/RbBtSn0w/spec-kit-extensions/tree/main/gh-address-cr
+[Unreleased]: https://github.com/RbBtSn0w/spec-kit-extensions/compare/gh-address-cr-v0.1.0...HEAD
+[0.1.0]: https://github.com/RbBtSn0w/spec-kit-extensions/releases/tag/gh-address-cr-v0.1.0
